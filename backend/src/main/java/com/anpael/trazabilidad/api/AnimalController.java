@@ -1,6 +1,7 @@
 package com.anpael.trazabilidad.api;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import com.anpael.trazabilidad.api.dto.AsignarCategoriaRequest;
 import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
 import com.anpael.trazabilidad.api.dto.CorregirAnimalRequest;
 import com.anpael.trazabilidad.api.dto.DarDeBajaRequest;
+import com.anpael.trazabilidad.domain.AnimalEvento;
 import com.anpael.trazabilidad.domain.AnimalLista;
 import com.anpael.trazabilidad.service.AnimalBajaService;
 import com.anpael.trazabilidad.service.AnimalCategoriaService;
@@ -65,6 +67,11 @@ public class AnimalController {
     @GetMapping("/{idAnimal}")
     public AnimalLista detalle(@PathVariable Integer idAnimal) {
         return animalService.obtener(idAnimal);
+    }
+
+    @GetMapping("/{idAnimal}/historial")
+    public List<AnimalEvento> historial(@PathVariable Integer idAnimal) {
+        return animalService.historial(idAnimal);
     }
 
     @PostMapping("/{idAnimal}/categoria")

@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.anpael.shared.exception.NoEncontradoException;
+import com.anpael.trazabilidad.domain.AnimalEvento;
 import com.anpael.trazabilidad.domain.AnimalLista;
+import com.anpael.trazabilidad.infrastructure.AnimalEventoRepository;
 import com.anpael.trazabilidad.infrastructure.AnimalListaRepository;
 
 @Service
@@ -17,9 +19,11 @@ import com.anpael.trazabilidad.infrastructure.AnimalListaRepository;
 public class AnimalService {
 
     private final AnimalListaRepository animales;
+    private final AnimalEventoRepository eventos;
 
-    public AnimalService(AnimalListaRepository animales) {
+    public AnimalService(AnimalListaRepository animales, AnimalEventoRepository eventos) {
         this.animales = animales;
+        this.eventos = eventos;
     }
 
     public Page<AnimalLista> buscar(String caravana, Boolean sinCategoria, Boolean sinRodeo, Pageable pageable) {
@@ -47,5 +51,11 @@ public class AnimalService {
     /** Los animales vigentes de un rodeo, ordenados por caravana. Lo usa el módulo planillas. */
     public List<AnimalLista> buscarPorRodeo(Integer idRodeo) {
         return animales.buscarPorRodeo(idRodeo);
+    }
+
+    /** La historia del animal: un evento por trabajo, el más reciente primero. */
+    public List<AnimalEvento> historial(Integer idAnimal) {
+        obtener(idAnimal); // 404 si no existe, antes de devolver una lista vacia enganosa
+        return eventos.findByIdAnimalOrderByFechaDesc(idAnimal);
     }
 }

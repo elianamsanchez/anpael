@@ -3,8 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   getAnimal, listarCategorias, listarRodeos, asignarCategoria, asignarRodeo,
-  listarCausasBaja, darDeBaja, listarRazas, listarPelajes, corregirAnimal,
-  type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje
+  listarCausasBaja, darDeBaja, listarRazas, listarPelajes, corregirAnimal, historialAnimal,
+  type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje, type AnimalEvento
 } from '@/api/animales'
 import type { ErrorApi } from '@/api/client'
 
@@ -47,25 +47,29 @@ const guardandoCorreccion = ref(false)
 const mensajeCorreccion = ref<string | null>(null)
 const errorCorreccion = ref<ErrorApi | null>(null)
 
+const historial = ref<AnimalEvento[]>([])
+
 async function cargar() {
   cargando.value = true
   error.value = null
   try {
-    const [animalCargado, categoriasCargadas, rodeosCargados, causasCargadas, razasCargadas, pelajesCargados] =
-      await Promise.all([
-        getAnimal(idAnimal),
-        listarCategorias(),
-        listarRodeos(),
-        listarCausasBaja(),
-        listarRazas(),
-        listarPelajes()
-      ])
+    const [animalCargado, categoriasCargadas, rodeosCargados, causasCargadas, razasCargadas, pelajesCargados,
+      historialCargado] = await Promise.all([
+      getAnimal(idAnimal),
+      listarCategorias(),
+      listarRodeos(),
+      listarCausasBaja(),
+      listarRazas(),
+      listarPelajes(),
+      historialAnimal(idAnimal)
+    ])
     animal.value = animalCargado
     categorias.value = categoriasCargadas
     rodeos.value = rodeosCargados
     causasBaja.value = causasCargadas
     razas.value = razasCargadas
     pelajes.value = pelajesCargados
+    historial.value = historialCargado
   } catch (e) {
     error.value = e as ErrorApi
     animal.value = null
@@ -246,6 +250,21 @@ onMounted(cargar)
         </dl>
       </section>
 
+      <section class="tarjeta historial">
+        <h3>Historial de trabajos</h3>
+        <p v-if="historial.length === 0" class="atenuado">Sin eventos registrados todavía.</p>
+        <ul v-else class="lista-historial">
+          <li v-for="ev in historial" :key="ev.idEvento">
+            <div class="fila-historial">
+              <span class="fecha-historial">{{ ev.fecha }}</span>
+              <span class="tipo-historial">{{ ev.tipoTrabajo }}</span>
+            </div>
+            <p v-if="ev.detalle" class="detalle-historial">{{ ev.detalle }}</p>
+            <p v-if="ev.comentario" class="detalle-historial atenuado">"{{ ev.comentario }}"</p>
+          </li>
+        </ul>
+      </section>
+
       <section class="tarjeta correccion">
         <h3>Corregir / completar datos</h3>
         <p class="atenuado chico">Dejá en blanco lo que no quieras cambiar.</p>
@@ -347,6 +366,16 @@ dd { margin: 0; font-weight: 600; text-align: right; }
   background: #FBEAE6; border: 1px solid #E8B3A6; color: var(--bad);
   border-radius: 8px; padding: 8px 10px; font-size: 13px; margin: 8px 0 0;
 }
+
+.historial { margin-top: 16px; }
+.historial h3 { margin: 0 0 12px; font-size: 15px; }
+.lista-historial { list-style: none; margin: 0; padding: 0; }
+.lista-historial li { padding: 10px 0; border-bottom: 1px solid #EBE5DC; }
+.lista-historial li:last-child { border-bottom: none; }
+.fila-historial { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.fecha-historial { font-size: 12.5px; color: var(--n500); white-space: nowrap; }
+.tipo-historial { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--tierra-txt); text-transform: uppercase; }
+.detalle-historial { margin: 4px 0 0; font-size: 13.5px; }
 
 .correccion { margin-top: 16px; }
 .correccion h3 { margin: 0 0 4px; font-size: 15px; }

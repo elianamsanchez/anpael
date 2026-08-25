@@ -49,6 +49,23 @@ export function getAnimal(idAnimal: number) {
   return api.get<Animal>(`/api/animales/${idAnimal}`).then(r => r.data)
 }
 
+/** Un evento del historial del animal (v_animal_evento, docs/modelo-datos.md). */
+export interface AnimalEvento {
+  idEvento: number
+  fecha: string
+  tipoTrabajo: string
+  jornada?: string
+  cuig?: string
+  origenDato: string
+  detalle?: string
+  clase: string
+  comentario?: string
+}
+
+export function historialAnimal(idAnimal: number) {
+  return api.get<AnimalEvento[]>(`/api/animales/${idAnimal}/historial`).then(r => r.data)
+}
+
 export interface Categoria {
   idCategoria: number
   codigo: string
