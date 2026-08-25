@@ -82,3 +82,24 @@ export function asignarCategoria(idAnimal: number, idCategoria: number) {
 export function asignarRodeo(idAnimal: number, idRodeo: number) {
   return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/rodeo`, { idRodeo }).then(r => r.data)
 }
+
+export interface CausaBaja {
+  idCausaBaja: number
+  tipoBaja: string
+  descripcion: string
+}
+
+export interface DarDeBajaParams {
+  idCausaBaja: number
+  pesoSalidaKg?: number
+  destino?: string
+  observaciones?: string
+}
+
+export function listarCausasBaja() {
+  return api.get<CausaBaja[]>('/api/causas-baja').then(r => r.data)
+}
+
+export function darDeBaja(idAnimal: number, params: DarDeBajaParams) {
+  return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/baja`, params).then(r => r.data)
+}

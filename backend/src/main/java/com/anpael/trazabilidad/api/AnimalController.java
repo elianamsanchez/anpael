@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.anpael.trazabilidad.api.dto.AsignacionResultado;
 import com.anpael.trazabilidad.api.dto.AsignarCategoriaRequest;
 import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
+import com.anpael.trazabilidad.api.dto.DarDeBajaRequest;
 import com.anpael.trazabilidad.domain.AnimalLista;
+import com.anpael.trazabilidad.service.AnimalBajaService;
 import com.anpael.trazabilidad.service.AnimalCategoriaService;
 import com.anpael.trazabilidad.service.AnimalRodeoService;
 import com.anpael.trazabilidad.service.AnimalService;
@@ -25,8 +27,7 @@ import jakarta.validation.Valid;
 
 /**
  * Padron para el saneamiento (v0.2a, docs/etapas.md): buscar un animal, ver
- * todo lo que se sabe de el, y asignarle categoria o rodeo. Dar de baja
- * queda para el siguiente endpoint propio.
+ * todo lo que se sabe de el, asignarle categoria/rodeo, y darlo de baja.
  */
 @RestController
 @RequestMapping("/api/animales")
@@ -35,12 +36,14 @@ public class AnimalController {
     private final AnimalService animalService;
     private final AnimalCategoriaService animalCategoriaService;
     private final AnimalRodeoService animalRodeoService;
+    private final AnimalBajaService animalBajaService;
 
     public AnimalController(AnimalService animalService, AnimalCategoriaService animalCategoriaService,
-            AnimalRodeoService animalRodeoService) {
+            AnimalRodeoService animalRodeoService, AnimalBajaService animalBajaService) {
         this.animalService = animalService;
         this.animalCategoriaService = animalCategoriaService;
         this.animalRodeoService = animalRodeoService;
+        this.animalBajaService = animalBajaService;
     }
 
     @GetMapping
@@ -72,6 +75,16 @@ public class AnimalController {
         animalService.obtener(idAnimal);
         String mensaje = animalRodeoService.asignar(idAnimal, pedido.idRodeo(),
                 pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
+        return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
+    }
+
+    @PostMapping("/{idAnimal}/baja")
+    public AsignacionResultado darDeBaja(@PathVariable Integer idAnimal,
+            @Valid @RequestBody DarDeBajaRequest pedido) {
+        animalService.obtener(idAnimal);
+        String mensaje = animalBajaService.darDeBaja(idAnimal, pedido.idCausaBaja(),
+                pedido.fecha() != null ? pedido.fecha() : LocalDate.now(),
+                pedido.pesoSalidaKg(), pedido.destino(), pedido.observaciones());
         return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
     }
 }

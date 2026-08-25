@@ -48,6 +48,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 var autoridad = new SimpleGrantedAuthority("ROLE_" + rol);
                 var auth = new UsernamePasswordAuthenticationToken(nombre, null, List.of(autoridad));
+                // El subject del JWT es el id de persona (JwtService.generar). Va en
+                // "details", no en el principal: JpaConfig.auditorActual() ya usa el
+                // principal como nombre legible para auditoria, y ContextoAutenticacion
+                // lee este id aparte para FKs numericos como baja.id_persona_registro.
+                auth.setDetails(claims.getSubject());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }

@@ -3,7 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   getAnimal, listarCategorias, listarRodeos, asignarCategoria, asignarRodeo,
-  type Animal, type Categoria, type Rodeo
+  listarCausasBaja, darDeBaja,
+  type Animal, type Categoria, type Rodeo, type CausaBaja
 } from '@/api/animales'
 import type { ErrorApi } from '@/api/client'
 
@@ -27,18 +28,28 @@ const guardandoRodeo = ref(false)
 const mensajeRodeo = ref<string | null>(null)
 const errorRodeo = ref<ErrorApi | null>(null)
 
+const causasBaja = ref<CausaBaja[]>([])
+const idCausaBajaElegida = ref<number | null>(null)
+const destinoBaja = ref('')
+const observacionesBaja = ref('')
+const guardandoBaja = ref(false)
+const mensajeBaja = ref<string | null>(null)
+const errorBaja = ref<ErrorApi | null>(null)
+
 async function cargar() {
   cargando.value = true
   error.value = null
   try {
-    const [animalCargado, categoriasCargadas, rodeosCargados] = await Promise.all([
+    const [animalCargado, categoriasCargadas, rodeosCargados, causasCargadas] = await Promise.all([
       getAnimal(idAnimal),
       listarCategorias(),
-      listarRodeos()
+      listarRodeos(),
+      listarCausasBaja()
     ])
     animal.value = animalCargado
     categorias.value = categoriasCargadas
     rodeos.value = rodeosCargados
+    causasBaja.value = causasCargadas
   } catch (e) {
     error.value = e as ErrorApi
     animal.value = null
@@ -76,6 +87,26 @@ async function guardarRodeo() {
     errorRodeo.value = e as ErrorApi
   } finally {
     guardandoRodeo.value = false
+  }
+}
+
+async function guardarBaja() {
+  if (!idCausaBajaElegida.value) return
+  guardandoBaja.value = true
+  mensajeBaja.value = null
+  errorBaja.value = null
+  try {
+    const resultado = await darDeBaja(idAnimal, {
+      idCausaBaja: idCausaBajaElegida.value,
+      destino: destinoBaja.value || undefined,
+      observaciones: observacionesBaja.value || undefined
+    })
+    animal.value = resultado.animal
+    mensajeBaja.value = resultado.mensaje
+  } catch (e) {
+    errorBaja.value = e as ErrorApi
+  } finally {
+    guardandoBaja.value = false
   }
 }
 
@@ -170,6 +201,30 @@ onMounted(cargar)
           <div v-if="animal.validacionObs"><dt>Observaciones</dt><dd>{{ animal.validacionObs }}</dd></div>
         </dl>
       </section>
+
+      <section class="tarjeta baja">
+        <h3>Dar de baja</h3>
+
+        <p v-if="animal.tieneBaja" class="atenuado">
+          Este animal ya tiene una baja registrada. No se puede cargar otra.
+        </p>
+
+        <form v-else class="form-baja" @submit.prevent="guardarBaja">
+          <select v-model.number="idCausaBajaElegida">
+            <option :value="null" disabled>Causa…</option>
+            <option v-for="c in causasBaja" :key="c.idCausaBaja" :value="c.idCausaBaja">
+              {{ c.tipoBaja }} · {{ c.descripcion }}
+            </option>
+          </select>
+          <input v-model="destinoBaja" type="text" placeholder="Destino (opcional)" />
+          <textarea v-model="observacionesBaja" placeholder="Observaciones (opcional)" rows="2"></textarea>
+          <button class="boton-chico" type="submit" :disabled="!idCausaBajaElegida || guardandoBaja">
+            {{ guardandoBaja ? 'Guardando…' : 'Registrar baja' }}
+          </button>
+        </form>
+        <p v-if="mensajeBaja" class="aviso-ok">{{ mensajeBaja }}</p>
+        <p v-if="errorBaja" class="aviso-error">{{ errorBaja.mensaje }}</p>
+      </section>
     </template>
   </main>
 </template>
@@ -210,4 +265,13 @@ dd { margin: 0; font-weight: 600; text-align: right; }
   background: #FBEAE6; border: 1px solid #E8B3A6; color: var(--bad);
   border-radius: 8px; padding: 8px 10px; font-size: 13px; margin: 8px 0 0;
 }
+
+.baja { margin-top: 16px; }
+.baja h3 { margin: 0 0 12px; font-size: 15px; }
+.form-baja { display: flex; flex-direction: column; gap: 8px; }
+.form-baja select, .form-baja input, .form-baja textarea {
+  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero); resize: vertical;
+}
+.form-baja .boton-chico { align-self: flex-start; }
 </style>
