@@ -58,4 +58,10 @@ public class AnimalService {
         obtener(idAnimal); // 404 si no existe, antes de devolver una lista vacia enganosa
         return eventos.findByIdAnimalOrderByFechaDesc(idAnimal);
     }
+
+    /** Un evento puntual, con su "detalle" legible. Lo usa el módulo planillas al corregir un resultado. */
+    public AnimalEvento obtenerEvento(Integer idEvento) {
+        return eventos.findById(idEvento)
+                .orElseThrow(() -> new NoEncontradoException("No existe el evento " + idEvento));
+    }
 }

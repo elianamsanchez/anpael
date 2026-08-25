@@ -6,7 +6,12 @@ import {
   listarCausasBaja, darDeBaja, listarRazas, listarPelajes, corregirAnimal, historialAnimal,
   type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje, type AnimalEvento
 } from '@/api/animales'
+import {
+  corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad
+} from '@/api/trabajos'
 import type { ErrorApi } from '@/api/client'
+
+const TIPOS_EDITABLES = ['TACTO', 'PESADA', 'REVISION_TOROS', 'SANIDAD']
 
 const route = useRoute()
 const idAnimal = Number(route.params.id)
@@ -48,6 +53,78 @@ const mensajeCorreccion = ref<string | null>(null)
 const errorCorreccion = ref<ErrorApi | null>(null)
 
 const historial = ref<AnimalEvento[]>([])
+
+interface EdicionEvento {
+  abierto: boolean
+  guardando: boolean
+  mensaje: string | null
+  error: ErrorApi | null
+  resultado: string
+  tamano: string
+  observaciones: string
+  kilos: string
+  circunferenciaEscrotal: string
+  condicionCorporal: string
+  apto: string
+  producto: string
+  dosis: string
+}
+const edicion = ref<Record<number, EdicionEvento>>({})
+
+function estadoEdicion(idEvento: number): EdicionEvento {
+  if (!edicion.value[idEvento]) {
+    edicion.value[idEvento] = {
+      abierto: false, guardando: false, mensaje: null, error: null,
+      resultado: '', tamano: '', observaciones: '',
+      kilos: '', circunferenciaEscrotal: '', condicionCorporal: '', apto: '',
+      producto: '', dosis: ''
+    }
+  }
+  return edicion.value[idEvento]
+}
+
+function alternarEdicion(idEvento: number) {
+  estadoEdicion(idEvento).abierto = !estadoEdicion(idEvento).abierto
+}
+
+async function guardarCorreccionEvento(ev: AnimalEvento) {
+  const e = estadoEdicion(ev.idEvento)
+  e.guardando = true
+  e.mensaje = null
+  e.error = null
+  try {
+    let resultado
+    if (ev.tipoTrabajo === 'TACTO') {
+      resultado = await corregirTacto(ev.idEvento, {
+        resultado: e.resultado || undefined,
+        tamano: e.tamano || undefined,
+        observaciones: e.observaciones || undefined
+      })
+    } else if (ev.tipoTrabajo === 'PESADA') {
+      resultado = await corregirPesada(ev.idEvento, { kilos: e.kilos ? Number(e.kilos) : undefined })
+    } else if (ev.tipoTrabajo === 'REVISION_TOROS') {
+      resultado = await corregirRevisionToros(ev.idEvento, {
+        circunferenciaEscrotal: e.circunferenciaEscrotal ? Number(e.circunferenciaEscrotal) : undefined,
+        condicionCorporal: e.condicionCorporal ? Number(e.condicionCorporal) : undefined,
+        apto: e.apto ? e.apto === 'si' : undefined
+      })
+    } else if (ev.tipoTrabajo === 'SANIDAD') {
+      resultado = await corregirSanidad(ev.idEvento, {
+        producto: e.producto || undefined,
+        dosis: e.dosis ? Number(e.dosis) : undefined
+      })
+    } else {
+      return
+    }
+    const idx = historial.value.findIndex(h => h.idEvento === ev.idEvento)
+    if (idx !== -1) historial.value[idx] = resultado.evento
+    e.mensaje = resultado.mensaje
+  } catch (err) {
+    e.error = err as ErrorApi
+  } finally {
+    e.guardando = false
+  }
+}
 
 async function cargar() {
   cargando.value = true
@@ -261,6 +338,57 @@ onMounted(cargar)
             </div>
             <p v-if="ev.detalle" class="detalle-historial">{{ ev.detalle }}</p>
             <p v-if="ev.comentario" class="detalle-historial atenuado">"{{ ev.comentario }}"</p>
+
+            <button v-if="TIPOS_EDITABLES.includes(ev.tipoTrabajo)" class="link-corregir"
+                    type="button" @click="alternarEdicion(ev.idEvento)">
+              {{ estadoEdicion(ev.idEvento).abierto ? 'Cancelar' : 'Corregir' }}
+            </button>
+
+            <form v-if="estadoEdicion(ev.idEvento).abierto" class="form-correccion-evento"
+                  @submit.prevent="guardarCorreccionEvento(ev)">
+              <p class="atenuado chico">Dejá en blanco lo que no quieras cambiar.</p>
+
+              <template v-if="ev.tipoTrabajo === 'TACTO'">
+                <select v-model="estadoEdicion(ev.idEvento).resultado">
+                  <option value="">Resultado (sin cambios)</option>
+                  <option value="PRENADA">Preñada</option>
+                  <option value="VACIA">Vacía</option>
+                  <option value="DUDOSA">Dudosa</option>
+                </select>
+                <select v-model="estadoEdicion(ev.idEvento).tamano">
+                  <option value="">Tamaño (sin cambios)</option>
+                  <option value="CHICA">Chica</option>
+                  <option value="MEDIANA">Mediana</option>
+                  <option value="GRANDE">Grande</option>
+                </select>
+                <input v-model="estadoEdicion(ev.idEvento).observaciones" type="text" placeholder="Observaciones" />
+              </template>
+
+              <template v-else-if="ev.tipoTrabajo === 'PESADA'">
+                <input v-model="estadoEdicion(ev.idEvento).kilos" type="number" min="15" max="1400" step="0.1" placeholder="Kilos" />
+              </template>
+
+              <template v-else-if="ev.tipoTrabajo === 'REVISION_TOROS'">
+                <input v-model="estadoEdicion(ev.idEvento).circunferenciaEscrotal" type="number" min="24" max="50" step="0.1" placeholder="Circunf. escrotal" />
+                <input v-model="estadoEdicion(ev.idEvento).condicionCorporal" type="number" min="1" max="5" step="0.5" placeholder="Cond. corporal" />
+                <select v-model="estadoEdicion(ev.idEvento).apto">
+                  <option value="">Apto (sin cambios)</option>
+                  <option value="si">Sí</option>
+                  <option value="no">No</option>
+                </select>
+              </template>
+
+              <template v-else-if="ev.tipoTrabajo === 'SANIDAD'">
+                <input v-model="estadoEdicion(ev.idEvento).producto" type="text" placeholder="Producto" />
+                <input v-model="estadoEdicion(ev.idEvento).dosis" type="number" min="0" step="0.01" placeholder="Dosis" />
+              </template>
+
+              <button class="boton-chico" type="submit" :disabled="estadoEdicion(ev.idEvento).guardando">
+                {{ estadoEdicion(ev.idEvento).guardando ? 'Guardando…' : 'Guardar corrección' }}
+              </button>
+              <p v-if="estadoEdicion(ev.idEvento).mensaje" class="aviso-ok">{{ estadoEdicion(ev.idEvento).mensaje }}</p>
+              <p v-if="estadoEdicion(ev.idEvento).error" class="aviso-error">{{ estadoEdicion(ev.idEvento).error!.mensaje }}</p>
+            </form>
           </li>
         </ul>
       </section>
@@ -376,6 +504,16 @@ dd { margin: 0; font-weight: 600; text-align: right; }
 .fecha-historial { font-size: 12.5px; color: var(--n500); white-space: nowrap; }
 .tipo-historial { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--tierra-txt); text-transform: uppercase; }
 .detalle-historial { margin: 4px 0 0; font-size: 13.5px; }
+.link-corregir {
+  background: none; border: none; color: var(--tierra-txt); font-size: 12px; font-weight: 600;
+  cursor: pointer; padding: 6px 0 0; text-decoration: underline;
+}
+.form-correccion-evento { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.form-correccion-evento select, .form-correccion-evento input {
+  font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 6px;
+  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero);
+}
+.form-correccion-evento .boton-chico { align-self: flex-start; }
 
 .correccion { margin-top: 16px; }
 .correccion h3 { margin: 0 0 4px; font-size: 15px; }
