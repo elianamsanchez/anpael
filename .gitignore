@@ -1,0 +1,53 @@
+# =====================================================================
+# LO QUE NUNCA TIENE QUE ENTRAR AL REPOSITORIO
+# =====================================================================
+# La regla de oro: si tiene una clave adentro, no va. Y una vez que un
+# secreto entra a git, queda en el historial aunque despues lo borres:
+# hay que rotar la clave, no alcanza con hacer un commit que la saque.
+
+# ---- secretos ----
+# Cualquier .env.<algo> queda afuera -- .env.local, .env.production, lo que
+# sea. Antes solo se listaban nombres puntuales y un .env.production hubiera
+# entrado al repo sin que nadie lo notara.
+.env
+.env.*
+*.pem
+*.key
+# los .example SI van: son la plantilla sin valores
+!.env.example
+!.env.*.example
+
+# ---- Java / Maven ----
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+!maven-wrapper.jar
+hs_err_pid*.log
+
+# ---- Node / Vue ----
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- editores ----
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# ---- config local de herramientas (Claude Code / MCP) ----
+.mcp.json
+.claude/settings.local.json
+
+# ---- salidas de trabajo ----
+*.log
+/tmp/
+planillas-generadas/

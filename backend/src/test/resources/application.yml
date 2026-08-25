@@ -1,0 +1,17 @@
+# Los tests no leen variables de entorno de produccion: Testcontainers
+# inyecta la conexion en tiempo de ejecucion (ver @DynamicPropertySource).
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/placeholder
+    username: placeholder
+    password: placeholder
+  jpa:
+    hibernate:
+      ddl-auto: none
+anpael:
+  entorno: test
+  cors:
+    origenes-permitidos: http://localhost:5173
+  jwt:
+    secreto: clave-solo-para-tests-no-usar-en-ningun-otro-lado
+    minutos-de-vida: 60

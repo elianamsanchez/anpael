@@ -1,0 +1,108 @@
+# =====================================================================
+# CONFIGURACION BASE
+# =====================================================================
+# ACA NO VA NINGUNA CONTRASEÑA. Todo lo secreto entra por variables de
+# entorno. Este archivo se versiona en git; un archivo con la clave de la
+# base adentro, no.
+#
+# Para desarrollo local, copiar .env.example a .env y cargarlo, o definir
+# las variables en la configuracion de ejecucion de IntelliJ.
+# =====================================================================
+
+spring:
+  application:
+    name: anpael
+
+  datasource:
+    # SUPABASE: hay dos cadenas de conexion y NO son intercambiables.
+    #
+    #   Direct connection (puerto 5432)
+    #       Para migraciones y para conectarse desde una IP fija.
+    #       En el plan gratuito puede no estar disponible por IPv4.
+    #
+    #   Transaction pooler (puerto 6543)  <-- el que usa una app
+    #       Es el que hay que usar desde el backend. Pero OJO: el pooler en
+    #       modo transaccion NO soporta prepared statements con nombre, y el
+    #       driver de PostgreSQL los usa por defecto. Sin
+    #       prepareThreshold=0 vas a ver errores intermitentes y dificiles
+    #       de diagnosticar del tipo "prepared statement S_1 already exists".
+    #       Por eso va en la URL de abajo.
+    url: ${ANPAEL_DB_URL}
+    username: ${ANPAEL_DB_USER}
+    password: ${ANPAEL_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # El plan gratuito de Supabase tiene pocas conexiones. Un pool chico
+      # evita quedarse sin ellas y no cambia nada para tres usuarios.
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      pool-name: anpael-pool
+
+  jpa:
+    hibernate:
+      # NO tocar. El esquema lo maneja Supabase por migraciones.
+      # Si Hibernate genera o modifica tablas hay dos fuentes de verdad y
+      # tarde o temprano se pisan. 'validate' hace que la aplicacion NO
+      # arranque si una entidad no coincide con la tabla real, que es
+      # exactamente lo que se quiere: fallar temprano y ruidoso.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Argentina/Buenos_Aires
+        # Sin esto, cada coleccion cargada dispara una consulta por fila.
+        default_batch_fetch_size: 32
+    open-in-view: false   # evita consultas sueltas al serializar la respuesta
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${ANPAEL_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+anpael:
+  # Que env te contestó /api/health, no cuántos animales tiene: local tiene
+  # un dump de producción, así que el conteo de animales ya no alcanza para
+  # distinguirlas.
+  entorno: ${ANPAEL_ENTORNO:sin-definir}
+  cors:
+    # El puerto 5173 es el de Vite en desarrollo. En produccion se agrega el
+    # dominio real por variable de entorno, separado por comas.
+    origenes-permitidos: ${ANPAEL_CORS_ORIGENES:http://localhost:5173,http://127.0.0.1:5173}
+  jwt:
+    # Se define en la v0.1, con el modulo seguridad. La clave NUNCA aca.
+    secreto: ${ANPAEL_JWT_SECRETO:cambiar-esto-en-cada-entorno-y-que-sea-largo}
+    minutos-de-vida: ${ANPAEL_JWT_MINUTOS:480}
+
+logging:
+  level:
+    com.anpael: INFO
+    org.hibernate.SQL: ${ANPAEL_LOG_SQL:WARN}
+
+---
+# =====================================================================
+# PERFIL local  ·  se activa con  -Dspring.profiles.active=local
+# =====================================================================
+spring:
+  config:
+    activate:
+      on-profile: local
+logging:
+  level:
+    com.anpael: DEBUG
+    org.hibernate.SQL: DEBUG
