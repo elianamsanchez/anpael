@@ -26,7 +26,8 @@ public class AnimalService {
         this.eventos = eventos;
     }
 
-    public Page<AnimalLista> buscar(String caravana, Boolean sinCategoria, Boolean sinRodeo, Pageable pageable) {
+    public Page<AnimalLista> buscar(String caravana, Boolean sinCategoria, Boolean sinRodeo, Integer idRodeo,
+            Integer idCategoria, Pageable pageable) {
         Specification<AnimalLista> spec = Specification.where(null);
 
         if (caravana != null && !caravana.isBlank()) {
@@ -38,6 +39,12 @@ public class AnimalService {
         }
         if (Boolean.TRUE.equals(sinRodeo)) {
             spec = spec.and((raiz, consulta, cb) -> cb.isNull(raiz.get("rodeo")));
+        }
+        if (idRodeo != null) {
+            spec = spec.and((raiz, consulta, cb) -> cb.equal(raiz.get("idRodeo"), idRodeo));
+        }
+        if (idCategoria != null) {
+            spec = spec.and((raiz, consulta, cb) -> cb.equal(raiz.get("idCategoria"), idCategoria));
         }
 
         return animales.findAll(spec, pageable);

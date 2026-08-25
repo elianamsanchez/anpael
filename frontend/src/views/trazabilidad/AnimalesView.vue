@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { buscarAnimales, type Animal } from '@/api/animales'
+import { buscarAnimales, listarRodeos, listarCategorias, type Animal, type Rodeo, type Categoria } from '@/api/animales'
 import type { ErrorApi } from '@/api/client'
 
 /**
@@ -11,9 +11,13 @@ import type { ErrorApi } from '@/api/client'
 const caravana = ref('')
 const sinCategoria = ref(false)
 const sinRodeo = ref(false)
+const idRodeoElegido = ref<number | null>(null)
+const idCategoriaElegida = ref<number | null>(null)
 const pagina = ref(0)
 const tamanioPagina = 30
 
+const rodeos = ref<Rodeo[]>([])
+const categorias = ref<Categoria[]>([])
 const cargando = ref(true)
 const animales = ref<Animal[]>([])
 const totalElementos = ref(0)
@@ -28,6 +32,8 @@ async function buscar() {
       caravana: caravana.value || undefined,
       sinCategoria: sinCategoria.value || undefined,
       sinRodeo: sinRodeo.value || undefined,
+      idRodeo: idRodeoElegido.value ?? undefined,
+      idCategoria: idCategoriaElegida.value ?? undefined,
       page: pagina.value,
       size: tamanioPagina
     })
@@ -42,15 +48,25 @@ async function buscar() {
   }
 }
 
+// "sin rodeo/categoria" y "un rodeo/categoria puntual" se pisan entre si: elegir uno limpia el otro.
+watch(idRodeoElegido, (valor) => { if (valor !== null) sinRodeo.value = false })
+watch(sinRodeo, (valor) => { if (valor) idRodeoElegido.value = null })
+watch(idCategoriaElegida, (valor) => { if (valor !== null) sinCategoria.value = false })
+watch(sinCategoria, (valor) => { if (valor) idCategoriaElegida.value = null })
+
 let debounce: ReturnType<typeof setTimeout>
 watch(caravana, () => {
   clearTimeout(debounce)
   debounce = setTimeout(() => { pagina.value = 0; buscar() }, 350)
 })
-watch([sinCategoria, sinRodeo], () => { pagina.value = 0; buscar() })
+watch([sinCategoria, sinRodeo, idRodeoElegido, idCategoriaElegida], () => { pagina.value = 0; buscar() })
 watch(pagina, buscar)
 
-onMounted(buscar)
+onMounted(() => {
+  buscar()
+  listarRodeos().then(r => { rodeos.value = r })
+  listarCategorias().then(c => { categorias.value = c })
+})
 </script>
 
 <template>
@@ -71,6 +87,14 @@ onMounted(buscar)
       <label class="check">
         <input v-model="sinRodeo" type="checkbox" /> Sin rodeo
       </label>
+      <select v-model.number="idRodeoElegido" class="select-rodeo">
+        <option :value="null">Todos los rodeos</option>
+        <option v-for="r in rodeos" :key="r.idRodeo" :value="r.idRodeo">{{ r.nombre }}</option>
+      </select>
+      <select v-model.number="idCategoriaElegida" class="select-rodeo">
+        <option :value="null">Todas las categorías</option>
+        <option v-for="c in categorias" :key="c.idCategoria" :value="c.idCategoria">{{ c.nombre }}</option>
+      </select>
       <span class="total" v-if="!cargando">{{ totalElementos.toLocaleString('es-AR') }} animales</span>
     </section>
 
@@ -132,6 +156,10 @@ onMounted(buscar)
   background: #fff; min-width: 240px;
 }
 .check { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--n500); cursor: pointer; }
+.select-rodeo {
+  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--n200); background: #fff; color: var(--cuero);
+}
 .total { margin-left: auto; font-size: 13px; color: var(--n500); }
 
 .tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 16px 20px; }

@@ -60,8 +60,10 @@ public class AnimalController {
             @RequestParam(required = false) String caravana,
             @RequestParam(required = false) Boolean sinCategoria,
             @RequestParam(required = false) Boolean sinRodeo,
+            @RequestParam(required = false) Integer idRodeo,
+            @RequestParam(required = false) Integer idCategoria,
             @PageableDefault(size = 50, sort = "caravana") Pageable pageable) {
-        return animalService.buscar(caravana, sinCategoria, sinRodeo, pageable);
+        return animalService.buscar(caravana, sinCategoria, sinRodeo, idRodeo, idCategoria, pageable);
     }
 
     @GetMapping("/{idAnimal}")

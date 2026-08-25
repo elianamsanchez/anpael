@@ -100,4 +100,10 @@ public class AnimalLista {
 
     @Column(name = "en_rodeo_desde")
     private LocalDate enRodeoDesde;
+
+    @Column(name = "id_rodeo")
+    private Integer idRodeo;
+
+    @Column(name = "id_categoria")
+    private Integer idCategoria;
 }

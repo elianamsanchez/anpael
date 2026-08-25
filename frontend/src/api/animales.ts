@@ -37,6 +37,8 @@ export interface BuscarAnimalesParams {
   caravana?: string
   sinCategoria?: boolean
   sinRodeo?: boolean
+  idRodeo?: number
+  idCategoria?: number
   page?: number
   size?: number
 }
