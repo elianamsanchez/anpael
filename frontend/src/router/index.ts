@@ -38,6 +38,11 @@ const router = createRouter({
       path: '/planillas',
       name: 'planillas',
       component: () => import('@/views/trazabilidad/PlanillasView.vue')
+    },
+    {
+      path: '/planillas/cargar',
+      name: 'planillas-cargar',
+      component: () => import('@/views/trazabilidad/CargarResultadosView.vue')
     }
   ]
 })

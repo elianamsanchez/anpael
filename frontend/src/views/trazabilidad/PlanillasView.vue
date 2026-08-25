@@ -83,6 +83,10 @@ onMounted(cargarRodeos)
       </form>
 
       <p v-if="error" class="aviso-error">{{ error.mensaje }}</p>
+
+      <p class="pie">
+        ¿Ya trabajaste con la planilla impresa? <RouterLink to="/planillas/cargar">Cargar resultados</RouterLink>
+      </p>
     </section>
   </main>
 </template>
@@ -110,4 +114,6 @@ onMounted(cargarRodeos)
   background: #FBEAE6; border: 1px solid #E8B3A6; color: var(--bad);
   border-radius: 8px; padding: 10px; font-size: 13px; margin: 14px 0 0;
 }
+.pie { font-size: 12.5px; color: var(--n500); margin: 16px 0 0; }
+.pie a { color: var(--tierra-txt); font-weight: 600; }
 </style>
