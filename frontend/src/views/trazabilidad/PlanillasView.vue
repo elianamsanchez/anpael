@@ -28,14 +28,26 @@ async function generar() {
   if (!idRodeoElegido.value || !tipoTrabajoElegido.value) return
   generando.value = true
   error.value = null
+
+  // window.open() tiene que pasar ACA, sincronico, dentro del handler del
+  // click: es lo unico que el navegador reconoce como "el usuario pidio
+  // esto" y deja pasar sin bloquear. Si se llama despues del await de
+  // abajo, para el navegador ya no hay gesto de usuario -es indistinguible
+  // de un popup que se abre solo- y lo bloquea en silencio, sin avisar.
+  const ventana = window.open('', '_blank')
+
   try {
     const pdf = await generarPlanilla(idRodeoElegido.value, tipoTrabajoElegido.value)
     const url = URL.createObjectURL(pdf)
-    window.open(url, '_blank')
-    // Se libera despues: si se revoca antes de que la pestaña nueva termine
-    // de cargar el PDF, se queda en blanco.
+    if (ventana) {
+      ventana.location.href = url
+    } else {
+      error.value = { estado: 0, mensaje: 'El navegador bloqueó la pestaña nueva.',
+        detalle: 'Permitila desde el ícono de la barra de direcciones y probá de nuevo.' }
+    }
     setTimeout(() => URL.revokeObjectURL(url), 30000)
   } catch (e) {
+    ventana?.close()
     error.value = e as ErrorApi
   } finally {
     generando.value = false
