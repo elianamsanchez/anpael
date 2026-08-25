@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getHealth, type Health } from '@/api/health'
 import type { ErrorApi } from '@/api/client'
+import { useAuth } from '@/stores/auth'
 
 /**
  * PANTALLA DE ESTADO  ·  el paso 3 del arranque tecnico.
@@ -12,11 +14,18 @@ import type { ErrorApi } from '@/api/client'
  * frena a quien viene de backend, y resolverlo con una pantalla tonta es
  * mucho mas barato que descubrirlo depurando el login.
  *
- * Se borra -o se convierte en pantalla de admin- cuando exista el login.
+ * Ahora es pantalla de admin (ruta privada): quien la ve ya inicio sesion.
  */
+const router = useRouter()
+const auth = useAuth()
 const cargando = ref(true)
 const datos = ref<Health | null>(null)
 const error = ref<ErrorApi | null>(null)
+
+function salir() {
+  auth.salir()
+  router.replace({ name: 'login' })
+}
 
 async function consultar() {
   cargando.value = true
@@ -42,6 +51,9 @@ onMounted(consultar)
         ANPAEL
         <small>Santa Ana · estado del sistema</small>
       </div>
+      <span class="espaciador"></span>
+      <span class="quien" v-if="auth.usuario">{{ auth.usuario.nombre }}</span>
+      <button class="salir" @click="salir">Salir</button>
     </header>
 
     <section class="tarjeta">
@@ -85,6 +97,12 @@ onMounted(consultar)
 .marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
 .marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
 .punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
+.espaciador { flex: 1; }
+.quien { font-weight: 400; font-size: 13px; color: var(--n500); }
+.salir {
+  background: none; border: 1px solid var(--n200); color: var(--cuero);
+  border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
 .tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 20px; }
 h2 { margin: 0 0 14px; font-size: 20px; }
 .bien { color: var(--ok); }

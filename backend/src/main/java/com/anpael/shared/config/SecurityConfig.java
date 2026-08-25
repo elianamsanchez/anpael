@@ -66,6 +66,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
+                // Swagger UI: solo documentacion, no expone datos. Los
+                // endpoints reales que liste siguen pidiendo JWT igual.
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // todo lo demas cerrado: necesita un JWT valido
                 .anyRequest().authenticated()
             )

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuth } from '@/stores/auth'
 
 /**
  * Rutas.
@@ -15,10 +16,14 @@ const router = createRouter({
     {
       path: '/',
       name: 'inicio',
-      component: () => import('@/views/EstadoView.vue'),
+      component: () => import('@/views/EstadoView.vue')
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/seguridad/LoginView.vue'),
       meta: { publico: true }
     }
-    // v0.1:  /login            -> views/seguridad/LoginView.vue
     // v0.2a: /animales         -> views/trazabilidad/AnimalesView.vue
     //        /animales/:id     -> views/trazabilidad/AnimalDetalleView.vue
     // v0.2b: /planillas        -> views/trazabilidad/PlanillasView.vue
@@ -26,12 +31,15 @@ const router = createRouter({
 })
 
 /**
- * Guardia de navegacion. Hoy no bloquea nada porque no hay login, pero queda
- * escrito para que agregar una ruta privada sea marcarla y nada mas.
+ * Guardia de navegacion. Una ruta es privada por default: hay que marcarla
+ * `meta: { publico: true }` a proposito para dejarla afuera del login.
  */
 router.beforeEach((to) => {
   if (to.meta.publico) return true
-  // v0.1: aca va la verificacion del store de auth
+  const auth = useAuth()
+  if (!auth.autenticado) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
   return true
 })
 

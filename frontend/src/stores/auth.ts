@@ -2,12 +2,10 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { setToken } from '@/api/client'
 
-export type Rol = 'ADMIN' | 'GERENTE' | 'OPERATIVO'
+export type Rol = 'PROPIETARIO' | 'GESTOR' | 'GERENTE' | 'OPERATIVO'
 
 export interface Usuario {
-  id: string
   nombre: string
-  email: string
   rol: Rol
 }
 
@@ -26,9 +24,9 @@ export const useAuth = defineStore('auth', () => {
   const token = ref<string | null>(null)
 
   const autenticado = computed(() => token.value !== null)
-  const esAdmin = computed(() => usuario.value?.rol === 'ADMIN')
+  const esPropietario = computed(() => usuario.value?.rol === 'PROPIETARIO')
   const puedeAprobar = computed(() =>
-    usuario.value?.rol === 'ADMIN' || usuario.value?.rol === 'GERENTE')
+    usuario.value?.rol === 'PROPIETARIO' || usuario.value?.rol === 'GERENTE')
 
   function entrar(u: Usuario, t: string) {
     usuario.value = u
@@ -42,5 +40,5 @@ export const useAuth = defineStore('auth', () => {
     setToken(null)
   }
 
-  return { usuario, token, autenticado, esAdmin, puedeAprobar, entrar, salir }
+  return { usuario, token, autenticado, esPropietario, puedeAprobar, entrar, salir }
 })
