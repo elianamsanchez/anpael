@@ -52,6 +52,7 @@ onMounted(consultar)
         <small>Santa Ana · estado del sistema</small>
       </div>
       <span class="espaciador"></span>
+      <RouterLink class="salir" to="/animales">Padrón</RouterLink>
       <span class="quien" v-if="auth.usuario">{{ auth.usuario.nombre }}</span>
       <button class="salir" @click="salir">Salir</button>
     </header>
@@ -102,6 +103,7 @@ onMounted(consultar)
 .salir {
   background: none; border: 1px solid var(--n200); color: var(--cuero);
   border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 600; cursor: pointer;
+  text-decoration: none;
 }
 .tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 20px; }
 h2 { margin: 0 0 14px; font-size: 20px; }

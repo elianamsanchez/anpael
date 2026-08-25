@@ -1,0 +1,77 @@
+package com.anpael.trazabilidad.api;
+
+import java.time.LocalDate;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.anpael.trazabilidad.api.dto.AsignacionResultado;
+import com.anpael.trazabilidad.api.dto.AsignarCategoriaRequest;
+import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
+import com.anpael.trazabilidad.domain.AnimalLista;
+import com.anpael.trazabilidad.service.AnimalCategoriaService;
+import com.anpael.trazabilidad.service.AnimalRodeoService;
+import com.anpael.trazabilidad.service.AnimalService;
+
+import jakarta.validation.Valid;
+
+/**
+ * Padron para el saneamiento (v0.2a, docs/etapas.md): buscar un animal, ver
+ * todo lo que se sabe de el, y asignarle categoria o rodeo. Dar de baja
+ * queda para el siguiente endpoint propio.
+ */
+@RestController
+@RequestMapping("/api/animales")
+public class AnimalController {
+
+    private final AnimalService animalService;
+    private final AnimalCategoriaService animalCategoriaService;
+    private final AnimalRodeoService animalRodeoService;
+
+    public AnimalController(AnimalService animalService, AnimalCategoriaService animalCategoriaService,
+            AnimalRodeoService animalRodeoService) {
+        this.animalService = animalService;
+        this.animalCategoriaService = animalCategoriaService;
+        this.animalRodeoService = animalRodeoService;
+    }
+
+    @GetMapping
+    public Page<AnimalLista> buscar(
+            @RequestParam(required = false) String caravana,
+            @RequestParam(required = false) Boolean sinCategoria,
+            @RequestParam(required = false) Boolean sinRodeo,
+            @PageableDefault(size = 50, sort = "caravana") Pageable pageable) {
+        return animalService.buscar(caravana, sinCategoria, sinRodeo, pageable);
+    }
+
+    @GetMapping("/{idAnimal}")
+    public AnimalLista detalle(@PathVariable Integer idAnimal) {
+        return animalService.obtener(idAnimal);
+    }
+
+    @PostMapping("/{idAnimal}/categoria")
+    public AsignacionResultado asignarCategoria(@PathVariable Integer idAnimal,
+            @Valid @RequestBody AsignarCategoriaRequest pedido) {
+        animalService.obtener(idAnimal); // 404 antes de tocar la base, no un FK roto
+        String mensaje = animalCategoriaService.asignar(idAnimal, pedido.idCategoria(),
+                pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
+        return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
+    }
+
+    @PostMapping("/{idAnimal}/rodeo")
+    public AsignacionResultado asignarRodeo(@PathVariable Integer idAnimal,
+            @Valid @RequestBody AsignarRodeoRequest pedido) {
+        animalService.obtener(idAnimal);
+        String mensaje = animalRodeoService.asignar(idAnimal, pedido.idRodeo(),
+                pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
+        return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
+    }
+}

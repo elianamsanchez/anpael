@@ -23,9 +23,17 @@ const router = createRouter({
       name: 'login',
       component: () => import('@/views/seguridad/LoginView.vue'),
       meta: { publico: true }
+    },
+    {
+      path: '/animales',
+      name: 'animales',
+      component: () => import('@/views/trazabilidad/AnimalesView.vue')
+    },
+    {
+      path: '/animales/:id',
+      name: 'animal-detalle',
+      component: () => import('@/views/trazabilidad/AnimalDetalleView.vue')
     }
-    // v0.2a: /animales         -> views/trazabilidad/AnimalesView.vue
-    //        /animales/:id     -> views/trazabilidad/AnimalDetalleView.vue
     // v0.2b: /planillas        -> views/trazabilidad/PlanillasView.vue
   ]
 })

@@ -1,0 +1,44 @@
+package com.anpael.trazabilidad.service;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.anpael.shared.exception.NoEncontradoException;
+import com.anpael.trazabilidad.domain.AnimalLista;
+import com.anpael.trazabilidad.infrastructure.AnimalListaRepository;
+
+@Service
+@Transactional(readOnly = true)
+public class AnimalService {
+
+    private final AnimalListaRepository animales;
+
+    public AnimalService(AnimalListaRepository animales) {
+        this.animales = animales;
+    }
+
+    public Page<AnimalLista> buscar(String caravana, Boolean sinCategoria, Boolean sinRodeo, Pageable pageable) {
+        Specification<AnimalLista> spec = Specification.where(null);
+
+        if (caravana != null && !caravana.isBlank()) {
+            String patron = "%" + caravana.trim().toLowerCase() + "%";
+            spec = spec.and((raiz, consulta, cb) -> cb.like(cb.lower(raiz.get("caravana")), patron));
+        }
+        if (Boolean.TRUE.equals(sinCategoria)) {
+            spec = spec.and((raiz, consulta, cb) -> cb.isTrue(raiz.get("sinCategoria")));
+        }
+        if (Boolean.TRUE.equals(sinRodeo)) {
+            spec = spec.and((raiz, consulta, cb) -> cb.isNull(raiz.get("rodeo")));
+        }
+
+        return animales.findAll(spec, pageable);
+    }
+
+    public AnimalLista obtener(Integer idAnimal) {
+        return animales.findById(idAnimal)
+                .orElseThrow(() -> new NoEncontradoException("No existe el animal " + idAnimal));
+    }
+}
