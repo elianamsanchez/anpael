@@ -13,6 +13,13 @@ spring:
   application:
     name: anpael
 
+  thymeleaf:
+    # El unico uso de Thymeleaf en esta app es render de HTML->PDF para las
+    # planillas (v0.2b): no sirve ninguna pagina web. XHTML en vez del modo
+    # HTML por defecto porque openhtmltopdf necesita XML bien formado -sin
+    # el conversor jsoup/neko, que no esta en el classpath.
+    mode: XHTML
+
   datasource:
     # SUPABASE: hay dos cadenas de conexion y NO son intercambiables.
     #

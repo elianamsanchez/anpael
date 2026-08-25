@@ -1,5 +1,7 @@
 package com.anpael.trazabilidad.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -40,5 +42,10 @@ public class AnimalService {
     public AnimalLista obtener(Integer idAnimal) {
         return animales.findById(idAnimal)
                 .orElseThrow(() -> new NoEncontradoException("No existe el animal " + idAnimal));
+    }
+
+    /** Los animales vigentes de un rodeo, ordenados por caravana. Lo usa el módulo planillas. */
+    public List<AnimalLista> buscarPorRodeo(Integer idRodeo) {
+        return animales.buscarPorRodeo(idRodeo);
     }
 }

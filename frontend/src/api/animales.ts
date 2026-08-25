@@ -103,3 +103,33 @@ export function listarCausasBaja() {
 export function darDeBaja(idAnimal: number, params: DarDeBajaParams) {
   return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/baja`, params).then(r => r.data)
 }
+
+export interface Raza {
+  idRaza: number
+  nombre: string
+}
+
+export interface Pelaje {
+  idPelaje: number
+  nombre: string
+}
+
+export interface CorregirAnimalParams {
+  idRaza?: number
+  idPelaje?: number
+  fechaNacimiento?: string
+  fechaNacEsEstimada?: boolean
+  pesoNacerKg?: number
+}
+
+export function listarRazas() {
+  return api.get<Raza[]>('/api/razas').then(r => r.data)
+}
+
+export function listarPelajes() {
+  return api.get<Pelaje[]>('/api/pelajes').then(r => r.data)
+}
+
+export function corregirAnimal(idAnimal: number, params: CorregirAnimalParams) {
+  return api.patch<Animal>(`/api/animales/${idAnimal}`, params).then(r => r.data)
+}

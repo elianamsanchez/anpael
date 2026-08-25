@@ -3,8 +3,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   getAnimal, listarCategorias, listarRodeos, asignarCategoria, asignarRodeo,
-  listarCausasBaja, darDeBaja,
-  type Animal, type Categoria, type Rodeo, type CausaBaja
+  listarCausasBaja, darDeBaja, listarRazas, listarPelajes, corregirAnimal,
+  type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje
 } from '@/api/animales'
 import type { ErrorApi } from '@/api/client'
 
@@ -36,20 +36,36 @@ const guardandoBaja = ref(false)
 const mensajeBaja = ref<string | null>(null)
 const errorBaja = ref<ErrorApi | null>(null)
 
+const razas = ref<Raza[]>([])
+const pelajes = ref<Pelaje[]>([])
+const idRazaElegida = ref<number | null>(null)
+const idPelajeElegido = ref<number | null>(null)
+const fechaNacimientoCorregida = ref('')
+const fechaEsEstimada = ref(false)
+const pesoNacerCorregido = ref('')
+const guardandoCorreccion = ref(false)
+const mensajeCorreccion = ref<string | null>(null)
+const errorCorreccion = ref<ErrorApi | null>(null)
+
 async function cargar() {
   cargando.value = true
   error.value = null
   try {
-    const [animalCargado, categoriasCargadas, rodeosCargados, causasCargadas] = await Promise.all([
-      getAnimal(idAnimal),
-      listarCategorias(),
-      listarRodeos(),
-      listarCausasBaja()
-    ])
+    const [animalCargado, categoriasCargadas, rodeosCargados, causasCargadas, razasCargadas, pelajesCargados] =
+      await Promise.all([
+        getAnimal(idAnimal),
+        listarCategorias(),
+        listarRodeos(),
+        listarCausasBaja(),
+        listarRazas(),
+        listarPelajes()
+      ])
     animal.value = animalCargado
     categorias.value = categoriasCargadas
     rodeos.value = rodeosCargados
     causasBaja.value = causasCargadas
+    razas.value = razasCargadas
+    pelajes.value = pelajesCargados
   } catch (e) {
     error.value = e as ErrorApi
     animal.value = null
@@ -107,6 +123,34 @@ async function guardarBaja() {
     errorBaja.value = e as ErrorApi
   } finally {
     guardandoBaja.value = false
+  }
+}
+
+async function guardarCorreccion() {
+  const cambios = {
+    idRaza: idRazaElegida.value ?? undefined,
+    idPelaje: idPelajeElegido.value ?? undefined,
+    fechaNacimiento: fechaNacimientoCorregida.value || undefined,
+    fechaNacEsEstimada: fechaNacimientoCorregida.value ? fechaEsEstimada.value : undefined,
+    pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined
+  }
+  if (Object.values(cambios).every(v => v === undefined)) return
+
+  guardandoCorreccion.value = true
+  mensajeCorreccion.value = null
+  errorCorreccion.value = null
+  try {
+    animal.value = await corregirAnimal(idAnimal, cambios)
+    mensajeCorreccion.value = 'Datos actualizados.'
+    idRazaElegida.value = null
+    idPelajeElegido.value = null
+    fechaNacimientoCorregida.value = ''
+    fechaEsEstimada.value = false
+    pesoNacerCorregido.value = ''
+  } catch (e) {
+    errorCorreccion.value = e as ErrorApi
+  } finally {
+    guardandoCorreccion.value = false
   }
 }
 
@@ -202,6 +246,44 @@ onMounted(cargar)
         </dl>
       </section>
 
+      <section class="tarjeta correccion">
+        <h3>Corregir / completar datos</h3>
+        <p class="atenuado chico">Dejá en blanco lo que no quieras cambiar.</p>
+
+        <form class="form-correccion" @submit.prevent="guardarCorreccion">
+          <label class="campo-chico">
+            <span>Raza</span>
+            <select v-model.number="idRazaElegida">
+              <option :value="null">(sin cambios)</option>
+              <option v-for="r in razas" :key="r.idRaza" :value="r.idRaza">{{ r.nombre }}</option>
+            </select>
+          </label>
+          <label class="campo-chico">
+            <span>Pelaje</span>
+            <select v-model.number="idPelajeElegido">
+              <option :value="null">(sin cambios)</option>
+              <option v-for="p in pelajes" :key="p.idPelaje" :value="p.idPelaje">{{ p.nombre }}</option>
+            </select>
+          </label>
+          <label class="campo-chico">
+            <span>Fecha de nacimiento</span>
+            <input v-model="fechaNacimientoCorregida" type="date" />
+          </label>
+          <label class="check" v-if="fechaNacimientoCorregida">
+            <input v-model="fechaEsEstimada" type="checkbox" /> Es estimada
+          </label>
+          <label class="campo-chico">
+            <span>Peso al nacer (kg)</span>
+            <input v-model="pesoNacerCorregido" type="number" min="10" max="70" step="0.1" placeholder="10 a 70" />
+          </label>
+          <button class="boton-chico" type="submit" :disabled="guardandoCorreccion">
+            {{ guardandoCorreccion ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+        </form>
+        <p v-if="mensajeCorreccion" class="aviso-ok">{{ mensajeCorreccion }}</p>
+        <p v-if="errorCorreccion" class="aviso-error">{{ errorCorreccion.mensaje }} <span v-if="errorCorreccion.detalle">— {{ errorCorreccion.detalle }}</span></p>
+      </section>
+
       <section class="tarjeta baja">
         <h3>Dar de baja</h3>
 
@@ -265,6 +347,18 @@ dd { margin: 0; font-weight: 600; text-align: right; }
   background: #FBEAE6; border: 1px solid #E8B3A6; color: var(--bad);
   border-radius: 8px; padding: 8px 10px; font-size: 13px; margin: 8px 0 0;
 }
+
+.correccion { margin-top: 16px; }
+.correccion h3 { margin: 0 0 4px; font-size: 15px; }
+.chico { font-size: 12.5px; margin: 0 0 12px; }
+.form-correccion { display: flex; flex-direction: column; gap: 10px; }
+.campo-chico { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--n500); }
+.campo-chico select, .campo-chico input {
+  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero);
+}
+.form-correccion .check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--n500); }
+.form-correccion .boton-chico { align-self: flex-start; }
 
 .baja { margin-top: 16px; }
 .baja h3 { margin: 0 0 12px; font-size: 15px; }

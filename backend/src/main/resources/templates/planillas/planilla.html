@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title th:text="${titulo}">Planilla</title>
+  <style>
+    @page { size: A4 landscape; margin: 15mm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #2b1a10; }
+    h1 { font-size: 17px; margin: 0 0 2px; }
+    p.subtitulo { font-size: 11px; color: #6b6257; margin: 0 0 14px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #999999; padding: 7px 8px; text-align: left; height: 24px; }
+    th { background-color: #EFE7DA; font-size: 10px; text-transform: uppercase; }
+    td.caravana { font-weight: bold; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <h1 th:text="${titulo}">Título</h1>
+  <p class="subtitulo" th:text="${fecha}">Fecha</p>
+  <table>
+    <thead>
+      <tr>
+        <th th:each="col : ${columnas}" th:text="${col}">Columna</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="fila : ${filas}">
+        <td th:each="valor, iter : ${fila}" th:text="${valor}" th:class="${iter.index == 0} ? 'caravana' : ''"> </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

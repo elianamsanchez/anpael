@@ -33,8 +33,12 @@ const router = createRouter({
       path: '/animales/:id',
       name: 'animal-detalle',
       component: () => import('@/views/trazabilidad/AnimalDetalleView.vue')
+    },
+    {
+      path: '/planillas',
+      name: 'planillas',
+      component: () => import('@/views/trazabilidad/PlanillasView.vue')
     }
-    // v0.2b: /planillas        -> views/trazabilidad/PlanillasView.vue
   ]
 })
 

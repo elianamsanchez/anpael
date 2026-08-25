@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.anpael.trazabilidad.api.dto.AsignacionResultado;
 import com.anpael.trazabilidad.api.dto.AsignarCategoriaRequest;
 import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
+import com.anpael.trazabilidad.api.dto.CorregirAnimalRequest;
 import com.anpael.trazabilidad.api.dto.DarDeBajaRequest;
 import com.anpael.trazabilidad.domain.AnimalLista;
 import com.anpael.trazabilidad.service.AnimalBajaService;
 import com.anpael.trazabilidad.service.AnimalCategoriaService;
+import com.anpael.trazabilidad.service.AnimalCorreccionService;
 import com.anpael.trazabilidad.service.AnimalRodeoService;
 import com.anpael.trazabilidad.service.AnimalService;
 
@@ -27,7 +30,8 @@ import jakarta.validation.Valid;
 
 /**
  * Padron para el saneamiento (v0.2a, docs/etapas.md): buscar un animal, ver
- * todo lo que se sabe de el, asignarle categoria/rodeo, y darlo de baja.
+ * todo lo que se sabe de el, asignarle categoria/rodeo, corregir sus datos,
+ * y darlo de baja.
  */
 @RestController
 @RequestMapping("/api/animales")
@@ -37,13 +41,16 @@ public class AnimalController {
     private final AnimalCategoriaService animalCategoriaService;
     private final AnimalRodeoService animalRodeoService;
     private final AnimalBajaService animalBajaService;
+    private final AnimalCorreccionService animalCorreccionService;
 
     public AnimalController(AnimalService animalService, AnimalCategoriaService animalCategoriaService,
-            AnimalRodeoService animalRodeoService, AnimalBajaService animalBajaService) {
+            AnimalRodeoService animalRodeoService, AnimalBajaService animalBajaService,
+            AnimalCorreccionService animalCorreccionService) {
         this.animalService = animalService;
         this.animalCategoriaService = animalCategoriaService;
         this.animalRodeoService = animalRodeoService;
         this.animalBajaService = animalBajaService;
+        this.animalCorreccionService = animalCorreccionService;
     }
 
     @GetMapping
@@ -76,6 +83,12 @@ public class AnimalController {
         String mensaje = animalRodeoService.asignar(idAnimal, pedido.idRodeo(),
                 pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
         return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
+    }
+
+    @PatchMapping("/{idAnimal}")
+    public AnimalLista corregir(@PathVariable Integer idAnimal, @Valid @RequestBody CorregirAnimalRequest pedido) {
+        animalCorreccionService.corregir(idAnimal, pedido);
+        return animalService.obtener(idAnimal);
     }
 
     @PostMapping("/{idAnimal}/baja")

@@ -53,6 +53,7 @@ onMounted(consultar)
       </div>
       <span class="espaciador"></span>
       <RouterLink class="salir" to="/animales">Padrón</RouterLink>
+      <RouterLink class="salir" to="/planillas">Planillas</RouterLink>
       <span class="quien" v-if="auth.usuario">{{ auth.usuario.nombre }}</span>
       <button class="salir" @click="salir">Salir</button>
     </header>
