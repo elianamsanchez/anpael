@@ -19,9 +19,11 @@ import com.anpael.trazabilidad.api.dto.AsignacionResultado;
 import com.anpael.trazabilidad.api.dto.AsignarCategoriaRequest;
 import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
 import com.anpael.trazabilidad.api.dto.CorregirAnimalRequest;
+import com.anpael.trazabilidad.api.dto.CrearAnimalRequest;
 import com.anpael.trazabilidad.api.dto.DarDeBajaRequest;
 import com.anpael.trazabilidad.domain.AnimalEvento;
 import com.anpael.trazabilidad.domain.AnimalLista;
+import com.anpael.trazabilidad.service.AnimalAltaService;
 import com.anpael.trazabilidad.service.AnimalBajaService;
 import com.anpael.trazabilidad.service.AnimalCategoriaService;
 import com.anpael.trazabilidad.service.AnimalCorreccionService;
@@ -44,15 +46,23 @@ public class AnimalController {
     private final AnimalRodeoService animalRodeoService;
     private final AnimalBajaService animalBajaService;
     private final AnimalCorreccionService animalCorreccionService;
+    private final AnimalAltaService animalAltaService;
 
     public AnimalController(AnimalService animalService, AnimalCategoriaService animalCategoriaService,
             AnimalRodeoService animalRodeoService, AnimalBajaService animalBajaService,
-            AnimalCorreccionService animalCorreccionService) {
+            AnimalCorreccionService animalCorreccionService, AnimalAltaService animalAltaService) {
         this.animalService = animalService;
         this.animalCategoriaService = animalCategoriaService;
         this.animalRodeoService = animalRodeoService;
         this.animalBajaService = animalBajaService;
         this.animalCorreccionService = animalCorreccionService;
+        this.animalAltaService = animalAltaService;
+    }
+
+    @PostMapping
+    public AnimalLista crear(@Valid @RequestBody CrearAnimalRequest pedido) {
+        Integer idAnimal = animalAltaService.crear(pedido);
+        return animalService.obtener(idAnimal);
     }
 
     @GetMapping

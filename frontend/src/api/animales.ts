@@ -152,3 +152,47 @@ export function listarPelajes() {
 export function corregirAnimal(idAnimal: number, params: CorregirAnimalParams) {
   return api.patch<Animal>(`/api/animales/${idAnimal}`, params).then(r => r.data)
 }
+
+export interface Cabana {
+  idCabana: number
+  nombre: string
+  contacto?: string
+}
+
+export interface Establecimiento {
+  idEstablecimiento: number
+  cuig: string
+  nombre: string
+  esPropio: boolean
+  activo: boolean
+}
+
+export function listarCabanas() {
+  return api.get<Cabana[]>('/api/cabanas').then(r => r.data)
+}
+
+export function listarEstablecimientos() {
+  return api.get<Establecimiento[]>('/api/establecimientos').then(r => r.data)
+}
+
+export interface NuevoAnimalParams {
+  caravana: string
+  sexo: string
+  origen: string
+  idRaza?: number
+  idPelaje?: number
+  idCabana?: number
+  idEstabOrigen?: number
+  fechaNacimiento?: string
+  fechaNacEsEstimada?: boolean
+  pesoNacerKg?: number
+  fechaIngreso?: string
+  idMadre?: number
+  idPadre?: number
+  idCategoria?: number
+  idRodeo?: number
+}
+
+export function crearAnimal(params: NuevoAnimalParams) {
+  return api.post<Animal>('/api/animales', params).then(r => r.data)
+}

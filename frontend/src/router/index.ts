@@ -30,6 +30,11 @@ const router = createRouter({
       component: () => import('@/views/trazabilidad/AnimalesView.vue')
     },
     {
+      path: '/animales/nuevo',
+      name: 'animal-nuevo',
+      component: () => import('@/views/trazabilidad/AnimalNuevoView.vue')
+    },
+    {
       path: '/animales/:id',
       name: 'animal-detalle',
       component: () => import('@/views/trazabilidad/AnimalDetalleView.vue')

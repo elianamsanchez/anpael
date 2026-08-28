@@ -77,6 +77,7 @@ onMounted(() => {
         ANPAEL
         <small>Santa Ana · saneamiento del padrón</small>
       </div>
+      <RouterLink to="/animales/nuevo" class="boton-nuevo">+ Nuevo animal</RouterLink>
     </header>
 
     <section class="filtros">
@@ -149,6 +150,11 @@ onMounted(() => {
 .marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
 .marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
 .punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
+.boton-nuevo {
+  margin-left: auto; background: var(--tierra); color: #fff; text-decoration: none;
+  border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600;
+}
+.boton-nuevo:hover { opacity: .9; }
 
 .filtros { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
 .buscador {
