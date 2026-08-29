@@ -1,0 +1,5 @@
+# Los scripts de shell necesitan LF siempre, incluso en Windows: con
+# core.autocrlf=true (el default de este repo) un checkout normal les mete
+# CRLF, y un script con CRLF falla al ejecutarse en bash (el shebang o
+# cualquier linea terminan con un \r suelto que la shell no espera).
+*.sh text eol=lf

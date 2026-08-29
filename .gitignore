@@ -51,3 +51,9 @@ Thumbs.db
 *.log
 /tmp/
 planillas-generadas/
+
+# ---- scripts/levantar_local.sh: pids y logs de los procesos que levanta ----
+/.dev/
+
+# ---- Supabase CLI ----
+supabase/.temp/
