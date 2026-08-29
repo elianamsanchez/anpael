@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { buscarAnimales, listarRodeos, listarCategorias, type Animal, type Rodeo, type Categoria } from '@/api/animales'
 import type { ErrorApi } from '@/api/client'
+import Marca from '@/components/base/Marca.vue'
+import Tarjeta from '@/components/base/Tarjeta.vue'
+import Buscador from '@/components/formularios/Buscador.vue'
+import Check from '@/components/formularios/Check.vue'
+import Campo from '@/components/formularios/Campo.vue'
+import Etiqueta from '@/components/base/Etiqueta.vue'
+import Tabla from '@/components/datos/Tabla.vue'
+import Paginado from '@/components/datos/Paginado.vue'
 
 /**
  * v0.2a · saneamiento (docs/etapas.md): buscar un animal por caravana y ver
@@ -67,45 +75,60 @@ onMounted(() => {
   listarRodeos().then(r => { rodeos.value = r })
   listarCategorias().then(c => { categorias.value = c })
 })
+
+const columnas = [
+  { clave: 'caravana', titulo: 'Caravana' },
+  { clave: 'sexo', titulo: 'Sexo' },
+  { clave: 'raza', titulo: 'Raza' },
+  { clave: 'categoria', titulo: 'Categoría' },
+  { clave: 'rodeo', titulo: 'Rodeo' },
+  { clave: 'validacion', titulo: 'Validación' }
+]
+
+const opcionesRodeo = computed(() => [
+  { valor: null, etiqueta: 'Todos los rodeos' },
+  ...rodeos.value.map(r => ({ valor: r.idRodeo, etiqueta: r.nombre }))
+])
+const opcionesCategoria = computed(() => [
+  { valor: null, etiqueta: 'Todas las categorías' },
+  ...categorias.value.map(c => ({ valor: c.idCategoria, etiqueta: c.nombre }))
+])
 </script>
 
 <template>
   <main class="pantalla">
     <RouterLink to="/" class="volver">‹ Inicio</RouterLink>
 
-    <header class="marca">
-      <span class="punto"></span>
-      <div>
-        ANPAEL
-        <small>Santa Ana · saneamiento del padrón</small>
-      </div>
-      <RouterLink to="/animales/nuevo" class="boton-nuevo">+ Nuevo animal</RouterLink>
-    </header>
+    <Marca bajada="Santa Ana · saneamiento del padrón" class="marca-animales">
+      <RouterLink to="/animales/nuevo" class="link-nuevo">+ Nuevo animal</RouterLink>
+    </Marca>
 
     <section class="filtros">
-      <input v-model="caravana" type="search" placeholder="Buscar por caravana…" class="buscador" />
-      <label class="check">
-        <input v-model="sinCategoria" type="checkbox" /> Sin categoría
-      </label>
-      <label class="check">
-        <input v-model="sinRodeo" type="checkbox" /> Sin rodeo
-      </label>
-      <select v-model.number="idRodeoElegido" class="select-rodeo">
-        <option :value="null">Todos los rodeos</option>
-        <option v-for="r in rodeos" :key="r.idRodeo" :value="r.idRodeo">{{ r.nombre }}</option>
-      </select>
-      <select v-model.number="idCategoriaElegida" class="select-rodeo">
-        <option :value="null">Todas las categorías</option>
-        <option v-for="c in categorias" :key="c.idCategoria" :value="c.idCategoria">{{ c.nombre }}</option>
-      </select>
+      <Buscador v-model:valor="caravana" placeholder="Buscar por caravana…" />
+      <Check etiqueta="Sin categoría" v-model:marcado="sinCategoria" />
+      <Check etiqueta="Sin rodeo" v-model:marcado="sinRodeo" />
+      <Campo
+        class="campo-filtro"
+        sobre-fondo
+        :opciones="opcionesRodeo"
+        :valor="idRodeoElegido"
+        @update:valor="idRodeoElegido = $event === '' ? null : Number($event)"
+      />
+      <Campo
+        class="campo-filtro"
+        sobre-fondo
+        :opciones="opcionesCategoria"
+        :valor="idCategoriaElegida"
+        @update:valor="idCategoriaElegida = $event === '' ? null : Number($event)"
+      />
       <span class="total" v-if="!cargando">{{ totalElementos.toLocaleString('es-AR') }} animales</span>
     </section>
 
-    <section class="tarjeta">
+    <Tarjeta denso>
       <p v-if="cargando" class="atenuado">Consultando…</p>
 
       <template v-else-if="error">
-        <h2 class="mal">No responde</h2>
+        <h2 class="etiqueta-mal">No responde</h2>
         <p><b>{{ error.mensaje }}</b></p>
       </template>
 
@@ -113,80 +136,43 @@ onMounted(() => {
         <p class="atenuado">No hay animales que coincidan con la búsqueda.</p>
       </template>
 
-      <table v-else class="tabla">
-        <thead>
-          <tr>
-            <th>Caravana</th>
-            <th>Sexo</th>
-            <th>Raza</th>
-            <th>Categoría</th>
-            <th>Rodeo</th>
-            <th>Validación</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="a in animales" :key="a.idAnimal">
-            <td>
-              <RouterLink :to="`/animales/${a.idAnimal}`">{{ a.caravana ?? '(sin identificación)' }}</RouterLink>
-            </td>
-            <td>{{ a.sexo }}</td>
-            <td>{{ a.raza ?? '—' }}</td>
-            <td><span v-if="a.sinCategoria" class="falta">sin categoría</span><span v-else>{{ a.categoria }}</span></td>
-            <td><span v-if="!a.rodeo" class="falta">sin rodeo</span><span v-else>{{ a.rodeo }}</span></td>
-            <td>{{ a.validacion }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <Tabla v-else :columnas="columnas" :filas="animales">
+        <template #celda-caravana="{ fila }">
+          <RouterLink class="link-caravana" :to="`/animales/${fila.idAnimal}`">{{ fila.caravana ?? '(sin identificación)' }}</RouterLink>
+        </template>
+        <template #celda-raza="{ fila }">{{ fila.raza ?? '—' }}</template>
+        <template #celda-categoria="{ fila }">
+          <Etiqueta v-if="fila.sinCategoria" tono="falta">sin categoría</Etiqueta>
+          <span v-else>{{ fila.categoria }}</span>
+        </template>
+        <template #celda-rodeo="{ fila }">
+          <Etiqueta v-if="!fila.rodeo" tono="falta">sin rodeo</Etiqueta>
+          <span v-else>{{ fila.rodeo }}</span>
+        </template>
+      </Tabla>
 
-      <nav class="paginado" v-if="totalPaginas > 1">
-        <button class="boton-chico" :disabled="pagina === 0" @click="pagina--">‹ Anterior</button>
-        <span class="atenuado">página {{ pagina + 1 }} de {{ totalPaginas }}</span>
-        <button class="boton-chico" :disabled="pagina >= totalPaginas - 1" @click="pagina++">Siguiente ›</button>
-      </nav>
-    </section>
+      <Paginado :pagina="pagina" :total-paginas="totalPaginas" @cambio="pagina = $event" />
+    </Tarjeta>
   </main>
 </template>
 
 <style scoped>
-.pantalla { max-width: 980px; margin: 6vh auto; padding: 0 16px; }
-.volver { display: inline-block; margin-bottom: 14px; color: var(--n500); font-size: 13px; text-decoration: none; }
+.pantalla { max-width: var(--ancho-tabla); margin: 6vh auto; padding: 0 16px; }
+.volver { display: inline-block; margin-bottom: 14px; color: var(--text-muted); font-size: var(--fs-13); text-decoration: none; }
 .volver:hover { text-decoration: underline; }
-.marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
-.marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
-.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
-.boton-nuevo {
-  margin-left: auto; background: var(--tierra); color: #fff; text-decoration: none;
-  border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600;
+header.marca-animales { margin-bottom: 18px; }
+.link-nuevo {
+  margin-left: auto; background: var(--action-primary); color: #fff; text-decoration: none;
+  border-radius: var(--radio-md); padding: 8px 14px; font-size: var(--fs-13); font-weight: var(--fw-semibold);
 }
-.boton-nuevo:hover { opacity: .9; }
+.link-nuevo:hover { background: var(--action-primary-hover); }
 
 .filtros { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
-.buscador {
-  font: inherit; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--n200);
-  background: #fff; min-width: 240px;
-}
-.check { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--n500); cursor: pointer; }
-.select-rodeo {
-  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--n200); background: #fff; color: var(--cuero);
-}
-.total { margin-left: auto; font-size: 13px; color: var(--n500); }
+label.campo-filtro { flex: 0 0 auto; min-width: 0; }
+.total { margin-left: auto; font-size: var(--fs-13); color: var(--text-muted); }
 
-.tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 16px 20px; }
-.atenuado { color: var(--n500); }
-.mal { color: var(--bad); }
-
-.tabla { width: 100%; border-collapse: collapse; font-size: 14px; }
-.tabla th { text-align: left; font-size: 12px; color: var(--n500); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--n200); }
-.tabla td { padding: 8px 10px; border-bottom: 1px solid #EBE5DC; }
-.tabla a { color: var(--tierra-txt); font-weight: 600; text-decoration: none; }
-.tabla a:hover { text-decoration: underline; }
-.falta { color: var(--warn); font-size: 12.5px; }
-
-.paginado { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; }
-.boton-chico {
-  background: none; border: 1px solid var(--n200); color: var(--cuero);
-  border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
-}
-.boton-chico:disabled { opacity: .4; cursor: not-allowed; }
+.atenuado { color: var(--text-muted); }
+.etiqueta-mal { color: var(--bad); }
+.link-caravana { color: var(--text-link); font-weight: var(--fw-semibold); text-decoration: none; }
+.link-caravana:hover { text-decoration: underline; }
 </style>

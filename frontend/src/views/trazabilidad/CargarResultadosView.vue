@@ -6,6 +6,11 @@ import {
   animalesDelRodeo, cargarTacto, cargarPesada, cargarRevisionToros, cargarSanidad
 } from '@/api/trabajos'
 import type { ErrorApi } from '@/api/client'
+import Marca from '@/components/base/Marca.vue'
+import Tarjeta from '@/components/base/Tarjeta.vue'
+import Campo from '@/components/formularios/Campo.vue'
+import Boton from '@/components/base/Boton.vue'
+import Aviso from '@/components/avisos/Aviso.vue'
 
 /**
  * v0.2b · cargar resultados (docs/etapas.md): "cargás los resultados sin
@@ -117,39 +122,30 @@ async function guardar() {
   <main class="pantalla">
     <RouterLink to="/" class="volver">‹ Inicio</RouterLink>
 
-    <header class="marca">
-      <span class="punto"></span>
-      <div>
-        ANPAEL
-        <small>Santa Ana · cargar resultados</small>
-      </div>
-    </header>
+    <Marca bajada="Santa Ana · cargar resultados" class="marca-cargar" />
 
     <section class="filtros">
-      <label class="campo-chico">
-        <span>Rodeo</span>
-        <select v-model.number="idRodeoElegido">
-          <option :value="null" disabled>Elegir rodeo…</option>
-          <option v-for="r in rodeos" :key="r.idRodeo" :value="r.idRodeo">{{ r.nombre }}</option>
-        </select>
-      </label>
-      <label class="campo-chico">
-        <span>Trabajo</span>
-        <select v-model="tipoTrabajoElegido">
-          <option :value="null" disabled>Elegir trabajo…</option>
-          <option v-for="t in TIPOS_TRABAJO_PLANILLA" :key="t.valor" :value="t.valor">{{ t.etiqueta }}</option>
-        </select>
-      </label>
+      <Campo
+        etiqueta="Rodeo" sobre-fondo class="campo-filtro"
+        :opciones="[{ valor: null, etiqueta: 'Elegir rodeo…' }, ...rodeos.map(r => ({ valor: r.idRodeo, etiqueta: r.nombre }))]"
+        :valor="idRodeoElegido"
+        @update:valor="idRodeoElegido = $event === '' ? null : Number($event)"
+      />
+      <Campo
+        etiqueta="Trabajo" sobre-fondo class="campo-filtro"
+        :opciones="[{ valor: null, etiqueta: 'Elegir trabajo…' }, ...TIPOS_TRABAJO_PLANILLA.map(t => ({ valor: t.valor, etiqueta: t.etiqueta }))]"
+        v-model:valor="tipoTrabajoElegido"
+      />
     </section>
 
-    <p v-if="error" class="aviso-error">{{ error.mensaje }}</p>
-    <p v-if="mensaje" class="aviso-ok">{{ mensaje }}</p>
+    <Aviso v-if="error" tono="error" class="aviso-fila">{{ error.mensaje }}</Aviso>
+    <Aviso v-if="mensaje" tono="ok" class="aviso-fila">{{ mensaje }}</Aviso>
 
-    <section v-if="cargandoAnimales" class="tarjeta">
+    <Tarjeta v-if="cargandoAnimales">
       <p class="atenuado">Consultando…</p>
-    </section>
+    </Tarjeta>
 
-    <section v-else-if="filas.length > 0" class="tarjeta ancha">
+    <Tarjeta v-else-if="filas.length > 0" denso class="tarjeta-ancha">
       <form @submit.prevent="guardar">
         <table class="tabla">
           <thead>
@@ -217,57 +213,37 @@ async function guardar() {
           </tbody>
         </table>
 
-        <button class="boton" type="submit" :disabled="guardando">
+        <Boton tipo="submit" :deshabilitado="guardando">
           {{ guardando ? 'Guardando…' : 'Guardar resultados' }}
-        </button>
+        </Boton>
       </form>
-    </section>
+    </Tarjeta>
 
-    <section v-else-if="idRodeoElegido && tipoTrabajoElegido" class="tarjeta">
+    <Tarjeta v-else-if="idRodeoElegido && tipoTrabajoElegido">
       <p class="atenuado">Este rodeo no tiene animales asignados todavía.</p>
-    </section>
+    </Tarjeta>
   </main>
 </template>
 
 <style scoped>
-.pantalla { max-width: 980px; margin: 6vh auto; padding: 0 16px; }
-.volver { display: inline-block; margin-bottom: 14px; color: var(--n500); font-size: 13px; text-decoration: none; }
+.pantalla { max-width: var(--ancho-tabla); margin: 6vh auto; padding: 0 16px; }
+.volver { display: inline-block; margin-bottom: 14px; color: var(--text-muted); font-size: var(--fs-13); text-decoration: none; }
 .volver:hover { text-decoration: underline; }
-.marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
-.marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
-.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
+header.marca-cargar { margin-bottom: 18px; }
 
 .filtros { display: flex; gap: 16px; margin-bottom: 14px; }
-.campo-chico { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--n500); }
-.campo-chico select {
-  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--n200); background: #fff; color: var(--cuero); min-width: 200px;
-}
+label.campo-filtro { flex: 0 0 auto; min-width: 200px; }
+p.aviso-fila { margin: 0 0 14px; }
 
-.tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 16px 20px; }
-.ancha { padding: 16px; }
-.atenuado { color: var(--n500); }
+section.tarjeta-ancha { padding: 16px; }
+.atenuado { color: var(--text-muted); }
 
-.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-bottom: 14px; }
-.tabla th { text-align: left; font-size: 11.5px; color: var(--n500); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--n200); }
-.tabla td { padding: 4px 6px; border-bottom: 1px solid #EBE5DC; }
-.tabla td.caravana { font-weight: 600; white-space: nowrap; }
+.tabla { width: 100%; border-collapse: collapse; font-size: var(--fs-135); margin-bottom: 14px; }
+.tabla th { text-align: left; font-size: 11.5px; color: var(--text-muted); font-weight: var(--fw-semibold); padding: 6px 8px; border-bottom: var(--borde-fino); }
+.tabla td { padding: 4px 6px; border-bottom: var(--borde-filete); }
+.tabla td.caravana { font-weight: var(--fw-semibold); white-space: nowrap; font-family: var(--font-mono); }
 .tabla input, .tabla select {
-  font: inherit; font-size: 13px; padding: 5px 6px; border-radius: 6px;
-  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero); width: 100%; box-sizing: border-box;
-}
-
-.boton {
-  background: var(--tierra-txt); color: #fff; border: 0;
-  border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer;
-}
-.boton:disabled { opacity: .5; cursor: not-allowed; }
-.aviso-ok {
-  background: #EAF3EA; border: 1px solid #BFDDBF; color: var(--ok);
-  border-radius: 8px; padding: 10px; font-size: 13px; margin: 0 0 14px;
-}
-.aviso-error {
-  background: #FBEAE6; border: 1px solid #E8B3A6; color: var(--bad);
-  border-radius: 8px; padding: 10px; font-size: 13px; margin: 0 0 14px;
+  font: inherit; font-family: var(--font-ui); font-size: var(--fs-13); padding: 5px 6px; border-radius: var(--radio-sm);
+  border: var(--borde-fino); background: var(--surface-field); color: var(--text-body); width: 100%; box-sizing: border-box;
 }
 </style>

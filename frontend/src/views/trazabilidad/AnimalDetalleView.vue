@@ -10,6 +10,14 @@ import {
   corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad
 } from '@/api/trabajos'
 import type { ErrorApi } from '@/api/client'
+import Marca from '@/components/base/Marca.vue'
+import Tarjeta from '@/components/base/Tarjeta.vue'
+import Boton from '@/components/base/Boton.vue'
+import Etiqueta from '@/components/base/Etiqueta.vue'
+import Campo from '@/components/formularios/Campo.vue'
+import Check from '@/components/formularios/Check.vue'
+import Aviso from '@/components/avisos/Aviso.vue'
+import ItemHistorial from '@/components/datos/ItemHistorial.vue'
 
 const TIPOS_EDITABLES = ['TACTO', 'PESADA', 'REVISION_TOROS', 'SANIDAD']
 
@@ -259,62 +267,64 @@ onMounted(cargar)
     <p v-if="cargando" class="atenuado">Consultando…</p>
 
     <template v-else-if="error">
-      <section class="tarjeta">
-        <h2 class="mal">No responde</h2>
+      <Tarjeta>
+        <h2 class="etiqueta-mal">No responde</h2>
         <p><b>{{ error.mensaje }}</b></p>
-      </section>
+      </Tarjeta>
     </template>
 
     <template v-else-if="animal">
-      <header class="marca">
-        <span class="punto"></span>
-        <div>
-          {{ animal.caravana ?? `Animal #${animal.idAnimal}` }}
-          <small>{{ animal.tipoIdent }} · {{ animal.sexo === 'M' ? 'macho' : 'hembra' }}</small>
-        </div>
-      </header>
+      <Marca
+        class="marca-animal"
+        :titulo="animal.caravana ?? `Animal #${animal.idAnimal}`"
+        :bajada="`${animal.tipoIdent} · ${animal.sexo === 'M' ? 'macho' : 'hembra'}`"
+      />
 
-      <section class="tarjeta">
-        <dl>
+      <Tarjeta>
+        <dl class="lista-info">
           <div><dt>Raza</dt><dd>{{ animal.raza ?? '—' }}</dd></div>
           <div>
             <dt>Categoría</dt>
-            <dd><span v-if="animal.sinCategoria" class="falta">sin asignar</span><span v-else>{{ animal.categoria }}</span></dd>
+            <dd><Etiqueta v-if="animal.sinCategoria" tono="falta">sin asignar</Etiqueta><span v-else>{{ animal.categoria }}</span></dd>
           </div>
           <div>
             <dt>Rodeo</dt>
             <dd>
-              <span v-if="!animal.rodeo" class="falta">sin asignar</span>
+              <Etiqueta v-if="!animal.rodeo" tono="falta">sin asignar</Etiqueta>
               <span v-else>{{ animal.rodeo }} <span class="atenuado">(desde {{ animal.enRodeoDesde }})</span></span>
             </dd>
           </div>
 
           <div class="asignar">
             <form class="form-asignar" @submit.prevent="guardarCategoria">
-              <select v-model.number="idCategoriaElegida">
-                <option :value="null" disabled>Asignar categoría…</option>
-                <option v-for="c in categorias" :key="c.idCategoria" :value="c.idCategoria">{{ c.nombre }}</option>
-              </select>
-              <button class="boton-chico" type="submit" :disabled="!idCategoriaElegida || guardandoCategoria">
+              <Campo
+                class="campo-asignar"
+                :opciones="[{ valor: null, etiqueta: 'Asignar categoría…' }, ...categorias.map(c => ({ valor: c.idCategoria, etiqueta: c.nombre }))]"
+                :valor="idCategoriaElegida"
+                @update:valor="idCategoriaElegida = $event === '' ? null : Number($event)"
+              />
+              <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idCategoriaElegida || guardandoCategoria">
                 {{ guardandoCategoria ? 'Guardando…' : 'Asignar' }}
-              </button>
+              </Boton>
             </form>
-            <p v-if="mensajeCategoria" class="aviso-ok">{{ mensajeCategoria }}</p>
-            <p v-if="errorCategoria" class="aviso-error">{{ errorCategoria.mensaje }}</p>
+            <Aviso v-if="mensajeCategoria" tono="ok" class="aviso-fila">{{ mensajeCategoria }}</Aviso>
+            <Aviso v-if="errorCategoria" tono="error" class="aviso-fila">{{ errorCategoria.mensaje }}</Aviso>
           </div>
 
           <div class="asignar">
             <form class="form-asignar" @submit.prevent="guardarRodeo">
-              <select v-model.number="idRodeoElegido">
-                <option :value="null" disabled>Asignar rodeo…</option>
-                <option v-for="r in rodeos" :key="r.idRodeo" :value="r.idRodeo">{{ r.nombre }}</option>
-              </select>
-              <button class="boton-chico" type="submit" :disabled="!idRodeoElegido || guardandoRodeo">
+              <Campo
+                class="campo-asignar"
+                :opciones="[{ valor: null, etiqueta: 'Asignar rodeo…' }, ...rodeos.map(r => ({ valor: r.idRodeo, etiqueta: r.nombre }))]"
+                :valor="idRodeoElegido"
+                @update:valor="idRodeoElegido = $event === '' ? null : Number($event)"
+              />
+              <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idRodeoElegido || guardandoRodeo">
                 {{ guardandoRodeo ? 'Guardando…' : 'Asignar' }}
-              </button>
+              </Boton>
             </form>
-            <p v-if="mensajeRodeo" class="aviso-ok">{{ mensajeRodeo }}</p>
-            <p v-if="errorRodeo" class="aviso-error">{{ errorRodeo.mensaje }}</p>
+            <Aviso v-if="mensajeRodeo" tono="ok" class="aviso-fila">{{ mensajeRodeo }}</Aviso>
+            <Aviso v-if="errorRodeo" tono="error" class="aviso-fila">{{ errorRodeo.mensaje }}</Aviso>
           </div>
           <div><dt>Fecha de nacimiento</dt>
             <dd>
@@ -326,7 +336,7 @@ onMounted(cargar)
           <div><dt>Establecimiento (CUIG)</dt><dd>{{ animal.cuig ?? '—' }}</dd></div>
           <div><dt>Estado</dt>
             <dd>
-              <span :class="animal.activo ? 'bien' : 'mal'">{{ animal.activo ? 'activo' : 'inactivo' }}</span>
+              <Etiqueta :tono="animal.activo ? 'ok' : 'mal'">{{ animal.activo ? 'activo' : 'inactivo' }}</Etiqueta>
               <span v-if="animal.tieneBaja" class="atenuado"> · tiene registro de baja</span>
             </dd>
           </div>
@@ -339,53 +349,56 @@ onMounted(cargar)
           </div>
           <div v-if="animal.validacionObs"><dt>Observaciones</dt><dd>{{ animal.validacionObs }}</dd></div>
         </dl>
-      </section>
+      </Tarjeta>
 
-      <section class="tarjeta historial">
-        <h3>Historial de trabajos</h3>
+      <Tarjeta titulo="Historial de trabajos" class="tarjeta-espaciada">
         <p v-if="historial.length === 0" class="atenuado">Sin eventos registrados todavía.</p>
         <ul v-else class="lista-historial">
-          <li v-for="ev in historial" :key="ev.idEvento">
-            <div class="fila-historial">
-              <span class="fecha-historial">{{ ev.fecha }}</span>
-              <span class="tipo-historial">{{ ev.tipoTrabajo }}</span>
-            </div>
-            <p v-if="ev.detalle" class="detalle-historial">{{ ev.detalle }}</p>
-            <p v-if="ev.comentario" class="detalle-historial atenuado">"{{ ev.comentario }}"</p>
-
-            <button v-if="TIPOS_EDITABLES.includes(ev.tipoTrabajo)" class="link-corregir"
-                    type="button" @click="alternarEdicion(ev.idEvento)">
+          <ItemHistorial
+            v-for="(ev, i) in historial"
+            :key="ev.idEvento"
+            :fecha="ev.fecha"
+            :tipo="ev.tipoTrabajo"
+            :detalle="ev.detalle"
+            :comentario="ev.comentario"
+            :ultimo="i === historial.length - 1"
+          >
+            <Boton
+              v-if="TIPOS_EDITABLES.includes(ev.tipoTrabajo)"
+              variante="texto" tamano="sm" tipo="button" class="link-corregir"
+              @click="alternarEdicion(ev.idEvento)"
+            >
               {{ estadoEdicion(ev.idEvento).abierto ? 'Cancelar' : 'Corregir' }}
-            </button>
+            </Boton>
 
             <form v-if="estadoEdicion(ev.idEvento).abierto" class="form-correccion-evento"
                   @submit.prevent="guardarCorreccionEvento(ev)">
               <p class="atenuado chico">Dejá en blanco lo que no quieras cambiar.</p>
 
               <template v-if="ev.tipoTrabajo === 'TACTO'">
-                <select v-model="estadoEdicion(ev.idEvento).resultado">
+                <select class="select-chico" v-model="estadoEdicion(ev.idEvento).resultado">
                   <option value="">Resultado (sin cambios)</option>
                   <option value="PRENADA">Preñada</option>
                   <option value="VACIA">Vacía</option>
                   <option value="DUDOSA">Dudosa</option>
                 </select>
-                <select v-model="estadoEdicion(ev.idEvento).tamano">
+                <select class="select-chico" v-model="estadoEdicion(ev.idEvento).tamano">
                   <option value="">Tamaño (sin cambios)</option>
                   <option value="CHICA">Chica</option>
                   <option value="MEDIANA">Mediana</option>
                   <option value="GRANDE">Grande</option>
                 </select>
-                <input v-model="estadoEdicion(ev.idEvento).observaciones" type="text" placeholder="Observaciones" />
+                <input class="select-chico" v-model="estadoEdicion(ev.idEvento).observaciones" type="text" placeholder="Observaciones" />
               </template>
 
               <template v-else-if="ev.tipoTrabajo === 'PESADA'">
-                <input v-model="estadoEdicion(ev.idEvento).kilos" type="number" min="15" max="1400" step="0.1" placeholder="Kilos" />
+                <input class="select-chico" v-model="estadoEdicion(ev.idEvento).kilos" type="number" min="15" max="1400" step="0.1" placeholder="Kilos" />
               </template>
 
               <template v-else-if="ev.tipoTrabajo === 'REVISION_TOROS'">
-                <input v-model="estadoEdicion(ev.idEvento).circunferenciaEscrotal" type="number" min="24" max="50" step="0.1" placeholder="Circunf. escrotal" />
-                <input v-model="estadoEdicion(ev.idEvento).condicionCorporal" type="number" min="1" max="5" step="0.5" placeholder="Cond. corporal" />
-                <select v-model="estadoEdicion(ev.idEvento).apto">
+                <input class="select-chico" v-model="estadoEdicion(ev.idEvento).circunferenciaEscrotal" type="number" min="24" max="50" step="0.1" placeholder="Circunf. escrotal" />
+                <input class="select-chico" v-model="estadoEdicion(ev.idEvento).condicionCorporal" type="number" min="1" max="5" step="0.5" placeholder="Cond. corporal" />
+                <select class="select-chico" v-model="estadoEdicion(ev.idEvento).apto">
                   <option value="">Apto (sin cambios)</option>
                   <option value="si">Sí</option>
                   <option value="no">No</option>
@@ -393,170 +406,107 @@ onMounted(cargar)
               </template>
 
               <template v-else-if="ev.tipoTrabajo === 'SANIDAD'">
-                <input v-model="estadoEdicion(ev.idEvento).producto" type="text" placeholder="Producto" />
-                <input v-model="estadoEdicion(ev.idEvento).dosis" type="number" min="0" step="0.01" placeholder="Dosis" />
+                <input class="select-chico" v-model="estadoEdicion(ev.idEvento).producto" type="text" placeholder="Producto" />
+                <input class="select-chico" v-model="estadoEdicion(ev.idEvento).dosis" type="number" min="0" step="0.01" placeholder="Dosis" />
               </template>
 
-              <button class="boton-chico" type="submit" :disabled="estadoEdicion(ev.idEvento).guardando">
+              <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="estadoEdicion(ev.idEvento).guardando">
                 {{ estadoEdicion(ev.idEvento).guardando ? 'Guardando…' : 'Guardar corrección' }}
-              </button>
-              <p v-if="estadoEdicion(ev.idEvento).mensaje" class="aviso-ok">{{ estadoEdicion(ev.idEvento).mensaje }}</p>
-              <p v-if="estadoEdicion(ev.idEvento).error" class="aviso-error">{{ estadoEdicion(ev.idEvento).error!.mensaje }}</p>
+              </Boton>
+              <Aviso v-if="estadoEdicion(ev.idEvento).mensaje" tono="ok" class="aviso-fila">{{ estadoEdicion(ev.idEvento).mensaje }}</Aviso>
+              <Aviso v-if="estadoEdicion(ev.idEvento).error" tono="error" class="aviso-fila">{{ estadoEdicion(ev.idEvento).error!.mensaje }}</Aviso>
             </form>
-          </li>
+          </ItemHistorial>
         </ul>
-      </section>
+      </Tarjeta>
 
-      <section class="tarjeta correccion">
-        <h3>Corregir / completar datos</h3>
-        <p class="atenuado chico">Dejá en blanco lo que no quieras cambiar.</p>
-
+      <Tarjeta titulo="Corregir / completar datos" nota="Dejá en blanco lo que no quieras cambiar." class="tarjeta-espaciada">
         <form class="form-correccion" @submit.prevent="guardarCorreccion">
-          <label class="campo-chico">
-            <span>Raza</span>
-            <select v-model.number="idRazaElegida">
-              <option :value="null">(sin cambios)</option>
-              <option v-for="r in razas" :key="r.idRaza" :value="r.idRaza">{{ r.nombre }}</option>
-            </select>
-          </label>
-          <label class="campo-chico">
-            <span>Pelaje</span>
-            <select v-model.number="idPelajeElegido">
-              <option :value="null">(sin cambios)</option>
-              <option v-for="p in pelajes" :key="p.idPelaje" :value="p.idPelaje">{{ p.nombre }}</option>
-            </select>
-          </label>
-          <label class="campo-chico">
-            <span>Fecha de nacimiento</span>
-            <input v-model="fechaNacimientoCorregida" type="date" />
-          </label>
-          <label class="check" v-if="fechaNacimientoCorregida">
-            <input v-model="fechaEsEstimada" type="checkbox" /> Es estimada
-          </label>
-          <label class="campo-chico">
-            <span>Peso al nacer (kg)</span>
-            <input v-model="pesoNacerCorregido" type="number" min="10" max="70" step="0.1" placeholder="10 a 70" />
-          </label>
-          <button class="boton-chico" type="submit" :disabled="guardandoCorreccion">
+          <Campo
+            etiqueta="Raza"
+            :opciones="[{ valor: null, etiqueta: '(sin cambios)' }, ...razas.map(r => ({ valor: r.idRaza, etiqueta: r.nombre }))]"
+            :valor="idRazaElegida"
+            @update:valor="idRazaElegida = $event === '' ? null : Number($event)"
+          />
+          <Campo
+            etiqueta="Pelaje"
+            :opciones="[{ valor: null, etiqueta: '(sin cambios)' }, ...pelajes.map(p => ({ valor: p.idPelaje, etiqueta: p.nombre }))]"
+            :valor="idPelajeElegido"
+            @update:valor="idPelajeElegido = $event === '' ? null : Number($event)"
+          />
+          <Campo etiqueta="Fecha de nacimiento" tipo="date" v-model:valor="fechaNacimientoCorregida" />
+          <Check v-if="fechaNacimientoCorregida" etiqueta="Es estimada" v-model:marcado="fechaEsEstimada" />
+          <Campo etiqueta="Peso al nacer (kg)" tipo="number" min="10" max="70" step="0.1" placeholder="10 a 70" v-model:valor="pesoNacerCorregido" />
+          <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="guardandoCorreccion">
             {{ guardandoCorreccion ? 'Guardando…' : 'Guardar cambios' }}
-          </button>
+          </Boton>
         </form>
-        <p v-if="mensajeCorreccion" class="aviso-ok">{{ mensajeCorreccion }}</p>
-        <p v-if="errorCorreccion" class="aviso-error">{{ errorCorreccion.mensaje }} <span v-if="errorCorreccion.detalle">— {{ errorCorreccion.detalle }}</span></p>
-      </section>
+        <Aviso v-if="mensajeCorreccion" tono="ok" class="aviso-fila">{{ mensajeCorreccion }}</Aviso>
+        <Aviso v-if="errorCorreccion" tono="error" class="aviso-fila">{{ errorCorreccion.mensaje }} <span v-if="errorCorreccion.detalle">— {{ errorCorreccion.detalle }}</span></Aviso>
+      </Tarjeta>
 
-      <section class="tarjeta baja">
-        <h3>Dar de baja</h3>
-
+      <Tarjeta titulo="Dar de baja" class="tarjeta-espaciada">
         <p v-if="animal.tieneBaja" class="atenuado">
           Este animal ya tiene una baja registrada. No se puede cargar otra.
         </p>
 
         <form v-else class="form-baja" @submit.prevent="guardarBaja">
-          <select v-model.number="idCausaBajaElegida">
-            <option :value="null" disabled>Causa…</option>
-            <option v-for="c in causasBaja" :key="c.idCausaBaja" :value="c.idCausaBaja">
-              {{ c.tipoBaja }} · {{ c.descripcion }}
-            </option>
-          </select>
+          <Campo
+            :opciones="[{ valor: null, etiqueta: 'Causa…' }, ...causasBaja.map(c => ({ valor: c.idCausaBaja, etiqueta: `${c.tipoBaja} · ${c.descripcion}` }))]"
+            :valor="idCausaBajaElegida"
+            @update:valor="idCausaBajaElegida = $event === '' ? null : Number($event)"
+          />
           <p v-if="esRegularizacion" class="atenuado chico">
             Regularización: usar solo si no se sabe cuándo ni por qué salió el animal.
             Si se conoce la fecha real, cargar la causa real (venta, muerte, traslado) con esa fecha.
           </p>
-          <label class="check">
-            <input v-model="fechaEsEstimadaBaja" type="checkbox" />
-            La fecha es estimada (hoy, no el día real en que salió el animal)
-          </label>
-          <input v-model="destinoBaja" type="text" placeholder="Destino (opcional)" />
-          <textarea v-model="observacionesBaja" placeholder="Observaciones (opcional)" rows="2"></textarea>
-          <button class="boton-chico" type="submit" :disabled="!idCausaBajaElegida || guardandoBaja">
+          <Check
+            etiqueta="La fecha es estimada (hoy, no el día real en que salió el animal)"
+            v-model:marcado="fechaEsEstimadaBaja"
+          />
+          <Campo placeholder="Destino (opcional)" v-model:valor="destinoBaja" />
+          <Campo tipo="textarea" :filas="2" placeholder="Observaciones (opcional)" v-model:valor="observacionesBaja" />
+          <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="!idCausaBajaElegida || guardandoBaja">
             {{ guardandoBaja ? 'Guardando…' : 'Registrar baja' }}
-          </button>
+          </Boton>
         </form>
-        <p v-if="mensajeBaja" class="aviso-ok">{{ mensajeBaja }}</p>
-        <p v-if="errorBaja" class="aviso-error">{{ errorBaja.mensaje }}</p>
-      </section>
+        <Aviso v-if="mensajeBaja" tono="ok" class="aviso-fila">{{ mensajeBaja }}</Aviso>
+        <Aviso v-if="errorBaja" tono="error" class="aviso-fila">{{ errorBaja.mensaje }}</Aviso>
+      </Tarjeta>
     </template>
   </main>
 </template>
 
 <style scoped>
-.pantalla { max-width: 620px; margin: 6vh auto; padding: 0 16px; }
+.pantalla { max-width: var(--ancho-lectura); margin: 6vh auto; padding: 0 16px; }
 .migas { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.volver { color: var(--n500); font-size: 13px; text-decoration: none; }
+.volver { color: var(--text-muted); font-size: var(--fs-13); text-decoration: none; }
 .volver:hover { text-decoration: underline; }
-.marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
-.marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
-.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
-.tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 20px; }
-.atenuado { color: var(--n500); }
-.mal { color: var(--bad); }
-.bien { color: var(--ok); }
-.falta { color: var(--warn); font-size: 12.5px; }
-dl { margin: 0; }
-dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid #EBE5DC; }
-dt { color: var(--n500); font-size: 13px; flex-shrink: 0; }
-dd { margin: 0; font-weight: 600; text-align: right; }
+header.marca-animal { margin-bottom: 18px; }
+.atenuado { color: var(--text-muted); }
+.etiqueta-mal { color: var(--bad); }
+section.tarjeta-espaciada { margin-top: 16px; }
+
+.lista-info { margin: 0; }
+.lista-info > div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: var(--borde-filete); }
+.lista-info dt { color: var(--text-muted); font-size: var(--fs-13); flex-shrink: 0; }
+.lista-info dd { margin: 0; font-weight: var(--fw-semibold); text-align: right; }
 
 .asignar { display: block; padding: 10px 0; }
-.form-asignar { display: flex; gap: 8px; }
-.form-asignar select {
-  flex: 1; font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero);
-}
-.boton-chico {
-  background: none; border: 1px solid var(--n200); color: var(--cuero);
-  border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
-}
-.boton-chico:disabled { opacity: .4; cursor: not-allowed; }
-.aviso-ok {
-  background: #EAF3EA; border: 1px solid #BFDDBF; color: var(--ok);
-  border-radius: 8px; padding: 8px 10px; font-size: 13px; margin: 8px 0 0;
-}
-.aviso-error {
-  background: #FBEAE6; border: 1px solid #E8B3A6; color: var(--bad);
-  border-radius: 8px; padding: 8px 10px; font-size: 13px; margin: 8px 0 0;
-}
+.form-asignar { display: flex; gap: 8px; align-items: flex-end; }
+label.campo-asignar { flex: 1; min-width: 0; }
+p.aviso-fila { margin: 8px 0 0; }
 
-.historial { margin-top: 16px; }
-.historial h3 { margin: 0 0 12px; font-size: 15px; }
 .lista-historial { list-style: none; margin: 0; padding: 0; }
-.lista-historial li { padding: 10px 0; border-bottom: 1px solid #EBE5DC; }
-.lista-historial li:last-child { border-bottom: none; }
-.fila-historial { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.fecha-historial { font-size: 12.5px; color: var(--n500); white-space: nowrap; }
-.tipo-historial { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--tierra-txt); text-transform: uppercase; }
-.detalle-historial { margin: 4px 0 0; font-size: 13.5px; }
-.link-corregir {
-  background: none; border: none; color: var(--tierra-txt); font-size: 12px; font-weight: 600;
-  cursor: pointer; padding: 6px 0 0; text-decoration: underline;
-}
+button.link-corregir { padding-top: 6px; }
 .form-correccion-evento { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-.form-correccion-evento select, .form-correccion-evento input {
-  font: inherit; font-size: 13px; padding: 6px 8px; border-radius: 6px;
-  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero);
+.select-chico {
+  font: inherit; font-family: var(--font-ui); font-size: var(--fs-13); padding: 6px 8px; border-radius: var(--radio-sm);
+  border: var(--borde-fino); background: var(--surface-field); color: var(--text-body);
 }
-.form-correccion-evento .boton-chico { align-self: flex-start; }
+button.boton-fila { align-self: flex-start; }
 
-.correccion { margin-top: 16px; }
-.correccion h3 { margin: 0 0 4px; font-size: 15px; }
-.chico { font-size: 12.5px; margin: 0 0 12px; }
+.chico { font-size: var(--fs-125); margin: 0 0 12px; }
 .form-correccion { display: flex; flex-direction: column; gap: 10px; }
-.campo-chico { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--n500); }
-.campo-chico select, .campo-chico input {
-  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero);
-}
-.form-correccion .check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--n500); }
-.form-correccion .boton-chico { align-self: flex-start; }
-
-.baja { margin-top: 16px; }
-.baja h3 { margin: 0 0 12px; font-size: 15px; }
 .form-baja { display: flex; flex-direction: column; gap: 8px; }
-.form-baja select, .form-baja input, .form-baja textarea {
-  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero); resize: vertical;
-}
-.form-baja .boton-chico { align-self: flex-start; }
-.form-baja .check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--n500); }
 </style>

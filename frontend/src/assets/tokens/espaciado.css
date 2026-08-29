@@ -1,0 +1,33 @@
+:root{
+  /* Escala de 2px tomada de los valores reales de las vistas Vue.
+     No hay grilla de 8: el código usa 6, 9, 10, 14, 18. Se respeta. */
+  --sp-1:2px;
+  --sp-2:4px;
+  --sp-3:6px;
+  --sp-4:8px;
+  --sp-5:10px;
+  --sp-6:12px;
+  --sp-7:14px;
+  --sp-8:16px;
+  --sp-9:18px;
+  --sp-10:20px;
+  --sp-12:24px;
+  --sp-16:32px;
+  --sp-20:40px;
+  --sp-24:48px;
+
+  /* medidas de pantalla, de los `max-width` de cada vista */
+  --ancho-angosto:380px;   /* login */
+  --ancho-lectura:620px;   /* estado, detalle, planillas */
+  --ancho-forma:720px;     /* alta de animal */
+  --ancho-tabla:980px;     /* padrón */
+
+  /* ritmo vertical */
+  --gap-campo:14px;
+  --gap-fila:8px;
+  --pad-tarjeta:20px;
+  --pad-tarjeta-tabla:16px 20px;
+
+  /* área táctil mínima en el celular, a pleno sol y con guantes */
+  --tap-min:44px; /* @kind spacing */
+}

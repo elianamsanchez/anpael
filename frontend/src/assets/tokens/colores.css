@@ -1,0 +1,121 @@
+/* Paleta "Cuero y campo" · v2
+   Base = lo que sigue vigente del código (cuero, monte, ok, bad, n200, n500)
+   + los colores de la foto de referencia (uploads/colores para paleta.PNG); el pasto
+   se cambió por un verde menos seco a pedido del usuario.
+   Fuera de la base: el naranja tierra (#B5651D / #964D00) y el amarillo warn
+   (#8A6100). El fondo de app dejó de ser arena: hoy está en prueba con un degradé verde
+   claro (--fondo-degrade), y los bordes pasaron a verde apagado. */
+:root{
+  /* --- base --- */
+  --cuero:#5C3D2E;      /* del código y del logotipo */
+  --monte:#6B7A4F;      /* del código */
+  --oliva:#856900;      /* foto · acción y dato faltante */
+  --pasto:#6D9A4F;      /* verde pasto fresco · acento vivo */
+  --trigo:#E9D0A1;      /* foto · superficie cálida */
+  --durazno:#FECF82;    /* foto · aviso, gráficos */
+  --piedra:#848F95;     /* foto · gris frío de apoyo */
+  --blanco:#FFFFFF;
+  --n50:#FFFFFF;        /* era #F9F3E9; ahora blanco */
+  --n200:#D9D3CA;       /* del código */
+  --n500:#766F63;       /* del código */
+  --ok:#3F7A44;         /* del código */
+  --bad:#9A3324;        /* del código */
+
+  --monte-hondo:#4C6B4A;  /* verde profundo: franjas, portadas, impresos */
+
+  /* --- rampa cuero --- */
+  --cuero-900:#2E1E17;
+  --cuero-700:#452D22;
+  --cuero-500:#5C3D2E;
+  --cuero-300:#8A6A58;
+  --cuero-100:#C7B2A6;
+
+  /* --- rampa oliva (reemplaza a la rampa tierra) --- */
+  --oliva-900:#4A3A00;
+  --oliva-700:#6B5400;
+  --oliva-500:#856900;
+  --oliva-300:#B9A24A;
+  --oliva-100:#F0E0BC;
+
+  /* --- rampa pasto --- */
+  --pasto-900:#35502A;
+  --pasto-700:#547A3B;
+  --pasto-500:#6D9A4F;
+  --pasto-300:#A2C286;
+  --pasto-100:#E2EDD8;
+
+  /* --- rampa monte --- */
+  --monte-900:#31402C;
+  --monte-700:#4C6B4A;
+  --monte-500:#6B7A4F;
+  --monte-300:#9BA77E;
+  --monte-100:#D3DABE;
+
+  /* --- rampa piedra --- */
+  --piedra-700:#4E585E;
+  --piedra-500:#848F95;
+  --piedra-300:#B3BBBF;
+  --piedra-100:#E2E6E8;
+
+  /* --- cálidos claros, para superficies --- */
+  --trigo-300:#E9D0A1;
+  --trigo-100:#FBF3E3;
+  --durazno-300:#FECF82;
+  --durazno-100:#FFEBCB;
+
+  /* --- neutros --- */
+  --n0:#FFFFFF;
+  --n25:#FDFBF7;
+  --n100:#EBE5DC;   /* filete de tabla, del código */
+  --n300:#BDB6AB;
+  --n700:#544E45;
+  --n900:#2B2620;
+
+  /* --- superficie --- */
+  --verde-claro:#CFE7C8;
+  --verde-claro-2:#E7F1E3;
+  /* prueba: fondo de app en degradé verde claro, de arriba hacia abajo */
+  --fondo-degrade:linear-gradient(180deg,var(--verde-claro) 0%,var(--verde-claro-2) 100%);
+  --surface-app:var(--verde-claro);
+  --surface-card:var(--blanco);
+  --surface-sunken:var(--trigo-100);
+  --surface-field:var(--trigo-100);
+  --surface-banda:var(--trigo-100);
+  --surface-inverse:var(--cuero-900);
+  --surface-brand:var(--monte-hondo);
+
+  /* --- texto --- */
+  --text-body:var(--cuero);
+  --text-strong:var(--cuero-900);
+  --text-muted:var(--n500);
+  --text-link:var(--oliva-700);
+  --text-on-dark:var(--n25);
+  --text-on-brand:#FFFFFF;
+
+  /* --- borde: verde apagado, para que la tarjeta se despegue del fondo verde --- */
+  --verde-borde:#C2D4BB;
+  --verde-filete:#E3EBDF;
+  --border-default:var(--verde-borde);
+  --border-hairline:var(--verde-filete);
+  --border-strong:var(--piedra-300);
+  --border-focus:var(--oliva);
+
+  /* --- acción --- */
+  --action-primary:var(--oliva-700);
+  --action-primary-hover:#574400;
+  --action-primary-press:#453600;
+  /* el relleno usa pasto-700: el pasto base no llega al contraste con texto blanco */
+  --action-accent:var(--pasto-700);
+  --action-accent-hover:#456630;
+  --action-quiet-border:var(--verde-borde);
+  --action-disabled-opacity:.5; /* @kind other */
+
+  /* --- estados: cada uno es un trío fondo/borde/texto --- */
+  --ok-bg:#EAF3EA;      --ok-border:#BFDDBF;   --ok-text:var(--ok);
+  --bad-bg:#FBEAE6;     --bad-border:#E8B3A6;  --bad-text:var(--bad);
+  --warn-bg:var(--durazno-100); --warn-border:#F2D5A0; --warn-text:var(--oliva-700);
+  --info-bg:#EDF0E4;    --info-border:#C9D3AE; --info-text:var(--monte-900);
+
+  /* --- el amarillo del dato faltante (era --warn) --- */
+  --falta-text:var(--oliva-700);
+}

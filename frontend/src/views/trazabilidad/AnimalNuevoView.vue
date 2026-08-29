@@ -7,6 +7,12 @@ import {
   type Categoria, type Rodeo, type Raza, type Pelaje, type Cabana, type Establecimiento
 } from '@/api/animales'
 import type { ErrorApi } from '@/api/client'
+import Marca from '@/components/base/Marca.vue'
+import Tarjeta from '@/components/base/Tarjeta.vue'
+import Campo from '@/components/formularios/Campo.vue'
+import Check from '@/components/formularios/Check.vue'
+import Boton from '@/components/base/Boton.vue'
+import Aviso from '@/components/avisos/Aviso.vue'
 
 /**
  * Alta de un animal nuevo (v0.2a): un ternero que nace o un animal que se
@@ -89,157 +95,103 @@ onMounted(() => {
       <RouterLink to="/animales" class="volver">Volver al padrón</RouterLink>
     </nav>
 
-    <header class="marca">
-      <span class="punto"></span>
-      <div>
-        Nuevo animal
-        <small>Alta con identificación visual en Santa Ana</small>
-      </div>
-    </header>
+    <Marca titulo="Nuevo animal" bajada="Alta con identificación visual en Santa Ana" class="marca-nuevo" />
 
-    <section class="tarjeta">
+    <Tarjeta>
       <form class="form-nuevo" @submit.prevent="guardar">
         <div class="fila">
-          <label class="campo">
-            <span>Caravana *</span>
-            <input v-model="caravana" type="text" placeholder="Ej: 0075" required />
-          </label>
-          <label class="campo">
-            <span>Sexo *</span>
-            <select v-model="sexo" required>
-              <option value="" disabled>Elegir…</option>
-              <option value="H">Hembra</option>
-              <option value="M">Macho</option>
-            </select>
-          </label>
+          <Campo etiqueta="Caravana" requerido placeholder="Ej: 0075" v-model:valor="caravana" />
+          <Campo
+            etiqueta="Sexo" requerido
+            :opciones="[{ valor: '', etiqueta: 'Elegir…' }, { valor: 'H', etiqueta: 'Hembra' }, { valor: 'M', etiqueta: 'Macho' }]"
+            v-model:valor="sexo"
+          />
         </div>
 
         <div class="fila">
-          <label class="campo">
-            <span>Origen *</span>
-            <select v-model="origen" required>
-              <option value="NACIDO">Nacido en el campo</option>
-              <option value="COMPRADO">Comprado</option>
-              <option value="RECIBIDO">Recibido</option>
-            </select>
-          </label>
-          <label class="campo" v-if="origen === 'COMPRADO'">
-            <span>Cabaña de origen</span>
-            <select v-model.number="idCabana">
-              <option :value="null">(sin especificar)</option>
-              <option v-for="c in cabanas" :key="c.idCabana" :value="c.idCabana">{{ c.nombre }}</option>
-            </select>
-          </label>
-          <label class="campo" v-if="origen !== 'NACIDO'">
-            <span>Establecimiento de origen</span>
-            <select v-model.number="idEstabOrigen">
-              <option :value="null">(sin especificar)</option>
-              <option v-for="e in establecimientos" :key="e.idEstablecimiento" :value="e.idEstablecimiento">
-                {{ e.nombre }} ({{ e.cuig }})
-              </option>
-            </select>
-          </label>
+          <Campo
+            etiqueta="Origen" requerido
+            :opciones="[{ valor: 'NACIDO', etiqueta: 'Nacido en el campo' }, { valor: 'COMPRADO', etiqueta: 'Comprado' }, { valor: 'RECIBIDO', etiqueta: 'Recibido' }]"
+            v-model:valor="origen"
+          />
+          <Campo
+            v-if="origen === 'COMPRADO'"
+            etiqueta="Cabaña de origen"
+            :opciones="[{ valor: null, etiqueta: '(sin especificar)' }, ...cabanas.map(c => ({ valor: c.idCabana, etiqueta: c.nombre }))]"
+            :valor="idCabana"
+            @update:valor="idCabana = $event === '' ? null : Number($event)"
+          />
+          <Campo
+            v-if="origen !== 'NACIDO'"
+            etiqueta="Establecimiento de origen"
+            :opciones="[{ valor: null, etiqueta: '(sin especificar)' }, ...establecimientos.map(e => ({ valor: e.idEstablecimiento, etiqueta: `${e.nombre} (${e.cuig})` }))]"
+            :valor="idEstabOrigen"
+            @update:valor="idEstabOrigen = $event === '' ? null : Number($event)"
+          />
         </div>
 
         <div class="fila">
-          <label class="campo">
-            <span>Raza</span>
-            <select v-model.number="idRaza">
-              <option :value="null">(sin especificar)</option>
-              <option v-for="r in razas" :key="r.idRaza" :value="r.idRaza">{{ r.nombre }}</option>
-            </select>
-          </label>
-          <label class="campo">
-            <span>Pelaje</span>
-            <select v-model.number="idPelaje">
-              <option :value="null">(sin especificar)</option>
-              <option v-for="p in pelajes" :key="p.idPelaje" :value="p.idPelaje">{{ p.nombre }}</option>
-            </select>
-          </label>
+          <Campo
+            etiqueta="Raza"
+            :opciones="[{ valor: null, etiqueta: '(sin especificar)' }, ...razas.map(r => ({ valor: r.idRaza, etiqueta: r.nombre }))]"
+            :valor="idRaza"
+            @update:valor="idRaza = $event === '' ? null : Number($event)"
+          />
+          <Campo
+            etiqueta="Pelaje"
+            :opciones="[{ valor: null, etiqueta: '(sin especificar)' }, ...pelajes.map(p => ({ valor: p.idPelaje, etiqueta: p.nombre }))]"
+            :valor="idPelaje"
+            @update:valor="idPelaje = $event === '' ? null : Number($event)"
+          />
         </div>
 
         <div class="fila">
-          <label class="campo">
-            <span>Fecha de nacimiento</span>
-            <input v-model="fechaNacimiento" type="date" />
-          </label>
-          <label class="check" v-if="fechaNacimiento">
-            <input v-model="fechaNacEsEstimada" type="checkbox" /> Es estimada
-          </label>
-          <label class="campo">
-            <span>Peso al nacer (kg)</span>
-            <input v-model="pesoNacerKg" type="number" min="10" max="70" step="0.1" placeholder="10 a 70" />
-          </label>
+          <Campo etiqueta="Fecha de nacimiento" tipo="date" v-model:valor="fechaNacimiento" />
+          <Check v-if="fechaNacimiento" etiqueta="Es estimada" class="check-fila" v-model:marcado="fechaNacEsEstimada" />
+          <Campo etiqueta="Peso al nacer (kg)" tipo="number" min="10" max="70" step="0.1" placeholder="10 a 70" v-model:valor="pesoNacerKg" />
         </div>
 
         <div class="fila">
-          <label class="campo">
-            <span>Fecha de ingreso</span>
-            <input v-model="fechaIngreso" type="date" />
-          </label>
-          <label class="campo">
-            <span>N° de madre (id animal)</span>
-            <input v-model="idMadre" type="number" min="1" placeholder="Opcional" />
-          </label>
-          <label class="campo">
-            <span>N° de padre (id animal)</span>
-            <input v-model="idPadre" type="number" min="1" placeholder="Opcional" />
-          </label>
+          <Campo etiqueta="Fecha de ingreso" tipo="date" v-model:valor="fechaIngreso" />
+          <Campo etiqueta="N° de madre (id animal)" tipo="number" min="1" placeholder="Opcional" v-model:valor="idMadre" />
+          <Campo etiqueta="N° de padre (id animal)" tipo="number" min="1" placeholder="Opcional" v-model:valor="idPadre" />
         </div>
 
         <div class="fila">
-          <label class="campo">
-            <span>Categoría</span>
-            <select v-model.number="idCategoria">
-              <option :value="null">(sin asignar)</option>
-              <option v-for="c in categorias" :key="c.idCategoria" :value="c.idCategoria">{{ c.nombre }}</option>
-            </select>
-          </label>
-          <label class="campo">
-            <span>Rodeo</span>
-            <select v-model.number="idRodeo">
-              <option :value="null">(sin asignar)</option>
-              <option v-for="r in rodeos" :key="r.idRodeo" :value="r.idRodeo">{{ r.nombre }}</option>
-            </select>
-          </label>
+          <Campo
+            etiqueta="Categoría"
+            :opciones="[{ valor: null, etiqueta: '(sin asignar)' }, ...categorias.map(c => ({ valor: c.idCategoria, etiqueta: c.nombre }))]"
+            :valor="idCategoria"
+            @update:valor="idCategoria = $event === '' ? null : Number($event)"
+          />
+          <Campo
+            etiqueta="Rodeo"
+            :opciones="[{ valor: null, etiqueta: '(sin asignar)' }, ...rodeos.map(r => ({ valor: r.idRodeo, etiqueta: r.nombre }))]"
+            :valor="idRodeo"
+            @update:valor="idRodeo = $event === '' ? null : Number($event)"
+          />
         </div>
 
-        <button class="boton-guardar" type="submit" :disabled="!caravana || !sexo || guardando">
+        <Boton class="boton-guardar" tipo="submit" :deshabilitado="!caravana || !sexo || guardando">
           {{ guardando ? 'Guardando…' : 'Dar de alta' }}
-        </button>
-        <p v-if="error" class="aviso-error">{{ error.mensaje }} <span v-if="error.detalle">— {{ error.detalle }}</span></p>
+        </Boton>
+        <Aviso v-if="error" tono="error">{{ error.mensaje }} <span v-if="error.detalle">— {{ error.detalle }}</span></Aviso>
       </form>
-    </section>
+    </Tarjeta>
   </main>
 </template>
 
 <style scoped>
-.pantalla { max-width: 720px; margin: 6vh auto; padding: 0 16px; }
+.pantalla { max-width: var(--ancho-forma); margin: 6vh auto; padding: 0 16px; }
 .migas { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.volver { color: var(--n500); font-size: 13px; text-decoration: none; }
+.volver { color: var(--text-muted); font-size: var(--fs-13); text-decoration: none; }
 .volver:hover { text-decoration: underline; }
-.atenuado { color: var(--n500); }
-.marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
-.marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
-.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
-.tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 20px; }
+.atenuado { color: var(--text-muted); }
+header.marca-nuevo { margin-bottom: 18px; }
 
-.form-nuevo { display: flex; flex-direction: column; gap: 14px; }
-.fila { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
-.campo { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--n500); flex: 1; min-width: 160px; }
-.campo select, .campo input {
-  font: inherit; font-size: 13.5px; padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--n200); background: var(--n50); color: var(--cuero);
-}
-.check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--n500); padding-bottom: 9px; }
+.form-nuevo { display: flex; flex-direction: column; gap: var(--gap-campo); }
+.fila { display: flex; gap: var(--gap-campo); flex-wrap: wrap; align-items: flex-end; }
+label.check-fila { padding-bottom: 9px; }
 
-.boton-guardar {
-  align-self: flex-start; background: var(--tierra); color: #fff; border: none;
-  border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
-}
-.boton-guardar:disabled { opacity: .5; cursor: not-allowed; }
-.aviso-error {
-  background: #FBEAE6; border: 1px solid #E8B3A6; color: var(--bad);
-  border-radius: 8px; padding: 8px 10px; font-size: 13px; margin: 0;
-}
+button.boton-guardar { align-self: flex-start; }
 </style>

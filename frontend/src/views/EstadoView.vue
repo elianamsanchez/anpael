@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getHealth, type Health } from '@/api/health'
 import type { ErrorApi } from '@/api/client'
 import { useAuth } from '@/stores/auth'
+import Marca from '@/components/base/Marca.vue'
+import Tarjeta from '@/components/base/Tarjeta.vue'
+import Boton from '@/components/base/Boton.vue'
+import Aviso from '@/components/avisos/Aviso.vue'
+import ListaDatos from '@/components/datos/ListaDatos.vue'
 
 /**
  * PANTALLA DE ESTADO  ·  el paso 3 del arranque tecnico.
@@ -41,28 +46,35 @@ async function consultar() {
 }
 
 onMounted(consultar)
+
+const items = computed(() => {
+  if (!datos.value) return []
+  const d = datos.value
+  const filas: { rotulo: string; valor: string | number; numerico?: boolean }[] = [
+    { rotulo: 'Aplicación', valor: d.aplicacion },
+    { rotulo: 'Base de datos', valor: d.base_de_datos }
+  ]
+  if (d.base) filas.push({ rotulo: 'Base', valor: d.base })
+  if (d.usuarioBase) filas.push({ rotulo: 'Usuario', valor: d.usuarioBase })
+  if (d.animales !== undefined) filas.push({ rotulo: 'Animales', valor: d.animales.toLocaleString('es-AR'), numerico: true })
+  return filas
+})
 </script>
 
 <template>
   <main class="pantalla">
-    <header class="marca">
-      <span class="punto"></span>
-      <div>
-        ANPAEL
-        <small>Santa Ana · estado del sistema</small>
-      </div>
-      <span class="espaciador"></span>
-      <RouterLink class="salir" to="/animales">Padrón</RouterLink>
-      <RouterLink class="salir" to="/planillas">Planillas</RouterLink>
+    <Marca bajada="Santa Ana · estado del sistema">
+      <RouterLink class="link-salir" to="/animales">Padrón</RouterLink>
+      <RouterLink class="link-salir" to="/planillas">Planillas</RouterLink>
       <span class="quien" v-if="auth.usuario">{{ auth.usuario.nombre }}</span>
-      <button class="salir" @click="salir">Salir</button>
-    </header>
+      <button class="link-salir link-salir--boton" @click="salir">Salir</button>
+    </Marca>
 
-    <section class="tarjeta">
+    <Tarjeta class="tarjeta-estado">
       <p v-if="cargando" class="atenuado">Consultando…</p>
 
       <template v-else-if="error">
-        <h2 class="mal">No responde</h2>
+        <h2 class="etiqueta-mal">No responde</h2>
         <p><b>{{ error.mensaje }}</b></p>
         <p v-if="error.detalle" class="atenuado">{{ error.detalle }}</p>
         <ol class="ayuda">
@@ -74,53 +86,34 @@ onMounted(consultar)
       </template>
 
       <template v-else-if="datos">
-        <h2 :class="datos.base_de_datos === 'ok' ? 'bien' : 'mal'">
+        <h2 :class="datos.base_de_datos === 'ok' ? 'etiqueta-ok' : 'etiqueta-mal'">
           {{ datos.base_de_datos === 'ok' ? 'Todo conectado' : 'Backend sí, base no' }}
         </h2>
-        <dl>
-          <div><dt>Aplicación</dt><dd>{{ datos.aplicacion }}</dd></div>
-          <div><dt>Base de datos</dt><dd>{{ datos.base_de_datos }}</dd></div>
-          <div v-if="datos.base"><dt>Base</dt><dd>{{ datos.base }}</dd></div>
-          <div v-if="datos.usuarioBase"><dt>Usuario</dt><dd>{{ datos.usuarioBase }}</dd></div>
-          <div v-if="datos.animales !== undefined">
-            <dt>Animales</dt><dd class="numero">{{ datos.animales.toLocaleString('es-AR') }}</dd>
-          </div>
-        </dl>
-        <p v-if="datos.detalle" class="aviso">{{ datos.detalle }}</p>
+        <ListaDatos :items="items" />
+        <Aviso v-if="datos.detalle" tono="atencion" class="aviso-detalle">{{ datos.detalle }}</Aviso>
       </template>
 
-      <button class="boton" @click="consultar" :disabled="cargando">Volver a consultar</button>
-    </section>
+      <Boton class="boton-consultar" @click="consultar" :deshabilitado="cargando">Volver a consultar</Boton>
+    </Tarjeta>
   </main>
 </template>
 
 <style scoped>
-.pantalla { max-width: 620px; margin: 8vh auto; padding: 0 16px; }
-.marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
-.marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
-.punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
-.espaciador { flex: 1; }
-.quien { font-weight: 400; font-size: 13px; color: var(--n500); }
-.salir {
-  background: none; border: 1px solid var(--n200); color: var(--cuero);
-  border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 600; cursor: pointer;
-  text-decoration: none;
+.pantalla { max-width: var(--ancho-lectura); margin: 6vh auto; padding: 0 16px; }
+.link-salir {
+  background: none; border: 1px solid var(--border-default); color: var(--text-body);
+  border-radius: var(--radio-md); padding: 6px 10px; font-size: var(--fs-13); font-weight: var(--fw-semibold);
+  cursor: pointer; text-decoration: none; font-family: inherit;
 }
-.tarjeta { background: #fff; border: 1px solid var(--n200); border-radius: 10px; padding: 20px; }
-h2 { margin: 0 0 14px; font-size: 20px; }
-.bien { color: var(--ok); }
-.mal { color: var(--bad); }
-dl { margin: 0; }
-dl > div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #EBE5DC; }
-dt { color: var(--n500); font-size: 13px; }
-dd { margin: 0; font-weight: 600; }
-.numero { font-variant-numeric: tabular-nums; }
-.atenuado { color: var(--n500); }
-.aviso { background: #FBF1DC; border: 1px solid #E8D3A6; color: #6E4E00;
-         border-radius: 8px; padding: 10px; font-size: 13px; }
-.ayuda { font-size: 13.5px; color: var(--n500); line-height: 1.7; }
-.ayuda code { background: var(--arena); padding: 1px 5px; border-radius: 4px; }
-.boton { margin-top: 16px; background: var(--tierra-txt); color: #fff; border: 0;
-         border-radius: 8px; padding: 9px 14px; font-weight: 600; cursor: pointer; }
-.boton:disabled { opacity: .5; cursor: not-allowed; }
+.link-salir--boton { font: inherit; }
+.quien { font-weight: var(--fw-regular); font-size: var(--fs-13); color: var(--text-muted); }
+section.tarjeta-estado { margin: 0; }
+h2 { margin: 0 0 14px; font-size: var(--fs-20); }
+.etiqueta-ok { color: var(--ok); }
+.etiqueta-mal { color: var(--bad); }
+.atenuado { color: var(--text-muted); }
+p.aviso-detalle { margin-top: 12px; }
+.ayuda { font-size: var(--fs-135); color: var(--text-muted); line-height: var(--lh-loose); }
+.ayuda code { background: var(--surface-sunken); padding: 1px 5px; border-radius: var(--radio-xs); }
+button.boton-consultar { margin-top: 16px; }
 </style>

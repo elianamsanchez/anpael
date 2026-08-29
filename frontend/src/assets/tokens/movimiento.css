@@ -1,0 +1,18 @@
+:root{
+  /* Sobrio a propósito: la app se usa con una mano, en el campo.
+     Nada rebota, nada se desliza. Cambios de opacidad y de color. */
+  --dur-instantanea:80ms; /* @kind other */
+  --dur-rapida:140ms; /* @kind other */
+  --dur-media:220ms; /* @kind other */
+  --ease-salida:cubic-bezier(.4,0,1,1); /* @kind other */
+  --ease-entrada:cubic-bezier(0,0,.2,1); /* @kind other */
+  --ease-estandar:cubic-bezier(.2,0,.2,1); /* @kind other */
+  --transicion-boton:background-color var(--dur-rapida) var(--ease-estandar),opacity var(--dur-rapida) var(--ease-estandar); /* @kind other */
+}
+@media (prefers-reduced-motion:reduce){
+  :root{
+    --dur-instantanea:0ms; /* @kind other */
+    --dur-rapida:0ms; /* @kind other */
+    --dur-media:0ms; /* @kind other */
+  }
+}

@@ -1,0 +1,21 @@
+:root{
+  /* Radios: el código usa 4 / 6 / 8 / 10 y nada más. */
+  --radio-xs:4px;   /* <code> */
+  --radio-sm:6px;   /* input chico dentro de un form embebido */
+  --radio-md:8px;   /* botones, inputs, avisos */
+  --radio-lg:10px;  /* tarjetas */
+  --radio-pill:999px;
+  --radio-circulo:50%;
+
+  --borde-fino:1px solid var(--border-default);
+  --borde-filete:1px solid var(--border-hairline);
+
+  /* El producto no usa sombra: separa con borde de 1px sobre fondo arena.
+     Estas dos existen solo para superficies flotantes (menú, hoja móvil). */
+  --sombra-none:none; /* @kind shadow */
+  --sombra-flotante:0 6px 20px -8px rgba(46,30,23,.28);
+  --sombra-elevada:0 12px 32px -10px rgba(46,30,23,.34);
+
+  --foco-anillo:2px solid var(--border-focus); /* @kind other */
+  --foco-offset:1px; /* @kind other */
+}
