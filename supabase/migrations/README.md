@@ -94,6 +94,24 @@ tablas terminaron en el esquema equivocado, y una vista de control se creó en
 funcionó. No "no dio error" — un `select` que muestre el resultado esperado.
 Los 20 archivos de la migración están hechos así.
 
+**4 · Desde `20260828110000_registro_migraciones_aplicadas.sql`, todo archivo
+nuevo termina anotándose:**
+
+```sql
+insert into _migraciones_aplicadas (version)
+values ('<nombre_de_archivo_sin_extension>')
+on conflict (version) do nothing;
+```
+
+Es la respuesta a "¿qué migraciones ya corrieron acá?" — antes había que
+inferirlo a mano, columna por columna. Para consultarlo:
+
+```sql
+select version, aplicada_en from _migraciones_aplicadas order by version;
+```
+
+Antes de correr un archivo nuevo contra un entorno, fijarse ahí si ya está.
+
 ---
 
 ## Antes de correr algo en la base de verdad
