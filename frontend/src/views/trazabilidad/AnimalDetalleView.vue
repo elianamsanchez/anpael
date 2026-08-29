@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   getAnimal, listarCategorias, listarRodeos, asignarCategoria, asignarRodeo,
@@ -35,11 +35,20 @@ const errorRodeo = ref<ErrorApi | null>(null)
 
 const causasBaja = ref<CausaBaja[]>([])
 const idCausaBajaElegida = ref<number | null>(null)
+const fechaEsEstimadaBaja = ref(false)
 const destinoBaja = ref('')
 const observacionesBaja = ref('')
 const guardandoBaja = ref(false)
 const mensajeBaja = ref<string | null>(null)
 const errorBaja = ref<ErrorApi | null>(null)
+
+const causaBajaElegida = computed(() => causasBaja.value.find(c => c.idCausaBaja === idCausaBajaElegida.value))
+const esRegularizacion = computed(() => causaBajaElegida.value?.tipoBaja === 'REGULARIZACION')
+
+// REGULARIZACION es "no sabemos ni cuando ni por que" (docs/modelo-datos.md):
+// la fecha que se carga es la del saneamiento, no la real, así que por
+// default es estimada. Para las demas causas se sabe la fecha real.
+watch(idCausaBajaElegida, () => { fechaEsEstimadaBaja.value = esRegularizacion.value })
 
 const razas = ref<Raza[]>([])
 const pelajes = ref<Pelaje[]>([])
@@ -195,6 +204,7 @@ async function guardarBaja() {
   try {
     const resultado = await darDeBaja(idAnimal, {
       idCausaBaja: idCausaBajaElegida.value,
+      fechaEsEstimada: fechaEsEstimadaBaja.value,
       destino: destinoBaja.value || undefined,
       observaciones: observacionesBaja.value || undefined
     })
@@ -449,6 +459,14 @@ onMounted(cargar)
               {{ c.tipoBaja }} · {{ c.descripcion }}
             </option>
           </select>
+          <p v-if="esRegularizacion" class="atenuado chico">
+            Regularización: usar solo si no se sabe cuándo ni por qué salió el animal.
+            Si se conoce la fecha real, cargar la causa real (venta, muerte, traslado) con esa fecha.
+          </p>
+          <label class="check">
+            <input v-model="fechaEsEstimadaBaja" type="checkbox" />
+            La fecha es estimada (hoy, no el día real en que salió el animal)
+          </label>
           <input v-model="destinoBaja" type="text" placeholder="Destino (opcional)" />
           <textarea v-model="observacionesBaja" placeholder="Observaciones (opcional)" rows="2"></textarea>
           <button class="boton-chico" type="submit" :disabled="!idCausaBajaElegida || guardandoBaja">
@@ -540,4 +558,5 @@ dd { margin: 0; font-weight: 600; text-align: right; }
   border: 1px solid var(--n200); background: var(--n50); color: var(--cuero); resize: vertical;
 }
 .form-baja .boton-chico { align-self: flex-start; }
+.form-baja .check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--n500); }
 </style>

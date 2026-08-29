@@ -13,6 +13,8 @@ public record DarDeBajaRequest(
 
         LocalDate fecha,
 
+        Boolean fechaEsEstimada,
+
         @Positive(message = "tiene que ser mayor a 0")
         BigDecimal pesoSalidaKg,
 

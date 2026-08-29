@@ -48,4 +48,12 @@ public class Baja {
 
     @Column(name = "id_persona_registro")
     private Integer idPersonaRegistro;
+
+    /**
+     * true = 'fecha' es el día del saneamiento, no el día real en que el
+     * animal salió del campo -lo normal en una baja REGULARIZACION
+     * (docs/modelo-datos.md, migración 20260828100000).
+     */
+    @Column(name = "fecha_es_estimada", nullable = false)
+    private Boolean fechaEsEstimada;
 }

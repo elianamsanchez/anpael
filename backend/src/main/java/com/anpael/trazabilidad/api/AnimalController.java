@@ -115,7 +115,7 @@ public class AnimalController {
             @Valid @RequestBody DarDeBajaRequest pedido) {
         animalService.obtener(idAnimal);
         String mensaje = animalBajaService.darDeBaja(idAnimal, pedido.idCausaBaja(),
-                pedido.fecha() != null ? pedido.fecha() : LocalDate.now(),
+                pedido.fecha() != null ? pedido.fecha() : LocalDate.now(), pedido.fechaEsEstimada(),
                 pedido.pesoSalidaKg(), pedido.destino(), pedido.observaciones());
         return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
     }

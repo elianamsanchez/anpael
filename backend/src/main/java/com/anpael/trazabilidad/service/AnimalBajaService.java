@@ -41,8 +41,8 @@ public class AnimalBajaService {
     }
 
     @Transactional
-    public String darDeBaja(Integer idAnimal, Integer idCausaBaja, LocalDate fecha, BigDecimal pesoSalidaKg,
-            String destino, String observaciones) {
+    public String darDeBaja(Integer idAnimal, Integer idCausaBaja, LocalDate fecha, Boolean fechaEsEstimada,
+            BigDecimal pesoSalidaKg, String destino, String observaciones) {
 
         if (bajas.existsByIdAnimal(idAnimal)) {
             throw new ReglaDeNegocioException("Este animal ya tiene una baja registrada. No se puede cargar otra.");
@@ -58,6 +58,7 @@ public class AnimalBajaService {
         baja.setPesoSalidaKg(pesoSalidaKg);
         baja.setDestino(destino);
         baja.setObservaciones(observaciones);
+        baja.setFechaEsEstimada(Boolean.TRUE.equals(fechaEsEstimada));
         baja.setIdPersonaRegistro(ContextoAutenticacion.idPersonaActual());
         bajas.save(baja);
 
