@@ -240,7 +240,11 @@ onMounted(cargar)
 
 <template>
   <main class="pantalla">
-    <RouterLink to="/animales" class="volver">‹ Volver al padrón</RouterLink>
+    <nav class="migas">
+      <RouterLink to="/" class="volver">‹ Inicio</RouterLink>
+      <span class="atenuado">·</span>
+      <RouterLink to="/animales" class="volver">Volver al padrón</RouterLink>
+    </nav>
 
     <p v-if="cargando" class="atenuado">Consultando…</p>
 
@@ -460,7 +464,8 @@ onMounted(cargar)
 
 <style scoped>
 .pantalla { max-width: 620px; margin: 6vh auto; padding: 0 16px; }
-.volver { display: inline-block; margin-bottom: 14px; color: var(--n500); font-size: 13px; text-decoration: none; }
+.migas { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.volver { color: var(--n500); font-size: 13px; text-decoration: none; }
 .volver:hover { text-decoration: underline; }
 .marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
 .marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }

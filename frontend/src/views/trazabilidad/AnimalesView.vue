@@ -71,6 +71,8 @@ onMounted(() => {
 
 <template>
   <main class="pantalla">
+    <RouterLink to="/" class="volver">‹ Inicio</RouterLink>
+
     <header class="marca">
       <span class="punto"></span>
       <div>
@@ -147,6 +149,8 @@ onMounted(() => {
 
 <style scoped>
 .pantalla { max-width: 980px; margin: 6vh auto; padding: 0 16px; }
+.volver { display: inline-block; margin-bottom: 14px; color: var(--n500); font-size: 13px; text-decoration: none; }
+.volver:hover { text-decoration: underline; }
 .marca { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-bottom: 18px; }
 .marca small { display: block; font-weight: 400; font-size: 12px; color: var(--n500); }
 .punto { width: 12px; height: 12px; border-radius: 50%; background: var(--tierra); }
