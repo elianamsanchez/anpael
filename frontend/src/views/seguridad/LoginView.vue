@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { login } from '@/api/auth'
 import { useAuth } from '@/stores/auth'
 import type { ErrorApi } from '@/api/client'
 import fotoCampo from '@/assets/images/login-campo.jpg'
 
 const router = useRouter()
-const route = useRoute()
 const auth = useAuth()
 
 const usuario = ref('')
@@ -21,8 +20,7 @@ async function entrar() {
   try {
     const respuesta = await login(usuario.value, password.value)
     auth.entrar({ nombre: respuesta.nombre, rol: respuesta.rol }, respuesta.token)
-    const destino = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-    router.replace(destino)
+    router.replace('/')
   } catch (e) {
     error.value = e as ErrorApi
   } finally {
