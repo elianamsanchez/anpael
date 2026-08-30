@@ -14,8 +14,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--fondo-degrade);
-  background-attachment: fixed;
+  background: var(--surface-app);
   color: var(--text-body);
   font-family: var(--font-ui);
 }

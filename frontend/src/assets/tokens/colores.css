@@ -3,8 +3,9 @@
    + los colores de la foto de referencia (uploads/colores para paleta.PNG); el pasto
    se cambió por un verde menos seco a pedido del usuario.
    Fuera de la base: el naranja tierra (#B5651D / #964D00) y el amarillo warn
-   (#8A6100). El fondo de app dejó de ser arena: hoy está en prueba con un degradé verde
-   claro (--fondo-degrade), y los bordes pasaron a verde apagado. */
+   (#8A6100). El fondo de app dejó de ser arena, después pasó por un degradé
+   verde claro a prueba, y hoy es el gris base (--gris-base) que usa la
+   pantalla de login. Los bordes pasaron a verde apagado. */
 :root{
   /* --- base --- */
   --cuero:#5C3D2E;      /* del código y del logotipo */
@@ -72,11 +73,10 @@
   --n900:#2B2620;
 
   /* --- superficie --- */
-  --verde-claro:#CFE7C8;
-  --verde-claro-2:#E7F1E3;
-  /* prueba: fondo de app en degradé verde claro, de arriba hacia abajo */
-  --fondo-degrade:linear-gradient(180deg,var(--verde-claro) 0%,var(--verde-claro-2) 100%);
-  --surface-app:var(--verde-claro);
+  /* el degradé verde estaba a prueba; se resolvió a favor del gris base
+     que ya usa la pantalla de login */
+  --gris-base:#F5F7F5;
+  --surface-app:var(--gris-base);
   --surface-card:var(--blanco);
   --surface-sunken:var(--trigo-100);
   --surface-field:var(--trigo-100);

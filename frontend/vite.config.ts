@@ -17,7 +17,7 @@ export default defineConfig({
         short_name: 'ANPAEL',
         description: 'Gestion ganadera',
         theme_color: '#5C3D2E',
-        background_color: '#CFE7C8',
+        background_color: '#F5F7F5',
         display: 'standalone',
         start_url: '/'
       }
