@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { getHealth, type Health } from '@/api/health'
 import type { ErrorApi } from '@/api/client'
-import { useAuth } from '@/stores/auth'
 import Marca from '@/components/base/Marca.vue'
 import Tarjeta from '@/components/base/Tarjeta.vue'
 import Boton from '@/components/base/Boton.vue'
@@ -13,24 +11,17 @@ import ListaDatos from '@/components/datos/ListaDatos.vue'
 /**
  * PANTALLA DE ESTADO  ·  el paso 3 del arranque tecnico.
  *
- * No tiene valor de negocio y es la pantalla mas importante del proyecto en
- * este momento: prueba que el frontend habla con el backend y que el backend
- * habla con la base. Segun el documento de stack, este es el paso que mas
- * frena a quien viene de backend, y resolverlo con una pantalla tonta es
- * mucho mas barato que descubrirlo depurando el login.
+ * No tiene valor de negocio: prueba que el frontend habla con el backend y
+ * que el backend habla con la base. Segun el documento de stack, este es el
+ * paso que mas frena a quien viene de backend, y resolverlo con una pantalla
+ * tonta es mucho mas barato que descubrirlo depurando el login.
  *
- * Ahora es pantalla de admin (ruta privada): quien la ve ya inicio sesion.
+ * Ya no es la pantalla de inicio (esa es DashboardView) -queda como una
+ * pantalla mas, para el chequeo tecnico puntual.
  */
-const router = useRouter()
-const auth = useAuth()
 const cargando = ref(true)
 const datos = ref<Health | null>(null)
 const error = ref<ErrorApi | null>(null)
-
-function salir() {
-  auth.salir()
-  router.replace({ name: 'login' })
-}
 
 async function consultar() {
   cargando.value = true
@@ -63,12 +54,9 @@ const items = computed(() => {
 
 <template>
   <main class="pantalla">
-    <Marca bajada="Santa Ana · estado del sistema">
-      <RouterLink class="link-salir" to="/animales">Padrón</RouterLink>
-      <RouterLink class="link-salir" to="/planillas">Planillas</RouterLink>
-      <span class="quien" v-if="auth.usuario">{{ auth.usuario.nombre }}</span>
-      <button class="link-salir link-salir--boton" @click="salir">Salir</button>
-    </Marca>
+    <RouterLink to="/" class="volver">‹ Inicio</RouterLink>
+
+    <Marca bajada="Santa Ana · estado del sistema" class="marca-estado" />
 
     <Tarjeta class="tarjeta-estado">
       <p v-if="cargando" class="atenuado">Consultando…</p>
@@ -100,13 +88,9 @@ const items = computed(() => {
 
 <style scoped>
 .pantalla { max-width: var(--ancho-lectura); margin: 6vh auto; padding: 0 16px; }
-.link-salir {
-  background: none; border: 1px solid var(--border-default); color: var(--text-body);
-  border-radius: var(--radio-md); padding: 6px 10px; font-size: var(--fs-13); font-weight: var(--fw-semibold);
-  cursor: pointer; text-decoration: none; font-family: inherit;
-}
-.link-salir--boton { font: inherit; }
-.quien { font-weight: var(--fw-regular); font-size: var(--fs-13); color: var(--text-muted); }
+.volver { display: inline-block; margin-bottom: 14px; color: var(--text-muted); font-size: var(--fs-13); text-decoration: none; }
+.volver:hover { text-decoration: underline; }
+header.marca-estado { margin-bottom: 18px; }
 section.tarjeta-estado { margin: 0; }
 h2 { margin: 0 0 14px; font-size: var(--fs-20); }
 .etiqueta-ok { color: var(--ok); }
