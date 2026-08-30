@@ -43,6 +43,7 @@ const errorRodeo = ref<ErrorApi | null>(null)
 
 const causasBaja = ref<CausaBaja[]>([])
 const idCausaBajaElegida = ref<number | null>(null)
+const fechaBaja = ref('')
 const fechaEsEstimadaBaja = ref(false)
 const destinoBaja = ref('')
 const observacionesBaja = ref('')
@@ -52,6 +53,12 @@ const errorBaja = ref<ErrorApi | null>(null)
 
 const causaBajaElegida = computed(() => causasBaja.value.find(c => c.idCausaBaja === idCausaBajaElegida.value))
 const esRegularizacion = computed(() => causaBajaElegida.value?.tipoBaja === 'REGULARIZACION')
+
+const causasBajaOrdenadas = computed(() =>
+  [...causasBaja.value].sort((a, b) =>
+    a.tipoBaja.localeCompare(b.tipoBaja) || a.descripcion.localeCompare(b.descripcion)
+  )
+)
 
 // REGULARIZACION es "no sabemos ni cuando ni por que" (docs/modelo-datos.md):
 // la fecha que se carga es la del saneamiento, no la real, así que por
@@ -212,6 +219,7 @@ async function guardarBaja() {
   try {
     const resultado = await darDeBaja(idAnimal, {
       idCausaBaja: idCausaBajaElegida.value,
+      fecha: fechaBaja.value || undefined,
       fechaEsEstimada: fechaEsEstimadaBaja.value,
       destino: destinoBaja.value || undefined,
       observaciones: observacionesBaja.value || undefined
@@ -452,7 +460,7 @@ onMounted(cargar)
 
         <form v-else class="form-baja" @submit.prevent="guardarBaja">
           <Campo
-            :opciones="[{ valor: null, etiqueta: 'Causa…' }, ...causasBaja.map(c => ({ valor: c.idCausaBaja, etiqueta: `${c.tipoBaja} · ${c.descripcion}` }))]"
+            :opciones="[{ valor: null, etiqueta: 'Causa…' }, ...causasBajaOrdenadas.map(c => ({ valor: c.idCausaBaja, etiqueta: `${c.tipoBaja} · ${c.descripcion}` }))]"
             :valor="idCausaBajaElegida"
             @update:valor="idCausaBajaElegida = $event === '' ? null : Number($event)"
           />
@@ -460,8 +468,10 @@ onMounted(cargar)
             Regularización: usar solo si no se sabe cuándo ni por qué salió el animal.
             Si se conoce la fecha real, cargar la causa real (venta, muerte, traslado) con esa fecha.
           </p>
+          <Campo etiqueta="Fecha de baja" tipo="date" v-model:valor="fechaBaja" />
+          <p v-if="!fechaBaja" class="atenuado chico">Si la dejás en blanco, se registra como hoy.</p>
           <Check
-            etiqueta="La fecha es estimada (hoy, no el día real en que salió el animal)"
+            etiqueta="La fecha es estimada"
             v-model:marcado="fechaEsEstimadaBaja"
           />
           <Campo placeholder="Destino (opcional)" v-model:valor="destinoBaja" />

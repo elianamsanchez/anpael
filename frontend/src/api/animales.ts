@@ -110,6 +110,7 @@ export interface CausaBaja {
 
 export interface DarDeBajaParams {
   idCausaBaja: number
+  fecha?: string
   fechaEsEstimada?: boolean
   pesoSalidaKg?: number
   destino?: string
