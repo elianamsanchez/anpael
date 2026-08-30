@@ -16,7 +16,7 @@ export default defineConfig({
         name: 'ANPAEL · Santa Ana',
         short_name: 'ANPAEL',
         description: 'Gestion ganadera',
-        theme_color: '#5C3D2E',
+        theme_color: '#2F5238',
         background_color: '#F5F7F5',
         display: 'standalone',
         start_url: '/'

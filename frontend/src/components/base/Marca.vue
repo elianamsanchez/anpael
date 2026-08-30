@@ -41,7 +41,7 @@ withDefaults(
   color: var(--text-body);
 }
 .marca-logo { height: 34px; width: auto; display: block; flex-shrink: 0; }
-.marca-punto { width: 12px; height: 12px; border-radius: var(--radio-circulo); background: var(--oliva); flex-shrink: 0; }
+.marca-punto { width: 12px; height: 12px; border-radius: var(--radio-circulo); background: var(--pasto-700); flex-shrink: 0; }
 .marca-bajada { display: block; font-weight: var(--fw-regular); font: var(--text-caption); color: var(--text-muted); }
 .marca-acciones { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 </style>

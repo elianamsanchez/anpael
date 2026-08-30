@@ -10,11 +10,11 @@
   --borde-fino:1px solid var(--border-default);
   --borde-filete:1px solid var(--border-hairline);
 
-  /* El producto no usa sombra: separa con borde de 1px sobre fondo arena.
+  /* El producto no usa sombra: separa con borde de 1px sobre el fondo gris claro.
      Estas dos existen solo para superficies flotantes (menú, hoja móvil). */
   --sombra-none:none; /* @kind shadow */
-  --sombra-flotante:0 6px 20px -8px rgba(46,30,23,.28);
-  --sombra-elevada:0 12px 32px -10px rgba(46,30,23,.34);
+  --sombra-flotante:0 6px 20px -8px rgba(30,35,31,.28);
+  --sombra-elevada:0 12px 32px -10px rgba(30,35,31,.34);
 
   --foco-anillo:2px solid var(--border-focus); /* @kind other */
   --foco-offset:1px; /* @kind other */

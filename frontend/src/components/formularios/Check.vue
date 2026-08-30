@@ -34,5 +34,5 @@ defineEmits<{ 'update:marcado': [marcado: boolean] }>()
   cursor: pointer;
 }
 .check--deshabilitado { cursor: not-allowed; opacity: .5; }
-.check-input { accent-color: var(--oliva); width: 15px; height: 15px; margin: 0; }
+.check-input { accent-color: var(--pasto-700); width: 15px; height: 15px; margin: 0; }
 </style>

@@ -8,7 +8,7 @@
 </template>
 
 <style>
-/* Los tokens de la paleta "Cuero y campo" viven en src/assets/tokens/
+/* Los tokens de la paleta "Campo abierto" viven en src/assets/tokens/
    (importados una sola vez en main.ts), para que PrimeVue y el codigo propio
    tomen del mismo lugar. */
 body {
