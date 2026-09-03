@@ -27,4 +27,7 @@ public class Rodeo {
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
+
+    @Column(name = "orden", nullable = false)
+    private Integer orden;
 }

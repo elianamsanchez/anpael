@@ -8,5 +8,5 @@ import com.anpael.trazabilidad.domain.Categoria;
 
 public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {
 
-    List<Categoria> findAllByOrderByOrdenAsc();
+    List<Categoria> findAllByActivoTrueOrderByOrdenAsc();
 }

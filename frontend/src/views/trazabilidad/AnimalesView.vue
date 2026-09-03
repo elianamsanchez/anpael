@@ -62,6 +62,14 @@ watch(sinRodeo, (valor) => { if (valor) idRodeoElegido.value = null })
 watch(idCategoriaElegida, (valor) => { if (valor !== null) sinCategoria.value = false })
 watch(sinCategoria, (valor) => { if (valor) idCategoriaElegida.value = null })
 
+// El combo de rodeo depende de la categoría elegida (rodeo_categoria): al
+// cambiarla, se releen solo los rodeos que la admiten y se limpia el rodeo
+// elegido, que puede haber quedado fuera de la lista nueva.
+watch(idCategoriaElegida, async (valor) => {
+  idRodeoElegido.value = null
+  rodeos.value = await listarRodeos(valor ?? undefined)
+})
+
 let debounce: ReturnType<typeof setTimeout>
 watch(caravana, () => {
   clearTimeout(debounce)
@@ -110,16 +118,16 @@ const opcionesCategoria = computed(() => [
       <Campo
         class="campo-filtro"
         sobre-fondo
-        :opciones="opcionesRodeo"
-        :valor="idRodeoElegido"
-        @update:valor="idRodeoElegido = $event === '' ? null : Number($event)"
+        :opciones="opcionesCategoria"
+        :valor="idCategoriaElegida"
+        @update:valor="idCategoriaElegida = $event === '' ? null : Number($event)"
       />
       <Campo
         class="campo-filtro"
         sobre-fondo
-        :opciones="opcionesCategoria"
-        :valor="idCategoriaElegida"
-        @update:valor="idCategoriaElegida = $event === '' ? null : Number($event)"
+        :opciones="opcionesRodeo"
+        :valor="idRodeoElegido"
+        @update:valor="idRodeoElegido = $event === '' ? null : Number($event)"
       />
       <span class="total" v-if="!cargando">{{ totalElementos.toLocaleString('es-AR') }} animales</span>
     </section>

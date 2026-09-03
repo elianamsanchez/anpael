@@ -94,8 +94,8 @@ export function listarCategorias() {
   return api.get<Categoria[]>('/api/categorias').then(r => r.data)
 }
 
-export function listarRodeos() {
-  return api.get<Rodeo[]>('/api/rodeos').then(r => r.data)
+export function listarRodeos(idCategoria?: number) {
+  return api.get<Rodeo[]>('/api/rodeos', { params: idCategoria ? { idCategoria } : undefined }).then(r => r.data)
 }
 
 export function asignarCategoria(idAnimal: number, idCategoria: number) {

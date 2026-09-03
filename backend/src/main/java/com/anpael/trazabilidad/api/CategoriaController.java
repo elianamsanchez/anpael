@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.anpael.trazabilidad.domain.Categoria;
 import com.anpael.trazabilidad.infrastructure.CategoriaRepository;
 
-/** Catálogo para el combo de "asignar categoría" (v0.2a). */
+/** Catálogo para el combo de "asignar categoría" (v0.2a). Solo las activas. */
 @RestController
 @RequestMapping("/api/categorias")
 public class CategoriaController {
@@ -22,6 +22,6 @@ public class CategoriaController {
 
     @GetMapping
     public List<Categoria> listar() {
-        return categorias.findAllByOrderByOrdenAsc();
+        return categorias.findAllByActivoTrueOrderByOrdenAsc();
     }
 }

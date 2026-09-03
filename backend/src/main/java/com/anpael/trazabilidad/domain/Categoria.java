@@ -27,4 +27,7 @@ public class Categoria {
 
     @Column(name = "orden", nullable = false)
     private Integer orden;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo;
 }
