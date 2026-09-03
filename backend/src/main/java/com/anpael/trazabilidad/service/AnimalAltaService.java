@@ -101,6 +101,9 @@ public class AnimalAltaService {
         animal.setSexo(pedido.sexo());
         animal.setFechaNacimiento(pedido.fechaNacimiento());
         animal.setFechaNacEsEstimada(Boolean.TRUE.equals(pedido.fechaNacEsEstimada()));
+        if (pedido.fechaNacimiento() != null) {
+            animal.setAnioNacimiento(pedido.fechaNacimiento().getYear());
+        }
         animal.setPesoNacerKg(pedido.pesoNacerKg());
         animal.setOrigen(pedido.origen());
         animal.setFechaIngreso(pedido.fechaIngreso());

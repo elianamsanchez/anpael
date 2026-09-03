@@ -56,6 +56,9 @@ public class Animal {
     @Column(name = "fecha_nac_es_estimada", nullable = false)
     private Boolean fechaNacEsEstimada;
 
+    @Column(name = "anio_nacimiento")
+    private Integer anioNacimiento;
+
     @Column(name = "peso_nacer_kg")
     private BigDecimal pesoNacerKg;
 
@@ -64,6 +67,9 @@ public class Animal {
 
     @Column(name = "fecha_ingreso")
     private LocalDate fechaIngreso;
+
+    @Column(name = "anio_ingreso")
+    private Integer anioIngreso;
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;

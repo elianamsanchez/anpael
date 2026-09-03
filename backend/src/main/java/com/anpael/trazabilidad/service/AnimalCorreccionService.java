@@ -49,9 +49,17 @@ public class AnimalCorreccionService {
         }
         if (pedido.fechaNacimiento() != null) {
             animal.setFechaNacimiento(pedido.fechaNacimiento());
+            // la fecha completa manda: si se carga, el año se recalcula de
+            // ella y pisa cualquier año cargado a mano en el mismo pedido.
+            animal.setAnioNacimiento(pedido.fechaNacimiento().getYear());
+        } else if (pedido.anioNacimiento() != null) {
+            animal.setAnioNacimiento(pedido.anioNacimiento());
         }
         if (pedido.fechaNacEsEstimada() != null) {
             animal.setFechaNacEsEstimada(pedido.fechaNacEsEstimada());
+        }
+        if (pedido.anioIngreso() != null) {
+            animal.setAnioIngreso(pedido.anioIngreso());
         }
         if (pedido.pesoNacerKg() != null) {
             animal.setPesoNacerKg(pedido.pesoNacerKg());

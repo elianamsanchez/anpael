@@ -106,4 +106,16 @@ public class AnimalLista {
 
     @Column(name = "id_categoria")
     private Integer idCategoria;
+
+    @Column(name = "pelaje")
+    private String pelaje;
+
+    @Column(name = "establecimiento")
+    private String establecimiento;
+
+    @Column(name = "anio_nacimiento")
+    private Integer anioNacimiento;
+
+    @Column(name = "anio_ingreso")
+    private Integer anioIngreso;
 }

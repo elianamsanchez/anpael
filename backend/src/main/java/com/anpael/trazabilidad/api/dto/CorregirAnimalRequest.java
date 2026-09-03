@@ -5,6 +5,8 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PastOrPresent;
 
 /**
@@ -23,6 +25,14 @@ public record CorregirAnimalRequest(
         LocalDate fechaNacimiento,
 
         Boolean fechaNacEsEstimada,
+
+        @Min(value = 1900, message = "tiene que ser un año válido")
+        @Max(value = 2100, message = "tiene que ser un año válido")
+        Integer anioNacimiento,
+
+        @Min(value = 1900, message = "tiene que ser un año válido")
+        @Max(value = 2100, message = "tiene que ser un año válido")
+        Integer anioIngreso,
 
         @DecimalMin(value = "10", message = "tiene que estar entre 10 y 70 kg")
         @DecimalMax(value = "70", message = "tiene que estar entre 10 y 70 kg")

@@ -71,7 +71,13 @@ const idRazaElegida = ref<number | null>(null)
 const idPelajeElegido = ref<number | null>(null)
 const fechaNacimientoCorregida = ref('')
 const fechaEsEstimada = ref(false)
+const anioNacimientoCorregido = ref('')
+const anioIngresoCorregido = ref('')
 const pesoNacerCorregido = ref('')
+
+// La fecha completa manda: si se carga, el año se completa solo (backend
+// AnimalCorreccionService), así que el campo manual no aplica.
+watch(fechaNacimientoCorregida, (valor) => { if (valor) anioNacimientoCorregido.value = '' })
 const guardandoCorreccion = ref(false)
 const mensajeCorreccion = ref<string | null>(null)
 const errorCorreccion = ref<ErrorApi | null>(null)
@@ -239,6 +245,8 @@ async function guardarCorreccion() {
     idPelaje: idPelajeElegido.value ?? undefined,
     fechaNacimiento: fechaNacimientoCorregida.value || undefined,
     fechaNacEsEstimada: fechaNacimientoCorregida.value ? fechaEsEstimada.value : undefined,
+    anioNacimiento: anioNacimientoCorregido.value ? Number(anioNacimientoCorregido.value) : undefined,
+    anioIngreso: anioIngresoCorregido.value ? Number(anioIngresoCorregido.value) : undefined,
     pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined
   }
   if (Object.values(cambios).every(v => v === undefined)) return
@@ -253,6 +261,8 @@ async function guardarCorreccion() {
     idPelajeElegido.value = null
     fechaNacimientoCorregida.value = ''
     fechaEsEstimada.value = false
+    anioNacimientoCorregido.value = ''
+    anioIngresoCorregido.value = ''
     pesoNacerCorregido.value = ''
   } catch (e) {
     errorCorreccion.value = e as ErrorApi
@@ -291,6 +301,7 @@ onMounted(cargar)
       <Tarjeta>
         <dl class="lista-info">
           <div><dt>Raza</dt><dd>{{ animal.raza ?? '—' }}</dd></div>
+          <div><dt>Color</dt><dd>{{ animal.pelaje ?? '—' }}</dd></div>
           <div>
             <dt>Categoría</dt>
             <dd><Etiqueta v-if="animal.sinCategoria" tono="falta">sin asignar</Etiqueta><span v-else>{{ animal.categoria }}</span></dd>
@@ -302,46 +313,18 @@ onMounted(cargar)
               <span v-else>{{ animal.rodeo }} <span class="atenuado">(desde {{ animal.enRodeoDesde }})</span></span>
             </dd>
           </div>
-
-          <div class="asignar">
-            <form class="form-asignar" @submit.prevent="guardarCategoria">
-              <Campo
-                class="campo-asignar"
-                :opciones="[{ valor: null, etiqueta: 'Asignar categoría…' }, ...categorias.map(c => ({ valor: c.idCategoria, etiqueta: c.nombre }))]"
-                :valor="idCategoriaElegida"
-                @update:valor="idCategoriaElegida = $event === '' ? null : Number($event)"
-              />
-              <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idCategoriaElegida || guardandoCategoria">
-                {{ guardandoCategoria ? 'Guardando…' : 'Asignar' }}
-              </Boton>
-            </form>
-            <Aviso v-if="mensajeCategoria" tono="ok" class="aviso-fila">{{ mensajeCategoria }}</Aviso>
-            <Aviso v-if="errorCategoria" tono="error" class="aviso-fila">{{ errorCategoria.mensaje }}</Aviso>
-          </div>
-
-          <div class="asignar">
-            <form class="form-asignar" @submit.prevent="guardarRodeo">
-              <Campo
-                class="campo-asignar"
-                :opciones="[{ valor: null, etiqueta: 'Asignar rodeo…' }, ...rodeos.map(r => ({ valor: r.idRodeo, etiqueta: r.nombre }))]"
-                :valor="idRodeoElegido"
-                @update:valor="idRodeoElegido = $event === '' ? null : Number($event)"
-              />
-              <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idRodeoElegido || guardandoRodeo">
-                {{ guardandoRodeo ? 'Guardando…' : 'Asignar' }}
-              </Boton>
-            </form>
-            <Aviso v-if="mensajeRodeo" tono="ok" class="aviso-fila">{{ mensajeRodeo }}</Aviso>
-            <Aviso v-if="errorRodeo" tono="error" class="aviso-fila">{{ errorRodeo.mensaje }}</Aviso>
-          </div>
           <div><dt>Fecha de nacimiento</dt>
             <dd>
               {{ animal.fechaNacimiento ?? 'sin registrar' }}
               <span v-if="animal.fechaNacEsEstimada" class="atenuado">(estimada)</span>
             </dd>
           </div>
+          <div><dt>Año de nacimiento</dt><dd>{{ animal.anioNacimiento ?? '—' }}</dd></div>
           <div><dt>Identificación desde</dt><dd>{{ animal.fechaIdent ?? '—' }}</dd></div>
-          <div><dt>Establecimiento (CUIG)</dt><dd>{{ animal.cuig ?? '—' }}</dd></div>
+          <div><dt>Año de 1er ingreso</dt><dd>{{ animal.anioIngreso ?? '—' }}</dd></div>
+          <div><dt>Establecimiento</dt>
+            <dd>{{ animal.establecimiento ?? '—' }} <span class="atenuado">({{ animal.cuig ?? '—' }})</span></dd>
+          </div>
           <div><dt>Estado</dt>
             <dd>
               <Etiqueta :tono="animal.activo ? 'ok' : 'mal'">{{ animal.activo ? 'activo' : 'inactivo' }}</Etiqueta>
@@ -444,6 +427,14 @@ onMounted(cargar)
           />
           <Campo etiqueta="Fecha de nacimiento" tipo="date" v-model:valor="fechaNacimientoCorregida" />
           <Check v-if="fechaNacimientoCorregida" etiqueta="Es estimada" v-model:marcado="fechaEsEstimada" />
+          <Campo
+            etiqueta="Año de nacimiento"
+            tipo="number" min="1900" max="2100"
+            :placeholder="fechaNacimientoCorregida ? 'Se completa solo con la fecha' : 'Si no se sabe la fecha exacta'"
+            :deshabilitado="!!fechaNacimientoCorregida"
+            v-model:valor="anioNacimientoCorregido"
+          />
+          <Campo etiqueta="Año de 1er ingreso" tipo="number" min="1900" max="2100" v-model:valor="anioIngresoCorregido" />
           <Campo etiqueta="Peso al nacer (kg)" tipo="number" min="10" max="70" step="0.1" placeholder="10 a 70" v-model:valor="pesoNacerCorregido" />
           <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="guardandoCorreccion">
             {{ guardandoCorreccion ? 'Guardando…' : 'Guardar cambios' }}
@@ -451,6 +442,40 @@ onMounted(cargar)
         </form>
         <Aviso v-if="mensajeCorreccion" tono="ok" class="aviso-fila">{{ mensajeCorreccion }}</Aviso>
         <Aviso v-if="errorCorreccion" tono="error" class="aviso-fila">{{ errorCorreccion.mensaje }} <span v-if="errorCorreccion.detalle">— {{ errorCorreccion.detalle }}</span></Aviso>
+      </Tarjeta>
+
+      <Tarjeta titulo="Categoría y rodeo" class="tarjeta-espaciada">
+        <div class="asignar">
+          <form class="form-asignar" @submit.prevent="guardarCategoria">
+            <Campo
+              class="campo-asignar"
+              :opciones="[{ valor: null, etiqueta: 'Asignar categoría…' }, ...categorias.map(c => ({ valor: c.idCategoria, etiqueta: c.nombre }))]"
+              :valor="idCategoriaElegida"
+              @update:valor="idCategoriaElegida = $event === '' ? null : Number($event)"
+            />
+            <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idCategoriaElegida || guardandoCategoria">
+              {{ guardandoCategoria ? 'Guardando…' : 'Asignar' }}
+            </Boton>
+          </form>
+          <Aviso v-if="mensajeCategoria" tono="ok" class="aviso-fila">{{ mensajeCategoria }}</Aviso>
+          <Aviso v-if="errorCategoria" tono="error" class="aviso-fila">{{ errorCategoria.mensaje }}</Aviso>
+        </div>
+
+        <div class="asignar">
+          <form class="form-asignar" @submit.prevent="guardarRodeo">
+            <Campo
+              class="campo-asignar"
+              :opciones="[{ valor: null, etiqueta: 'Asignar rodeo…' }, ...rodeos.map(r => ({ valor: r.idRodeo, etiqueta: r.nombre }))]"
+              :valor="idRodeoElegido"
+              @update:valor="idRodeoElegido = $event === '' ? null : Number($event)"
+            />
+            <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idRodeoElegido || guardandoRodeo">
+              {{ guardandoRodeo ? 'Guardando…' : 'Asignar' }}
+            </Boton>
+          </form>
+          <Aviso v-if="mensajeRodeo" tono="ok" class="aviso-fila">{{ mensajeRodeo }}</Aviso>
+          <Aviso v-if="errorRodeo" tono="error" class="aviso-fila">{{ errorRodeo.mensaje }}</Aviso>
+        </div>
       </Tarjeta>
 
       <Tarjeta titulo="Dar de baja" class="tarjeta-espaciada">

@@ -12,13 +12,17 @@ export interface Animal {
   tipoIdent?: string
   sexo: string
   raza?: string
+  pelaje?: string
   categoriaCodigo?: string
   categoria?: string
   fechaNacimiento?: string
   fechaNacEsEstimada: boolean
+  anioNacimiento?: number
   fechaIdent?: string
   fechaIdentEsEstimada: boolean
+  anioIngreso?: number
   cuig?: string
+  establecimiento?: string
   activo: boolean
   tieneBaja: boolean
   validacion: string
@@ -140,6 +144,8 @@ export interface CorregirAnimalParams {
   idPelaje?: number
   fechaNacimiento?: string
   fechaNacEsEstimada?: boolean
+  anioNacimiento?: number
+  anioIngreso?: number
   pesoNacerKg?: number
 }
 
