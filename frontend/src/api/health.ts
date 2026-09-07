@@ -2,6 +2,7 @@ import { api } from './client'
 
 export interface Health {
   aplicacion: string
+  entorno: string
   hora: string
   base_de_datos: string
   usuarioBase?: string

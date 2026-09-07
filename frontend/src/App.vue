@@ -1,9 +1,11 @@
 <script setup lang="ts">
 // Cascara minima. El layout con menu lateral entra en la v0.1, junto con el
 // login: antes de eso no hay nada que menuear.
+import BarraEntorno from '@/components/base/BarraEntorno.vue'
 </script>
 
 <template>
+  <BarraEntorno />
   <RouterView />
 </template>
 

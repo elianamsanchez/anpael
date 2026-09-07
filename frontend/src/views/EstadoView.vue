@@ -43,6 +43,7 @@ const items = computed(() => {
   const d = datos.value
   const filas: { rotulo: string; valor: string | number; numerico?: boolean }[] = [
     { rotulo: 'Aplicación', valor: d.aplicacion },
+    { rotulo: 'Entorno', valor: d.entorno },
     { rotulo: 'Base de datos', valor: d.base_de_datos }
   ]
   if (d.base) filas.push({ rotulo: 'Base', valor: d.base })
