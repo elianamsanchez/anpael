@@ -4,9 +4,9 @@ import { useRoute } from 'vue-router'
 import {
   getAnimal, listarCategorias, listarRodeos, asignarCategoria, asignarRodeo,
   listarCausasBaja, darDeBaja, listarRazas, listarPelajes, corregirAnimal, historialAnimal,
-  marcarValidacion,
+  marcarValidacion, listarEstablecimientos, asignarEstablecimiento,
   type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje, type AnimalEvento,
-  type MarcarValidacionParams
+  type MarcarValidacionParams, type Establecimiento
 } from '@/api/animales'
 import {
   corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad
@@ -42,6 +42,12 @@ const idRodeoElegido = ref<number | null>(null)
 const guardandoRodeo = ref(false)
 const mensajeRodeo = ref<string | null>(null)
 const errorRodeo = ref<ErrorApi | null>(null)
+
+const establecimientos = ref<Establecimiento[]>([])
+const idEstablecimientoElegido = ref<number | null>(null)
+const guardandoEstablecimiento = ref(false)
+const mensajeEstablecimiento = ref<string | null>(null)
+const errorEstablecimiento = ref<ErrorApi | null>(null)
 
 const causasBaja = ref<CausaBaja[]>([])
 const idCausaBajaElegida = ref<number | null>(null)
@@ -171,14 +177,15 @@ async function cargar() {
   error.value = null
   try {
     const [animalCargado, categoriasCargadas, rodeosCargados, causasCargadas, razasCargadas, pelajesCargados,
-      historialCargado] = await Promise.all([
+      historialCargado, establecimientosCargados] = await Promise.all([
       getAnimal(idAnimal),
       listarCategorias(),
       listarRodeos(),
       listarCausasBaja(),
       listarRazas(),
       listarPelajes(),
-      historialAnimal(idAnimal)
+      historialAnimal(idAnimal),
+      listarEstablecimientos()
     ])
     animal.value = animalCargado
     categorias.value = categoriasCargadas
@@ -187,6 +194,7 @@ async function cargar() {
     razas.value = razasCargadas
     pelajes.value = pelajesCargados
     historial.value = historialCargado
+    establecimientos.value = establecimientosCargados
     if (ESTADOS_VALIDACION.includes(animalCargado.validacion as MarcarValidacionParams['estado'])) {
       estadoValidacionElegido.value = animalCargado.validacion as MarcarValidacionParams['estado']
     }
@@ -228,6 +236,22 @@ async function guardarRodeo() {
     errorRodeo.value = e as ErrorApi
   } finally {
     guardandoRodeo.value = false
+  }
+}
+
+async function guardarEstablecimiento() {
+  if (!idEstablecimientoElegido.value) return
+  guardandoEstablecimiento.value = true
+  mensajeEstablecimiento.value = null
+  errorEstablecimiento.value = null
+  try {
+    const resultado = await asignarEstablecimiento(idAnimal, idEstablecimientoElegido.value)
+    animal.value = resultado.animal
+    mensajeEstablecimiento.value = resultado.mensaje
+  } catch (e) {
+    errorEstablecimiento.value = e as ErrorApi
+  } finally {
+    guardandoEstablecimiento.value = false
   }
 }
 
@@ -356,7 +380,10 @@ onMounted(cargar)
           <div><dt>Identificación desde</dt><dd>{{ animal.fechaIdent ?? '—' }}</dd></div>
           <div><dt>Año de 1er ingreso</dt><dd>{{ animal.anioIngreso ?? '—' }}</dd></div>
           <div><dt>Establecimiento</dt>
-            <dd>{{ animal.establecimiento ?? '—' }} <span class="atenuado">({{ animal.cuig ?? '—' }})</span></dd>
+            <dd>
+              <Etiqueta v-if="!animal.cuig" tono="falta">sin asignar</Etiqueta>
+              <span v-else>{{ animal.establecimiento }} <span class="atenuado">({{ animal.cuig }})</span></span>
+            </dd>
           </div>
           <div><dt>Estado</dt>
             <dd>
@@ -477,7 +504,7 @@ onMounted(cargar)
         <Aviso v-if="errorCorreccion" tono="error" class="aviso-fila">{{ errorCorreccion.mensaje }} <span v-if="errorCorreccion.detalle">— {{ errorCorreccion.detalle }}</span></Aviso>
       </Tarjeta>
 
-      <Tarjeta titulo="Categoría y rodeo" class="tarjeta-espaciada">
+      <Tarjeta titulo="Categoría, rodeo y establecimiento" class="tarjeta-espaciada">
         <div class="asignar">
           <form class="form-asignar" @submit.prevent="guardarCategoria">
             <Campo
@@ -508,6 +535,25 @@ onMounted(cargar)
           </form>
           <Aviso v-if="mensajeRodeo" tono="ok" class="aviso-fila">{{ mensajeRodeo }}</Aviso>
           <Aviso v-if="errorRodeo" tono="error" class="aviso-fila">{{ errorRodeo.mensaje }}</Aviso>
+        </div>
+
+        <div v-if="!animal.cuig" class="asignar">
+          <form class="form-asignar" @submit.prevent="guardarEstablecimiento">
+            <Campo
+              class="campo-asignar"
+              :opciones="[
+                { valor: null, etiqueta: 'Asignar establecimiento…' },
+                ...establecimientos.map(e => ({ valor: e.idEstablecimiento, etiqueta: `${e.nombre} (${e.cuig})` }))
+              ]"
+              :valor="idEstablecimientoElegido"
+              @update:valor="idEstablecimientoElegido = $event === '' ? null : Number($event)"
+            />
+            <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idEstablecimientoElegido || guardandoEstablecimiento">
+              {{ guardandoEstablecimiento ? 'Guardando…' : 'Asignar' }}
+            </Boton>
+          </form>
+          <Aviso v-if="mensajeEstablecimiento" tono="ok" class="aviso-fila">{{ mensajeEstablecimiento }}</Aviso>
+          <Aviso v-if="errorEstablecimiento" tono="error" class="aviso-fila">{{ errorEstablecimiento.mensaje }}</Aviso>
         </div>
       </Tarjeta>
 

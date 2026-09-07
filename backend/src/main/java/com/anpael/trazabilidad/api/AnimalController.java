@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.anpael.trazabilidad.api.dto.AsignacionResultado;
 import com.anpael.trazabilidad.api.dto.AsignarCategoriaRequest;
+import com.anpael.trazabilidad.api.dto.AsignarEstablecimientoRequest;
 import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
 import com.anpael.trazabilidad.api.dto.CorregirAnimalRequest;
 import com.anpael.trazabilidad.api.dto.CrearAnimalRequest;
@@ -28,6 +29,7 @@ import com.anpael.trazabilidad.service.AnimalAltaService;
 import com.anpael.trazabilidad.service.AnimalBajaService;
 import com.anpael.trazabilidad.service.AnimalCategoriaService;
 import com.anpael.trazabilidad.service.AnimalCorreccionService;
+import com.anpael.trazabilidad.service.AnimalEstablecimientoService;
 import com.anpael.trazabilidad.service.AnimalRodeoService;
 import com.anpael.trazabilidad.service.AnimalService;
 import com.anpael.trazabilidad.service.AnimalValidacionService;
@@ -50,11 +52,12 @@ public class AnimalController {
     private final AnimalCorreccionService animalCorreccionService;
     private final AnimalAltaService animalAltaService;
     private final AnimalValidacionService animalValidacionService;
+    private final AnimalEstablecimientoService animalEstablecimientoService;
 
     public AnimalController(AnimalService animalService, AnimalCategoriaService animalCategoriaService,
             AnimalRodeoService animalRodeoService, AnimalBajaService animalBajaService,
             AnimalCorreccionService animalCorreccionService, AnimalAltaService animalAltaService,
-            AnimalValidacionService animalValidacionService) {
+            AnimalValidacionService animalValidacionService, AnimalEstablecimientoService animalEstablecimientoService) {
         this.animalService = animalService;
         this.animalCategoriaService = animalCategoriaService;
         this.animalRodeoService = animalRodeoService;
@@ -62,6 +65,7 @@ public class AnimalController {
         this.animalCorreccionService = animalCorreccionService;
         this.animalAltaService = animalAltaService;
         this.animalValidacionService = animalValidacionService;
+        this.animalEstablecimientoService = animalEstablecimientoService;
     }
 
     @PostMapping
@@ -106,6 +110,14 @@ public class AnimalController {
         animalService.obtener(idAnimal);
         String mensaje = animalRodeoService.asignar(idAnimal, pedido.idRodeo(),
                 pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
+        return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
+    }
+
+    @PostMapping("/{idAnimal}/establecimiento")
+    public AsignacionResultado asignarEstablecimiento(@PathVariable Integer idAnimal,
+            @Valid @RequestBody AsignarEstablecimientoRequest pedido) {
+        animalService.obtener(idAnimal);
+        String mensaje = animalEstablecimientoService.asignar(idAnimal, pedido.idEstablecimiento());
         return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
     }
 
