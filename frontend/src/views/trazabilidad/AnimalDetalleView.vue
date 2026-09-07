@@ -4,7 +4,9 @@ import { useRoute } from 'vue-router'
 import {
   getAnimal, listarCategorias, listarRodeos, asignarCategoria, asignarRodeo,
   listarCausasBaja, darDeBaja, listarRazas, listarPelajes, corregirAnimal, historialAnimal,
-  type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje, type AnimalEvento
+  marcarValidacion,
+  type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje, type AnimalEvento,
+  type MarcarValidacionParams
 } from '@/api/animales'
 import {
   corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad
@@ -81,6 +83,14 @@ watch(fechaNacimientoCorregida, (valor) => { if (valor) anioNacimientoCorregido.
 const guardandoCorreccion = ref(false)
 const mensajeCorreccion = ref<string | null>(null)
 const errorCorreccion = ref<ErrorApi | null>(null)
+
+const ESTADOS_VALIDACION: MarcarValidacionParams['estado'][] = ['VALIDADO', 'CORREGIR', 'DUDOSO']
+
+const estadoValidacionElegido = ref<MarcarValidacionParams['estado'] | null>(null)
+const observacionValidacion = ref('')
+const guardandoValidacion = ref(false)
+const mensajeValidacion = ref<string | null>(null)
+const errorValidacion = ref<ErrorApi | null>(null)
 
 const historial = ref<AnimalEvento[]>([])
 
@@ -177,6 +187,10 @@ async function cargar() {
     razas.value = razasCargadas
     pelajes.value = pelajesCargados
     historial.value = historialCargado
+    if (ESTADOS_VALIDACION.includes(animalCargado.validacion as MarcarValidacionParams['estado'])) {
+      estadoValidacionElegido.value = animalCargado.validacion as MarcarValidacionParams['estado']
+    }
+    observacionValidacion.value = animalCargado.validacionObs ?? ''
   } catch (e) {
     error.value = e as ErrorApi
     animal.value = null
@@ -236,6 +250,25 @@ async function guardarBaja() {
     errorBaja.value = e as ErrorApi
   } finally {
     guardandoBaja.value = false
+  }
+}
+
+async function guardarValidacion() {
+  if (!estadoValidacionElegido.value) return
+  guardandoValidacion.value = true
+  mensajeValidacion.value = null
+  errorValidacion.value = null
+  try {
+    const resultado = await marcarValidacion(idAnimal, {
+      estado: estadoValidacionElegido.value,
+      observacion: observacionValidacion.value || undefined
+    })
+    animal.value = resultado.animal
+    mensajeValidacion.value = resultado.mensaje
+  } catch (e) {
+    errorValidacion.value = e as ErrorApi
+  } finally {
+    guardandoValidacion.value = false
   }
 }
 
@@ -478,6 +511,35 @@ onMounted(cargar)
         </div>
       </Tarjeta>
 
+      <Tarjeta titulo="Revisión de saneamiento" class="tarjeta-espaciada">
+        <p class="atenuado chico">
+          Estado actual:
+          <Etiqueta :tono="animal.validacion === 'VALIDADO' ? 'ok' : animal.validacion === 'CORREGIR' ? 'mal' : animal.validacion === 'DUDOSO' ? 'atenuado' : 'falta'">
+            {{ animal.validacion === 'SIN_REVISAR' ? 'sin revisar' : animal.validacion.toLowerCase() }}
+          </Etiqueta>
+          <span v-if="animal.revisadoPor"> · por {{ animal.revisadoPor }}</span>
+        </p>
+
+        <form class="form-validacion" @submit.prevent="guardarValidacion">
+          <Campo
+            :opciones="[
+              { valor: null, etiqueta: 'Marcar como…' },
+              { valor: 'VALIDADO', etiqueta: 'Validado' },
+              { valor: 'CORREGIR', etiqueta: 'A corregir' },
+              { valor: 'DUDOSO', etiqueta: 'Dudoso' }
+            ]"
+            :valor="estadoValidacionElegido"
+            @update:valor="estadoValidacionElegido = $event === '' ? null : ($event as MarcarValidacionParams['estado'])"
+          />
+          <Campo tipo="textarea" :filas="2" placeholder="Observaciones (opcional)" v-model:valor="observacionValidacion" />
+          <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="!estadoValidacionElegido || guardandoValidacion">
+            {{ guardandoValidacion ? 'Guardando…' : 'Guardar revisión' }}
+          </Boton>
+        </form>
+        <Aviso v-if="mensajeValidacion" tono="ok" class="aviso-fila">{{ mensajeValidacion }}</Aviso>
+        <Aviso v-if="errorValidacion" tono="error" class="aviso-fila">{{ errorValidacion.mensaje }}</Aviso>
+      </Tarjeta>
+
       <Tarjeta titulo="Dar de baja" class="tarjeta-espaciada">
         <p v-if="animal.tieneBaja" class="atenuado">
           Este animal ya tiene una baja registrada. No se puede cargar otra.
@@ -544,4 +606,5 @@ button.boton-fila { align-self: flex-start; }
 .chico { font-size: var(--fs-125); margin: 0 0 12px; }
 .form-correccion { display: flex; flex-direction: column; gap: 10px; }
 .form-baja { display: flex; flex-direction: column; gap: 8px; }
+.form-validacion { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 </style>

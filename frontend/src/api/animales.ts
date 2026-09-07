@@ -106,6 +106,15 @@ export function asignarRodeo(idAnimal: number, idRodeo: number) {
   return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/rodeo`, { idRodeo }).then(r => r.data)
 }
 
+export interface MarcarValidacionParams {
+  estado: 'VALIDADO' | 'CORREGIR' | 'DUDOSO'
+  observacion?: string
+}
+
+export function marcarValidacion(idAnimal: number, params: MarcarValidacionParams) {
+  return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/validacion`, params).then(r => r.data)
+}
+
 export interface CausaBaja {
   idCausaBaja: number
   tipoBaja: string

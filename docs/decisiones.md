@@ -178,17 +178,26 @@ animales que ya no están en el campo. Es un `INSERT`, va en la v0.2a.
 
 ---
 
-## ADR-004 · La app HTML de revisión convive, no compite · RESUELTA
+## ADR-004 · La app HTML de revisión convive, no compite · RESUELTA (retirada 2026-09-07)
 
-Ya existe `santa_ana_v02.html`: un archivo, sin compilar, que lee la base por
-la API REST de Supabase y sirve para revisar los 1.732 animales migrados.
+Ya existía `santa_ana_v02.html`: un archivo, sin compilar, que lee la base
+por la API REST de Supabase y servía para revisar los 1.732 animales
+migrados.
 
-**No se reemplaza con la v0.1.** Es una herramienta de saneamiento con vida
-corta, ya funciona, y rehacerla en Vue no agrega nada. Cuando el módulo de
-trazabilidad tenga la pantalla de animales, deja de usarse sola.
+**No se reemplazó con la v0.1 en su momento.** Era una herramienta de
+saneamiento con vida corta, ya funcionaba, y rehacerla en Vue no agregaba
+nada. La decisión original ya prometía el final: *"cuando el módulo de
+trazabilidad tenga la pantalla de animales, deja de usarse sola"*.
 
-Lo que sí importa: escribe en `animal_validacion`, así que esa tabla **no se
-toca** hasta que la revisión termine.
+**Actualización 2026-09-07:** esa pantalla ya existe (`AnimalDetalleView`),
+así que `santa_ana_v02.html` se retira. La marca de revisión
+(VALIDADO/CORREGIR/DUDOSO + observación) se hace desde ahí, con
+`POST /api/animales/{id}/validacion` (`AnimalValidacionService`). La
+restricción de "`animal_validacion` no se toca desde el backend" queda sin
+efecto: esa tabla ahora la escribe el backend, y es la única fuente
+—`santa_ana_v02.html` no se vuelve a correr contra la base real. Al momento
+del cambio la revisión de la migración estaba apenas empezada (0,1%,
+2 de 1.732 animales); continúa desde la app, no desde cero.
 
 ---
 

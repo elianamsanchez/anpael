@@ -21,6 +21,7 @@ import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
 import com.anpael.trazabilidad.api.dto.CorregirAnimalRequest;
 import com.anpael.trazabilidad.api.dto.CrearAnimalRequest;
 import com.anpael.trazabilidad.api.dto.DarDeBajaRequest;
+import com.anpael.trazabilidad.api.dto.MarcarValidacionRequest;
 import com.anpael.trazabilidad.domain.AnimalEvento;
 import com.anpael.trazabilidad.domain.AnimalLista;
 import com.anpael.trazabilidad.service.AnimalAltaService;
@@ -29,6 +30,7 @@ import com.anpael.trazabilidad.service.AnimalCategoriaService;
 import com.anpael.trazabilidad.service.AnimalCorreccionService;
 import com.anpael.trazabilidad.service.AnimalRodeoService;
 import com.anpael.trazabilidad.service.AnimalService;
+import com.anpael.trazabilidad.service.AnimalValidacionService;
 
 import jakarta.validation.Valid;
 
@@ -47,16 +49,19 @@ public class AnimalController {
     private final AnimalBajaService animalBajaService;
     private final AnimalCorreccionService animalCorreccionService;
     private final AnimalAltaService animalAltaService;
+    private final AnimalValidacionService animalValidacionService;
 
     public AnimalController(AnimalService animalService, AnimalCategoriaService animalCategoriaService,
             AnimalRodeoService animalRodeoService, AnimalBajaService animalBajaService,
-            AnimalCorreccionService animalCorreccionService, AnimalAltaService animalAltaService) {
+            AnimalCorreccionService animalCorreccionService, AnimalAltaService animalAltaService,
+            AnimalValidacionService animalValidacionService) {
         this.animalService = animalService;
         this.animalCategoriaService = animalCategoriaService;
         this.animalRodeoService = animalRodeoService;
         this.animalBajaService = animalBajaService;
         this.animalCorreccionService = animalCorreccionService;
         this.animalAltaService = animalAltaService;
+        this.animalValidacionService = animalValidacionService;
     }
 
     @PostMapping
@@ -101,6 +106,14 @@ public class AnimalController {
         animalService.obtener(idAnimal);
         String mensaje = animalRodeoService.asignar(idAnimal, pedido.idRodeo(),
                 pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
+        return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
+    }
+
+    @PostMapping("/{idAnimal}/validacion")
+    public AsignacionResultado marcarValidacion(@PathVariable Integer idAnimal,
+            @Valid @RequestBody MarcarValidacionRequest pedido) {
+        animalService.obtener(idAnimal);
+        String mensaje = animalValidacionService.marcar(idAnimal, pedido.estado(), pedido.observacion());
         return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
     }
 
