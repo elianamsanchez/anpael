@@ -44,11 +44,11 @@ if responde "http://localhost:$anpael_port/api/health"; then
 else
   (
     cd "$repo_dir/backend"
-    if [ -f .env ]; then
-      echo "Usando backend/.env"
-      set -a; source .env; set +a
+    if [ -f .env.local ]; then
+      echo "Usando backend/.env.local"
+      set -a; source .env.local; set +a
     else
-      echo "No hay backend/.env: uso los defaults del Supabase local en Docker."
+      echo "No hay backend/.env.local: uso los defaults del Supabase local en Docker."
       export ANPAEL_ENTORNO=local
       export ANPAEL_DB_URL="jdbc:postgresql://127.0.0.1:54322/postgres"
       export ANPAEL_DB_USER=postgres

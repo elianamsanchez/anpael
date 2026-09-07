@@ -46,27 +46,29 @@ querés correr los tests de integración.
 
 ### 1 · Backend
 
-Hay dos plantillas, una por entorno. Copiá la que corresponda a `.env`:
+Hay dos plantillas, una por entorno. Copiá cada una a un archivo separado
+(no a `.env` a secas: así podés tener las dos completadas al mismo tiempo
+sin pisarte):
 
 ```bash
 cd backend
-cp .env.local.example .env        # contra el Supabase local en Docker
-# o, para hablarle a la base real:
-cp .env.production.example .env
+cp .env.local.example .env.local            # contra el Supabase local en Docker
+cp .env.production.example .env.production  # contra la base real
 ```
 
-`.env` queda igual en los dos casos — lo que cambia es de dónde salió. Nunca
-tengas los dos entornos completados en el mismo `.env` a la vez.
+Completá cada uno con sus valores (`.env.production` necesita la
+contraseña real de Supabase y su propio `ANPAEL_JWT_SECRETO`, distinto del
+de local).
 
-Cargá las variables y arrancá:
+Cargá las variables del entorno que quieras levantar y arrancá:
 
 ```bash
-set -a; source .env; set +a
+set -a; source .env.local; set +a        # o .env.production
 mvn spring-boot:run
 ```
 
 En IntelliJ es más cómodo: `Run → Edit Configurations → Environment
-variables` y pegar ahí el contenido del `.env`.
+variables` y pegar ahí el contenido del archivo que corresponda.
 
 **Qué mirar para saber que anduvo.** Con el backend levantado:
 
@@ -122,7 +124,7 @@ arriba anda, el backend está en otro puerto: revisá `ANPAEL_PORT` y el
 
 | Síntoma | Causa | Solución |
 |---|---|---|
-| `prepared statement "S_1" already exists`, y **a veces sí y a veces no** | el pooler de transacciones no soporta *prepared statements* con nombre | agregar `?prepareThreshold=0` a la URL (ya está en `.env.example`) |
+| `prepared statement "S_1" already exists`, y **a veces sí y a veces no** | el pooler de transacciones no soporta *prepared statements* con nombre | agregar `?prepareThreshold=0` a la URL (ya está en `.env.production.example`) |
 | `permission denied for view v_...` | falta el `GRANT`. RLS y GRANT son candados distintos | correr `mig_20_permisos.sql` |
 | `Connection refused` en el puerto 5432 | el plan gratuito puede no tener conexión directa por IPv4 | usar el pooler, puerto **6543** |
 | la aplicación no arranca y dice *Schema-validation: missing table* | una entidad JPA no coincide con la tabla real | corregir la entidad; **no** poner `ddl-auto: update` |
@@ -140,7 +142,8 @@ estorbo.
 Ningún archivo del repositorio tiene una clave adentro, y así tiene que
 quedar. Todo entra por variables de entorno.
 
-- `.env` está en `.gitignore`. `.env.example` es la plantilla, sin valores.
+- `.env`, `.env.local` y `.env.production` están en `.gitignore`. Las
+  plantillas sin valores son `.env.local.example` y `.env.production.example`.
 - La clave `sb_secret_` / *service role* de Supabase **no se usa acá** y no
   tiene que estar en ninguna máquina de desarrollo: saltea toda la seguridad
   de la base.
