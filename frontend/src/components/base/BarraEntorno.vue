@@ -52,7 +52,13 @@ const texto = computed(() => {
   text-align: center;
   padding: 4px 8px;
 }
-.barra-entorno--produccion { background: var(--bad); color: var(--text-on-brand); }
+.barra-entorno--produccion {
+  background: var(--bad-bg);
+  border-bottom: 2px solid var(--bad);
+  color: var(--bad);
+  font-size: var(--fs-16);
+  padding: 8px;
+}
 .barra-entorno--local { background: var(--surface-banda); color: var(--text-muted); }
 .barra-entorno--indefinido { background: var(--ambar-500); color: var(--text-on-brand); }
 </style>
