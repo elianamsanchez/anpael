@@ -25,12 +25,13 @@ public class AnimalRodeoService {
     private EntityManager entityManager;
 
     @Transactional
-    public String asignar(Integer idAnimal, Integer idRodeo, LocalDate fecha) {
+    public String asignar(Integer idAnimal, Integer idRodeo, LocalDate fecha, Boolean fechaEsEstimada) {
         String resultado = (String) entityManager
-                .createNativeQuery("select mover_a_rodeo(:idAnimal, :idRodeo, :fecha)")
+                .createNativeQuery("select mover_a_rodeo(:idAnimal, :idRodeo, :fecha, :fechaEsEstimada)")
                 .setParameter("idAnimal", idAnimal)
                 .setParameter("idRodeo", idRodeo)
                 .setParameter("fecha", fecha)
+                .setParameter("fechaEsEstimada", Boolean.TRUE.equals(fechaEsEstimada))
                 .getSingleResult();
 
         if (resultado != null && resultado.startsWith("ERROR")) {

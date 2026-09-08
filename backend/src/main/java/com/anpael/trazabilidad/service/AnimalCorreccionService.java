@@ -61,6 +61,9 @@ public class AnimalCorreccionService {
         if (pedido.anioIngreso() != null) {
             animal.setAnioIngreso(pedido.anioIngreso());
         }
+        if (pedido.anioPrimerServicio() != null) {
+            animal.setAnioPrimerServicio(pedido.anioPrimerServicio());
+        }
         if (pedido.pesoNacerKg() != null) {
             animal.setPesoNacerKg(pedido.pesoNacerKg());
         }

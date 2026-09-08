@@ -71,6 +71,10 @@ public class Animal {
     @Column(name = "anio_ingreso")
     private Integer anioIngreso;
 
+    /** Cuándo entró a servicio -pensado para toros, no se restringe a nivel de base. */
+    @Column(name = "anio_primer_servicio")
+    private Integer anioPrimerServicio;
+
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 }

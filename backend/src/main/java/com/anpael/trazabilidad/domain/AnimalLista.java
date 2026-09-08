@@ -101,6 +101,9 @@ public class AnimalLista {
     @Column(name = "en_rodeo_desde")
     private LocalDate enRodeoDesde;
 
+    @Column(name = "en_rodeo_desde_es_estimada")
+    private Boolean enRodeoDesdeEsEstimada;
+
     @Column(name = "id_rodeo")
     private Integer idRodeo;
 
@@ -118,4 +121,7 @@ public class AnimalLista {
 
     @Column(name = "anio_ingreso")
     private Integer anioIngreso;
+
+    @Column(name = "anio_primer_servicio")
+    private Integer anioPrimerServicio;
 }

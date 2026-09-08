@@ -124,7 +124,7 @@ public class AnimalAltaService {
             animalCategoriaService.asignar(animal.getIdAnimal(), pedido.idCategoria(), fechaAsignacion);
         }
         if (pedido.idRodeo() != null) {
-            animalRodeoService.asignar(animal.getIdAnimal(), pedido.idRodeo(), fechaAsignacion);
+            animalRodeoService.asignar(animal.getIdAnimal(), pedido.idRodeo(), fechaAsignacion, false);
         }
 
         return animal.getIdAnimal();

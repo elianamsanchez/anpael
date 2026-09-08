@@ -9,5 +9,8 @@ public record AsignarRodeoRequest(
         @NotNull(message = "es obligatorio")
         Integer idRodeo,
 
-        LocalDate fecha) {
+        LocalDate fecha,
+
+        /** true = la fecha es la del saneamiento, no la real en que el animal entró al rodeo. */
+        Boolean fechaEsEstimada) {
 }

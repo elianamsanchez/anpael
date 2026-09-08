@@ -115,7 +115,7 @@ public class AnimalController {
             @Valid @RequestBody AsignarRodeoRequest pedido) {
         animalService.obtener(idAnimal);
         String mensaje = animalRodeoService.asignar(idAnimal, pedido.idRodeo(),
-                pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
+                pedido.fecha() != null ? pedido.fecha() : LocalDate.now(), pedido.fechaEsEstimada());
         return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
     }
 

@@ -21,6 +21,7 @@ export interface Animal {
   fechaIdent?: string
   fechaIdentEsEstimada: boolean
   anioIngreso?: number
+  anioPrimerServicio?: number
   cuig?: string
   establecimiento?: string
   activo: boolean
@@ -35,6 +36,7 @@ export interface Animal {
   sinCategoria: boolean
   rodeo?: string
   enRodeoDesde?: string
+  enRodeoDesdeEsEstimada?: boolean
 }
 
 export interface BuscarAnimalesParams {
@@ -114,8 +116,8 @@ export function asignarCategoria(idAnimal: number, idCategoria: number) {
   return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/categoria`, { idCategoria }).then(r => r.data)
 }
 
-export function asignarRodeo(idAnimal: number, idRodeo: number) {
-  return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/rodeo`, { idRodeo }).then(r => r.data)
+export function asignarRodeo(idAnimal: number, idRodeo: number, fechaEsEstimada?: boolean) {
+  return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/rodeo`, { idRodeo, fechaEsEstimada }).then(r => r.data)
 }
 
 export function asignarEstablecimiento(idAnimal: number, idEstablecimiento: number) {
@@ -171,6 +173,7 @@ export interface CorregirAnimalParams {
   fechaNacEsEstimada?: boolean
   anioNacimiento?: number
   anioIngreso?: number
+  anioPrimerServicio?: number
   pesoNacerKg?: number
 }
 

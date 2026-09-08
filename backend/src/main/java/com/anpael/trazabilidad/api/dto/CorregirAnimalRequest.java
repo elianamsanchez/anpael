@@ -34,6 +34,10 @@ public record CorregirAnimalRequest(
         @Max(value = 2100, message = "tiene que ser un año válido")
         Integer anioIngreso,
 
+        @Min(value = 1900, message = "tiene que ser un año válido")
+        @Max(value = 2100, message = "tiene que ser un año válido")
+        Integer anioPrimerServicio,
+
         @DecimalMin(value = "10", message = "tiene que estar entre 10 y 70 kg")
         @DecimalMax(value = "70", message = "tiene que estar entre 10 y 70 kg")
         BigDecimal pesoNacerKg) {

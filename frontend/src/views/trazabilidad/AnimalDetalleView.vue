@@ -39,6 +39,7 @@ const mensajeCategoria = ref<string | null>(null)
 const errorCategoria = ref<ErrorApi | null>(null)
 
 const idRodeoElegido = ref<number | null>(null)
+const fechaEsEstimadaRodeo = ref(false)
 const guardandoRodeo = ref(false)
 const mensajeRodeo = ref<string | null>(null)
 const errorRodeo = ref<ErrorApi | null>(null)
@@ -81,6 +82,7 @@ const fechaNacimientoCorregida = ref('')
 const fechaEsEstimada = ref(false)
 const anioNacimientoCorregido = ref('')
 const anioIngresoCorregido = ref('')
+const anioPrimerServicioCorregido = ref('')
 const pesoNacerCorregido = ref('')
 
 // La fecha completa manda: si se carga, el año se completa solo (backend
@@ -232,9 +234,10 @@ async function guardarRodeo() {
   mensajeRodeo.value = null
   errorRodeo.value = null
   try {
-    const resultado = await asignarRodeo(idAnimal, idRodeoElegido.value)
+    const resultado = await asignarRodeo(idAnimal, idRodeoElegido.value, fechaEsEstimadaRodeo.value)
     animal.value = resultado.animal
     mensajeRodeo.value = resultado.mensaje
+    fechaEsEstimadaRodeo.value = false
   } catch (e) {
     errorRodeo.value = e as ErrorApi
   } finally {
@@ -307,6 +310,7 @@ async function guardarCorreccion() {
     fechaNacEsEstimada: fechaNacimientoCorregida.value ? fechaEsEstimada.value : undefined,
     anioNacimiento: anioNacimientoCorregido.value ? Number(anioNacimientoCorregido.value) : undefined,
     anioIngreso: anioIngresoCorregido.value ? Number(anioIngresoCorregido.value) : undefined,
+    anioPrimerServicio: anioPrimerServicioCorregido.value ? Number(anioPrimerServicioCorregido.value) : undefined,
     pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined
   }
   if (Object.values(cambios).every(v => v === undefined)) return
@@ -323,6 +327,7 @@ async function guardarCorreccion() {
     fechaEsEstimada.value = false
     anioNacimientoCorregido.value = ''
     anioIngresoCorregido.value = ''
+    anioPrimerServicioCorregido.value = ''
     pesoNacerCorregido.value = ''
   } catch (e) {
     errorCorreccion.value = e as ErrorApi
@@ -378,7 +383,12 @@ onMounted(cargar)
             <dt>Rodeo</dt>
             <dd>
               <Etiqueta v-if="!animal.rodeo" tono="falta">sin asignar</Etiqueta>
-              <span v-else>{{ animal.rodeo }} <span class="atenuado">(desde {{ animal.enRodeoDesde }})</span></span>
+              <span v-else>
+                {{ animal.rodeo }}
+                <span class="atenuado">
+                  (desde {{ animal.enRodeoDesde }}<template v-if="animal.enRodeoDesdeEsEstimada">, fecha de la migración</template>)
+                </span>
+              </span>
             </dd>
           </div>
           <div><dt>Fecha de nacimiento</dt>
@@ -389,7 +399,8 @@ onMounted(cargar)
           </div>
           <div><dt>Año de nacimiento</dt><dd>{{ animal.anioNacimiento ?? '—' }}</dd></div>
           <div><dt>Identificación desde</dt><dd>{{ animal.fechaIdent ?? '—' }}</dd></div>
-          <div><dt>Año de 1er ingreso</dt><dd>{{ animal.anioIngreso ?? '—' }}</dd></div>
+          <div><dt>Año de ingreso</dt><dd>{{ animal.anioIngreso ?? '—' }}</dd></div>
+          <div v-if="animal.sexo === 'M'"><dt>Año de primer servicio</dt><dd>{{ animal.anioPrimerServicio ?? '—' }}</dd></div>
           <div><dt>Establecimiento</dt>
             <dd>
               <Etiqueta v-if="!animal.cuig" tono="falta">sin asignar</Etiqueta>
@@ -505,7 +516,12 @@ onMounted(cargar)
             :deshabilitado="!!fechaNacimientoCorregida"
             v-model:valor="anioNacimientoCorregido"
           />
-          <Campo etiqueta="Año de 1er ingreso" tipo="number" min="1900" max="2100" v-model:valor="anioIngresoCorregido" />
+          <Campo etiqueta="Año de ingreso" tipo="number" min="1900" max="2100" v-model:valor="anioIngresoCorregido" />
+          <Campo
+            v-if="animal.sexo === 'M'"
+            etiqueta="Año de primer servicio" tipo="number" min="1900" max="2100"
+            v-model:valor="anioPrimerServicioCorregido"
+          />
           <Campo etiqueta="Peso al nacer (kg)" tipo="number" min="10" max="70" step="0.1" placeholder="10 a 70" v-model:valor="pesoNacerCorregido" />
           <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="guardandoCorreccion">
             {{ guardandoCorreccion ? 'Guardando…' : 'Guardar cambios' }}
@@ -544,6 +560,7 @@ onMounted(cargar)
               {{ guardandoRodeo ? 'Guardando…' : 'Asignar' }}
             </Boton>
           </form>
+          <Check etiqueta="La fecha es la de la migración" v-model:marcado="fechaEsEstimadaRodeo" />
           <Aviso v-if="mensajeRodeo" tono="ok" class="aviso-fila">{{ mensajeRodeo }}</Aviso>
           <Aviso v-if="errorRodeo" tono="error" class="aviso-fila">{{ errorRodeo.mensaje }}</Aviso>
         </div>
