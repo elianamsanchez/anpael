@@ -208,8 +208,8 @@ export function listarCabanas() {
   return api.get<Cabana[]>('/api/cabanas').then(r => r.data)
 }
 
-export function listarEstablecimientos() {
-  return api.get<Establecimiento[]>('/api/establecimientos').then(r => r.data)
+export function listarEstablecimientos(todos?: boolean) {
+  return api.get<Establecimiento[]>('/api/establecimientos', { params: todos ? { todos: true } : undefined }).then(r => r.data)
 }
 
 export interface NuevoAnimalParams {

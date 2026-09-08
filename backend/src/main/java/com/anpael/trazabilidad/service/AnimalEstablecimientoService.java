@@ -12,14 +12,19 @@ import com.anpael.trazabilidad.infrastructure.EstablecimientoRepository;
 import com.anpael.trazabilidad.infrastructure.IdentificacionRepository;
 
 /**
- * Asigna el establecimiento (y con él, el CUIG) a un animal que no lo tiene.
+ * Asigna o corrige el establecimiento (y con él, el CUIG) de un animal.
  * El CUIG no es un campo del animal: sale de identificacion.id_establecimiento
- * (docs/modelo-datos.md), así que "asignar cuig" es en realidad completar ese
- * dato en su identificación vigente.
+ * (docs/modelo-datos.md), así que "asignar cuig" es en realidad completar o
+ * corregir ese dato en su identificación vigente.
  *
- * A propósito solo completa lo que falta -no corrige un establecimiento ya
- * cargado-: si hubiera que corregirlo, el origen del animal cambió de
- * verdad, y eso es una decisión aparte, no un fix de datos.
+ * Corregir uno ya cargado es válido -por ejemplo, un animal que quedó
+ * unificado a PC269 por mig_17_unificar_cuig.sql ("es el mismo campo, otra
+ * sociedad") pero en realidad corresponde puntualmente a Al154-.
+ *
+ * Actualiza TODAS las identificaciones vigentes del animal, no solo la
+ * principal: los toros suelen tener FUEGO y VISUAL a la vez, migradas con
+ * el mismo establecimiento en las dos filas (docs/modelo-datos.md), y
+ * corregir solo una dejaría la otra con el dato viejo.
  */
 @Service
 public class AnimalEstablecimientoService {
@@ -42,19 +47,24 @@ public class AnimalEstablecimientoService {
         if (vigentes.isEmpty()) {
             throw new ReglaDeNegocioException("El animal no tiene una identificación vigente para asignarle un establecimiento.");
         }
-        if (vigentes.size() > 1) {
-            throw new ReglaDeNegocioException(
-                    "El animal tiene más de una identificación vigente; no se puede elegir cuál actualizar.");
+
+        boolean huboCambio = false;
+        boolean esCorreccion = false;
+        for (Identificacion identificacion : vigentes) {
+            Integer actual = identificacion.getIdEstablecimiento();
+            if (idEstablecimiento.equals(actual)) {
+                continue;
+            }
+            huboCambio = true;
+            esCorreccion = esCorreccion || actual != null;
+            identificacion.setIdEstablecimiento(idEstablecimiento);
+            identificaciones.save(identificacion);
         }
 
-        Identificacion identificacion = vigentes.get(0);
-        if (identificacion.getIdEstablecimiento() != null) {
-            throw new ReglaDeNegocioException("Este animal ya tiene un establecimiento asignado.");
+        if (!huboCambio) {
+            return "Sin cambios: ya estaba asignado a " + establecimiento.getNombre() + ".";
         }
-
-        identificacion.setIdEstablecimiento(idEstablecimiento);
-        identificaciones.save(identificacion);
-
-        return "Asignado a " + establecimiento.getNombre() + " (" + establecimiento.getCuig() + ").";
+        return (esCorreccion ? "Corregido a " : "Asignado a ") + establecimiento.getNombre()
+                + " (" + establecimiento.getCuig() + ").";
     }
 }

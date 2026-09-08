@@ -306,7 +306,7 @@ async function cargar() {
       listarRazas(),
       listarPelajes(),
       historialAnimal(idAnimal),
-      listarEstablecimientos(),
+      listarEstablecimientos(true),
       identificacionesAnimal(idAnimal)
     ])
     animal.value = animalCargado
@@ -773,19 +773,22 @@ onMounted(cargar)
           <Aviso v-if="errorRodeo" tono="error" class="aviso-fila">{{ errorRodeo.mensaje }}</Aviso>
         </div>
 
-        <div v-if="!animal.cuig" class="asignar">
+        <div class="asignar">
           <form class="form-asignar" @submit.prevent="guardarEstablecimiento">
             <Campo
               class="campo-asignar"
               :opciones="[
-                { valor: null, etiqueta: 'Asignar establecimiento…' },
-                ...establecimientos.map(e => ({ valor: e.idEstablecimiento, etiqueta: `${e.nombre} (${e.cuig})` }))
+                { valor: null, etiqueta: animal.cuig ? 'Corregir establecimiento…' : 'Asignar establecimiento…' },
+                ...establecimientos.map(e => ({
+                  valor: e.idEstablecimiento,
+                  etiqueta: `${e.nombre} (${e.cuig})${e.activo ? '' : ' · inactivo'}`
+                }))
               ]"
               :valor="idEstablecimientoElegido"
               @update:valor="idEstablecimientoElegido = $event === '' ? null : Number($event)"
             />
             <Boton variante="sobrio" tamano="sm" tipo="submit" :deshabilitado="!idEstablecimientoElegido || guardandoEstablecimiento">
-              {{ guardandoEstablecimiento ? 'Guardando…' : 'Asignar' }}
+              {{ guardandoEstablecimiento ? 'Guardando…' : (animal.cuig ? 'Corregir' : 'Asignar') }}
             </Boton>
           </form>
           <Aviso v-if="mensajeEstablecimiento" tono="ok" class="aviso-fila">{{ mensajeEstablecimiento }}</Aviso>
