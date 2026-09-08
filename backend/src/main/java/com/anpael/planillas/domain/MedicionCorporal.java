@@ -9,8 +9,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Condicion corporal, dentadura, alzada (docs/modelo-datos.md). Solo se
- * carga condicion_corporal desde la planilla de revision de toros. */
+/** Condicion corporal, dentadura, alzada (docs/modelo-datos.md). Se cargan
+ * condicion_corporal y dentadura desde la planilla de revision de toros;
+ * alzada todavia no tiene pantalla. */
 @Entity
 @Table(name = "medicion_corporal")
 @Getter
@@ -23,4 +24,8 @@ public class MedicionCorporal {
 
     @Column(name = "condicion_corporal")
     private BigDecimal condicionCorporal;
+
+    /** Catálogo: 2D, 3D, 4D, 6D, BLL, 3/4D, MD+, MD, MD-, 1/4D, -1/4D, SD/CUT (CHECK en la base). */
+    @Column(name = "dentadura")
+    private String dentadura;
 }

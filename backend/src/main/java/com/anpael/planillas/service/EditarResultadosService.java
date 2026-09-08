@@ -105,13 +105,18 @@ public class EditarResultadosService {
         }
         revisionesToro.save(revision);
 
-        if (pedido.condicionCorporal() != null) {
+        if (pedido.condicionCorporal() != null || pedido.dentadura() != null) {
             MedicionCorporal medicion = medicionesCorporales.findById(idEvento).orElseGet(() -> {
                 MedicionCorporal nueva = new MedicionCorporal();
                 nueva.setIdEvento(idEvento);
                 return nueva;
             });
-            medicion.setCondicionCorporal(pedido.condicionCorporal());
+            if (pedido.condicionCorporal() != null) {
+                medicion.setCondicionCorporal(pedido.condicionCorporal());
+            }
+            if (pedido.dentadura() != null) {
+                medicion.setDentadura(pedido.dentadura());
+            }
             medicionesCorporales.save(medicion);
         }
     }

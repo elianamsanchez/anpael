@@ -9,7 +9,8 @@ import {
   type MarcarValidacionParams, type Establecimiento, type Identificacion
 } from '@/api/animales'
 import {
-  corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad
+  corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad,
+  cargarTacto, cargarPesada, cargarRevisionToros, cargarSanidad
 } from '@/api/trabajos'
 import type { ErrorApi } from '@/api/client'
 import Marca from '@/components/base/Marca.vue'
@@ -22,6 +23,14 @@ import Aviso from '@/components/avisos/Aviso.vue'
 import ItemHistorial from '@/components/datos/ItemHistorial.vue'
 
 const TIPOS_EDITABLES = ['TACTO', 'PESADA', 'REVISION_TOROS', 'SANIDAD']
+const TIPOS_TRABAJO = [
+  { valor: 'TACTO', etiqueta: 'Tacto' },
+  { valor: 'PESADA', etiqueta: 'Pesada' },
+  { valor: 'REVISION_TOROS', etiqueta: 'Revisión de toros' },
+  { valor: 'SANIDAD', etiqueta: 'Sanidad' }
+]
+// Catálogo de dentadura (CHECK de medicion_corporal, docs/modelo-datos.md).
+const OPCIONES_DENTADURA = ['2D', '3D', '4D', '6D', 'BLL', '3/4D', 'MD+', 'MD', 'MD-', '1/4D', '-1/4D', 'SD/CUT']
 
 const route = useRoute()
 const idAnimal = Number(route.params.id)
@@ -103,6 +112,32 @@ const errorValidacion = ref<ErrorApi | null>(null)
 const historial = ref<AnimalEvento[]>([])
 const identificaciones = ref<Identificacion[]>([])
 
+interface NuevoTrabajo {
+  tipo: string
+  fecha: string
+  resultado: string
+  tamano: string
+  observaciones: string
+  kilos: string
+  circunferenciaEscrotal: string
+  condicionCorporal: string
+  dentadura: string
+  apto: string
+  producto: string
+  dosis: string
+}
+function trabajoVacio(): NuevoTrabajo {
+  return {
+    tipo: '', fecha: '', resultado: '', tamano: '', observaciones: '',
+    kilos: '', circunferenciaEscrotal: '', condicionCorporal: '', dentadura: '', apto: '',
+    producto: '', dosis: ''
+  }
+}
+const nuevoTrabajo = ref<NuevoTrabajo>(trabajoVacio())
+const guardandoTrabajo = ref(false)
+const mensajeTrabajo = ref<string | null>(null)
+const errorTrabajo = ref<ErrorApi | null>(null)
+
 interface EdicionEvento {
   abierto: boolean
   guardando: boolean
@@ -114,6 +149,7 @@ interface EdicionEvento {
   kilos: string
   circunferenciaEscrotal: string
   condicionCorporal: string
+  dentadura: string
   apto: string
   producto: string
   dosis: string
@@ -125,7 +161,7 @@ function estadoEdicion(idEvento: number): EdicionEvento {
     edicion.value[idEvento] = {
       abierto: false, guardando: false, mensaje: null, error: null,
       resultado: '', tamano: '', observaciones: '',
-      kilos: '', circunferenciaEscrotal: '', condicionCorporal: '', apto: '',
+      kilos: '', circunferenciaEscrotal: '', condicionCorporal: '', dentadura: '', apto: '',
       producto: '', dosis: ''
     }
   }
@@ -155,6 +191,7 @@ async function guardarCorreccionEvento(ev: AnimalEvento) {
       resultado = await corregirRevisionToros(ev.idEvento, {
         circunferenciaEscrotal: e.circunferenciaEscrotal ? Number(e.circunferenciaEscrotal) : undefined,
         condicionCorporal: e.condicionCorporal ? Number(e.condicionCorporal) : undefined,
+        dentadura: e.dentadura || undefined,
         apto: e.apto ? e.apto === 'si' : undefined
       })
     } else if (ev.tipoTrabajo === 'SANIDAD') {
@@ -172,6 +209,48 @@ async function guardarCorreccionEvento(ev: AnimalEvento) {
     e.error = err as ErrorApi
   } finally {
     e.guardando = false
+  }
+}
+
+async function guardarTrabajoNuevo() {
+  if (!animal.value?.idRodeo || !nuevoTrabajo.value.tipo) return
+  const idRodeo = animal.value.idRodeo
+  const t = nuevoTrabajo.value
+  const fecha = t.fecha || undefined
+
+  guardandoTrabajo.value = true
+  mensajeTrabajo.value = null
+  errorTrabajo.value = null
+  try {
+    let resultado
+    if (t.tipo === 'TACTO') {
+      resultado = await cargarTacto(idRodeo, [{
+        idAnimal, resultado: t.resultado, tamano: t.tamano || undefined, observaciones: t.observaciones || undefined
+      }], fecha)
+    } else if (t.tipo === 'PESADA') {
+      resultado = await cargarPesada(idRodeo, [{ idAnimal, kilos: Number(t.kilos) }], fecha)
+    } else if (t.tipo === 'REVISION_TOROS') {
+      resultado = await cargarRevisionToros(idRodeo, [{
+        idAnimal,
+        circunferenciaEscrotal: t.circunferenciaEscrotal ? Number(t.circunferenciaEscrotal) : undefined,
+        condicionCorporal: t.condicionCorporal ? Number(t.condicionCorporal) : undefined,
+        dentadura: t.dentadura || undefined,
+        apto: t.apto === 'si'
+      }], fecha)
+    } else if (t.tipo === 'SANIDAD') {
+      resultado = await cargarSanidad(idRodeo, [{
+        idAnimal, producto: t.producto, dosis: t.dosis ? Number(t.dosis) : undefined
+      }], fecha)
+    } else {
+      return
+    }
+    mensajeTrabajo.value = resultado.mensaje
+    historial.value = await historialAnimal(idAnimal)
+    nuevoTrabajo.value = trabajoVacio()
+  } catch (e) {
+    errorTrabajo.value = e as ErrorApi
+  } finally {
+    guardandoTrabajo.value = false
   }
 }
 
@@ -424,6 +503,71 @@ onMounted(cargar)
         </dl>
       </Tarjeta>
 
+      <Tarjeta titulo="Agregar trabajo" class="tarjeta-espaciada">
+        <p v-if="!animal.idRodeo" class="atenuado chico">
+          Este animal no tiene rodeo asignado -asignale uno primero en "Categoría, rodeo y establecimiento" para poder cargarle un trabajo.
+        </p>
+
+        <form v-else class="form-trabajo" @submit.prevent="guardarTrabajoNuevo">
+          <Campo
+            etiqueta="Tipo de trabajo"
+            :opciones="[{ valor: null, etiqueta: 'Elegir…' }, ...TIPOS_TRABAJO.map(t => ({ valor: t.valor, etiqueta: t.etiqueta }))]"
+            :valor="nuevoTrabajo.tipo"
+            @update:valor="nuevoTrabajo.tipo = $event"
+          />
+          <Campo etiqueta="Fecha" tipo="date" placeholder="Si se deja en blanco, hoy" v-model:valor="nuevoTrabajo.fecha" />
+
+          <template v-if="nuevoTrabajo.tipo === 'TACTO'">
+            <Campo
+              etiqueta="Resultado"
+              :opciones="[{ valor: '', etiqueta: 'Elegir…' }, { valor: 'PRENADA', etiqueta: 'Preñada' }, { valor: 'VACIA', etiqueta: 'Vacía' }, { valor: 'DUDOSA', etiqueta: 'Dudosa' }]"
+              v-model:valor="nuevoTrabajo.resultado"
+            />
+            <Campo
+              v-if="nuevoTrabajo.resultado === 'PRENADA'"
+              etiqueta="Tamaño"
+              :opciones="[{ valor: '', etiqueta: 'Elegir…' }, { valor: 'CHICA', etiqueta: 'Chica' }, { valor: 'MEDIANA', etiqueta: 'Mediana' }, { valor: 'GRANDE', etiqueta: 'Grande' }]"
+              v-model:valor="nuevoTrabajo.tamano"
+            />
+            <Campo etiqueta="Observaciones" tipo="textarea" :filas="2" v-model:valor="nuevoTrabajo.observaciones" />
+          </template>
+
+          <template v-else-if="nuevoTrabajo.tipo === 'PESADA'">
+            <Campo etiqueta="Kilos" tipo="number" min="15" max="1400" step="0.1" v-model:valor="nuevoTrabajo.kilos" />
+          </template>
+
+          <template v-else-if="nuevoTrabajo.tipo === 'REVISION_TOROS'">
+            <Campo etiqueta="Circunferencia escrotal (cm)" tipo="number" min="24" max="50" step="0.1" v-model:valor="nuevoTrabajo.circunferenciaEscrotal" />
+            <Campo etiqueta="Condición corporal" tipo="number" min="1" max="5" step="0.5" v-model:valor="nuevoTrabajo.condicionCorporal" />
+            <Campo
+              etiqueta="Dentadura"
+              :opciones="[{ valor: '', etiqueta: 'Elegir…' }, ...OPCIONES_DENTADURA.map(d => ({ valor: d, etiqueta: d }))]"
+              v-model:valor="nuevoTrabajo.dentadura"
+            />
+            <Campo
+              etiqueta="Apto"
+              :opciones="[{ valor: '', etiqueta: 'Elegir…' }, { valor: 'si', etiqueta: 'Sí' }, { valor: 'no', etiqueta: 'No' }]"
+              v-model:valor="nuevoTrabajo.apto"
+            />
+          </template>
+
+          <template v-else-if="nuevoTrabajo.tipo === 'SANIDAD'">
+            <Campo etiqueta="Producto" v-model:valor="nuevoTrabajo.producto" />
+            <Campo etiqueta="Dosis" tipo="number" min="0" step="0.01" v-model:valor="nuevoTrabajo.dosis" />
+          </template>
+
+          <Boton
+            v-if="nuevoTrabajo.tipo"
+            variante="sobrio" tamano="sm" class="boton-fila" tipo="submit"
+            :deshabilitado="guardandoTrabajo"
+          >
+            {{ guardandoTrabajo ? 'Guardando…' : 'Agregar trabajo' }}
+          </Boton>
+        </form>
+        <Aviso v-if="mensajeTrabajo" tono="ok" class="aviso-fila">{{ mensajeTrabajo }}</Aviso>
+        <Aviso v-if="errorTrabajo" tono="error" class="aviso-fila">{{ errorTrabajo.mensaje }} <span v-if="errorTrabajo.detalle">— {{ errorTrabajo.detalle }}</span></Aviso>
+      </Tarjeta>
+
       <Tarjeta titulo="Historial de trabajos" class="tarjeta-espaciada">
         <p v-if="historial.length === 0" class="atenuado">Sin eventos registrados todavía.</p>
         <ul v-else class="lista-historial">
@@ -471,6 +615,10 @@ onMounted(cargar)
               <template v-else-if="ev.tipoTrabajo === 'REVISION_TOROS'">
                 <input class="select-chico" v-model="estadoEdicion(ev.idEvento).circunferenciaEscrotal" type="number" min="24" max="50" step="0.1" placeholder="Circunf. escrotal" />
                 <input class="select-chico" v-model="estadoEdicion(ev.idEvento).condicionCorporal" type="number" min="1" max="5" step="0.5" placeholder="Cond. corporal" />
+                <select class="select-chico" v-model="estadoEdicion(ev.idEvento).dentadura">
+                  <option value="">Dentadura (sin cambios)</option>
+                  <option v-for="d in OPCIONES_DENTADURA" :key="d" :value="d">{{ d }}</option>
+                </select>
                 <select class="select-chico" v-model="estadoEdicion(ev.idEvento).apto">
                   <option value="">Apto (sin cambios)</option>
                   <option value="si">Sí</option>
@@ -679,6 +827,7 @@ button.boton-fila { align-self: flex-start; }
 
 .chico { font-size: var(--fs-125); margin: 0 0 12px; }
 .form-correccion { display: flex; flex-direction: column; gap: 10px; }
+.form-trabajo { display: flex; flex-direction: column; gap: 10px; }
 .form-baja { display: flex; flex-direction: column; gap: 8px; }
 .form-validacion { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 </style>

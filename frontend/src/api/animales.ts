@@ -37,6 +37,7 @@ export interface Animal {
   rodeo?: string
   enRodeoDesde?: string
   enRodeoDesdeEsEstimada?: boolean
+  idRodeo?: number
 }
 
 export interface BuscarAnimalesParams {

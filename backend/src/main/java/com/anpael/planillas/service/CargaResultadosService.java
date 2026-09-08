@@ -113,10 +113,11 @@ public class CargaResultadosService {
             revision.setCircEscrotalCm(linea.circunferenciaEscrotal());
             revisionesToro.save(revision);
 
-            if (linea.condicionCorporal() != null) {
+            if (linea.condicionCorporal() != null || linea.dentadura() != null) {
                 MedicionCorporal medicion = new MedicionCorporal();
                 medicion.setIdEvento(evento.getIdEvento());
                 medicion.setCondicionCorporal(linea.condicionCorporal());
+                medicion.setDentadura(linea.dentadura());
                 medicionesCorporales.save(medicion);
             }
         }

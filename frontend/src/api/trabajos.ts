@@ -17,24 +17,25 @@ export interface LineaRevisionToros {
   idAnimal: number
   circunferenciaEscrotal?: number
   condicionCorporal?: number
+  dentadura?: string
   apto: boolean
 }
 export interface LineaSanidad { idAnimal: number; producto: string; dosis?: number }
 
-export function cargarTacto(idRodeo: number, resultados: LineaTacto[]) {
-  return api.post<ResumenCarga>('/api/trabajos/tacto', { idRodeo, resultados }).then(r => r.data)
+export function cargarTacto(idRodeo: number, resultados: LineaTacto[], fecha?: string) {
+  return api.post<ResumenCarga>('/api/trabajos/tacto', { idRodeo, fecha, resultados }).then(r => r.data)
 }
 
-export function cargarPesada(idRodeo: number, resultados: LineaPesada[]) {
-  return api.post<ResumenCarga>('/api/trabajos/pesada', { idRodeo, resultados }).then(r => r.data)
+export function cargarPesada(idRodeo: number, resultados: LineaPesada[], fecha?: string) {
+  return api.post<ResumenCarga>('/api/trabajos/pesada', { idRodeo, fecha, resultados }).then(r => r.data)
 }
 
-export function cargarRevisionToros(idRodeo: number, resultados: LineaRevisionToros[]) {
-  return api.post<ResumenCarga>('/api/trabajos/revision-toros', { idRodeo, resultados }).then(r => r.data)
+export function cargarRevisionToros(idRodeo: number, resultados: LineaRevisionToros[], fecha?: string) {
+  return api.post<ResumenCarga>('/api/trabajos/revision-toros', { idRodeo, fecha, resultados }).then(r => r.data)
 }
 
-export function cargarSanidad(idRodeo: number, resultados: LineaSanidad[]) {
-  return api.post<ResumenCarga>('/api/trabajos/sanidad', { idRodeo, resultados }).then(r => r.data)
+export function cargarSanidad(idRodeo: number, resultados: LineaSanidad[], fecha?: string) {
+  return api.post<ResumenCarga>('/api/trabajos/sanidad', { idRodeo, fecha, resultados }).then(r => r.data)
 }
 
 export interface CorreccionResultado {
@@ -52,7 +53,7 @@ export function corregirPesada(idEvento: number, cambios: { kilos?: number }) {
 
 export function corregirRevisionToros(
   idEvento: number,
-  cambios: { circunferenciaEscrotal?: number; condicionCorporal?: number; apto?: boolean }
+  cambios: { circunferenciaEscrotal?: number; condicionCorporal?: number; dentadura?: string; apto?: boolean }
 ) {
   return api.patch<CorreccionResultado>(`/api/eventos/${idEvento}/revision-toros`, cambios).then(r => r.data)
 }

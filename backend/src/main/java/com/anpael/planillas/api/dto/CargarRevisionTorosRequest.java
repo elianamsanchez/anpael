@@ -9,6 +9,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public record CargarRevisionTorosRequest(
 
@@ -32,6 +33,10 @@ public record CargarRevisionTorosRequest(
             @DecimalMin(value = "1", message = "tiene que estar entre 1 y 5")
             @DecimalMax(value = "5", message = "tiene que estar entre 1 y 5")
             BigDecimal condicionCorporal,
+
+            @Pattern(regexp = "2D|3D|4D|6D|BLL|3/4D|MD\\+|MD|MD-|1/4D|-1/4D|SD/CUT",
+                    message = "no es un valor del catálogo de dentadura")
+            String dentadura,
 
             @NotNull(message = "es obligatorio")
             Boolean apto) {
