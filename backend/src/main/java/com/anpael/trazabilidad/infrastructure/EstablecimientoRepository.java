@@ -11,4 +11,6 @@ public interface EstablecimientoRepository extends JpaRepository<Establecimiento
     List<Establecimiento> findByEsPropioTrueAndActivoTrue();
 
     List<Establecimiento> findAllByActivoTrueOrderByNombreAsc();
+
+    List<Establecimiento> findAllByOrderByNombreAsc();
 }

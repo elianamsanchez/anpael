@@ -4,12 +4,20 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.anpael.trazabilidad.domain.Establecimiento;
 import com.anpael.trazabilidad.infrastructure.EstablecimientoRepository;
 
-/** Catálogo para el combo de "establecimiento de origen" al dar de alta un animal comprado o recibido. */
+/**
+ * Catálogo para el combo de "establecimiento de origen" al dar de alta un
+ * animal comprado o recibido, y para corregirlo en uno ya cargado.
+ *
+ * `todos=true` incluye los inactivos (ej. Al154, el CUIG viejo de Santa Ana):
+ * no tiene sentido ofrecerlos para un animal nuevo, pero corregir uno viejo
+ * a veces necesita justamente el que ya no está activo.
+ */
 @RestController
 @RequestMapping("/api/establecimientos")
 public class EstablecimientoController {
@@ -21,7 +29,8 @@ public class EstablecimientoController {
     }
 
     @GetMapping
-    public List<Establecimiento> listar() {
-        return establecimientos.findAllByActivoTrueOrderByNombreAsc();
+    public List<Establecimiento> listar(@RequestParam(defaultValue = "false") boolean todos) {
+        return todos ? establecimientos.findAllByOrderByNombreAsc()
+                : establecimientos.findAllByActivoTrueOrderByNombreAsc();
     }
 }
