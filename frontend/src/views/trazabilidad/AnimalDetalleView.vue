@@ -112,6 +112,45 @@ const errorValidacion = ref<ErrorApi | null>(null)
 const historial = ref<AnimalEvento[]>([])
 const identificaciones = ref<Identificacion[]>([])
 
+const ETIQUETA_TIPO_TRABAJO: Record<string, string> = {
+  TACTO: 'Tacto', PESADA: 'Pesada', REVISION_TOROS: 'Revisión de toros',
+  SANIDAD: 'Sanidad', IDENTIFICACION: 'Identificación'
+}
+const ORDEN_TIPOS_FILTRO = ['TACTO', 'REVISION_TOROS', 'PESADA', 'SANIDAD', 'IDENTIFICACION']
+
+const filtroTipoHistorial = ref<string | null>(null)
+
+// Los chips solo muestran tipos que realmente aparecen en el historial de
+// este animal -no tiene sentido ofrecer "Sanidad" si nunca tuvo una.
+const tiposEnHistorial = computed(() => {
+  const presentes = new Set(historial.value.map(ev => ev.tipoTrabajo))
+  const ordenados = ORDEN_TIPOS_FILTRO.filter(t => presentes.has(t))
+  const otros = [...presentes].filter(t => !ORDEN_TIPOS_FILTRO.includes(t))
+  return [...ordenados, ...otros]
+})
+
+const historialFiltrado = computed(() =>
+  filtroTipoHistorial.value
+    ? historial.value.filter(ev => ev.tipoTrabajo === filtroTipoHistorial.value)
+    : historial.value
+)
+
+// El historial ya viene ordenado por fecha descendente (findByIdAnimalOrderByFechaDesc):
+// agrupar por año contiguo alcanza, no hace falta reordenar.
+const historialAgrupado = computed(() => {
+  const grupos: { anio: string; items: AnimalEvento[] }[] = []
+  for (const ev of historialFiltrado.value) {
+    const anio = ev.fecha.slice(0, 4)
+    const actual = grupos[grupos.length - 1]
+    if (actual?.anio === anio) {
+      actual.items.push(ev)
+    } else {
+      grupos.push({ anio, items: [ev] })
+    }
+  }
+  return grupos
+})
+
 interface NuevoTrabajo {
   tipo: string
   fecha: string
@@ -570,16 +609,35 @@ onMounted(cargar)
 
       <Tarjeta titulo="Historial de trabajos" class="tarjeta-espaciada">
         <p v-if="historial.length === 0" class="atenuado">Sin eventos registrados todavía.</p>
-        <ul v-else class="lista-historial">
-          <ItemHistorial
-            v-for="(ev, i) in historial"
-            :key="ev.idEvento"
-            :fecha="ev.fecha"
-            :tipo="ev.tipoTrabajo"
-            :detalle="ev.detalle"
-            :comentario="ev.comentario"
-            :ultimo="i === historial.length - 1"
-          >
+
+        <template v-else>
+          <div v-if="tiposEnHistorial.length > 1" class="filtros-historial">
+            <button
+              type="button" class="chip" :class="{ 'chip--activo': !filtroTipoHistorial }"
+              @click="filtroTipoHistorial = null"
+            >Todos</button>
+            <button
+              v-for="t in tiposEnHistorial" :key="t" type="button" class="chip"
+              :class="{ 'chip--activo': filtroTipoHistorial === t }"
+              @click="filtroTipoHistorial = t"
+            >{{ ETIQUETA_TIPO_TRABAJO[t] ?? t }}</button>
+          </div>
+
+          <p v-if="historialFiltrado.length === 0" class="atenuado">No hay eventos de este tipo.</p>
+
+          <ul v-else class="lista-historial">
+          <template v-for="grupo in historialAgrupado" :key="grupo.anio">
+            <li class="anio-historial">{{ grupo.anio }}</li>
+            <ItemHistorial
+              v-for="ev in grupo.items"
+              :key="ev.idEvento"
+              :fecha="ev.fecha"
+              :tipo="ev.tipoTrabajo"
+              :detalle="ev.detalle"
+              :comentario="ev.comentario"
+              :origen-dato="ev.origenDato"
+              :ultimo="ev.idEvento === historialFiltrado[historialFiltrado.length - 1]?.idEvento"
+            >
             <Boton
               v-if="TIPOS_EDITABLES.includes(ev.tipoTrabajo)"
               variante="texto" tamano="sm" tipo="button" class="link-corregir"
@@ -637,8 +695,10 @@ onMounted(cargar)
               <Aviso v-if="estadoEdicion(ev.idEvento).mensaje" tono="ok" class="aviso-fila">{{ estadoEdicion(ev.idEvento).mensaje }}</Aviso>
               <Aviso v-if="estadoEdicion(ev.idEvento).error" tono="error" class="aviso-fila">{{ estadoEdicion(ev.idEvento).error!.mensaje }}</Aviso>
             </form>
-          </ItemHistorial>
-        </ul>
+            </ItemHistorial>
+          </template>
+          </ul>
+        </template>
       </Tarjeta>
 
       <Tarjeta titulo="Corregir / completar datos" nota="Dejá en blanco lo que no quieras cambiar." class="tarjeta-espaciada">
@@ -817,6 +877,18 @@ label.campo-asignar { flex: 1; min-width: 0; }
 p.aviso-fila { margin: 8px 0 0; }
 
 .lista-historial { list-style: none; margin: 0; padding: 0; }
+.anio-historial {
+  list-style: none; font-size: var(--fs-11); font-weight: var(--fw-bold); color: var(--text-muted);
+  letter-spacing: var(--ls-caps); text-transform: uppercase; margin: 14px 0 4px 42px;
+}
+.anio-historial:first-child { margin-top: 0; }
+.filtros-historial { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+button.chip {
+  font: inherit; font-family: var(--font-ui); font-size: var(--fs-13); font-weight: var(--fw-semibold);
+  padding: 5px 12px; border-radius: var(--radio-pill); border: var(--borde-fino);
+  background: var(--surface-card); color: var(--text-muted); cursor: pointer;
+}
+button.chip--activo { background: var(--cielo-100); border-color: var(--cielo-300); color: var(--cielo-700); }
 button.link-corregir { padding-top: 6px; }
 .form-correccion-evento { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .select-chico {
