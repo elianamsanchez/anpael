@@ -22,6 +22,7 @@ import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
 import com.anpael.trazabilidad.api.dto.CorregirAnimalRequest;
 import com.anpael.trazabilidad.api.dto.CrearAnimalRequest;
 import com.anpael.trazabilidad.api.dto.DarDeBajaRequest;
+import com.anpael.trazabilidad.api.dto.IdentificacionDto;
 import com.anpael.trazabilidad.api.dto.MarcarValidacionRequest;
 import com.anpael.trazabilidad.domain.AnimalEvento;
 import com.anpael.trazabilidad.domain.AnimalLista;
@@ -93,6 +94,11 @@ public class AnimalController {
     @GetMapping("/{idAnimal}/historial")
     public List<AnimalEvento> historial(@PathVariable Integer idAnimal) {
         return animalService.historial(idAnimal);
+    }
+
+    @GetMapping("/{idAnimal}/identificaciones")
+    public List<IdentificacionDto> identificaciones(@PathVariable Integer idAnimal) {
+        return animalService.identificaciones(idAnimal);
     }
 
     @PostMapping("/{idAnimal}/categoria")

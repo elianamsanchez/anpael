@@ -1,6 +1,9 @@
 package com.anpael.trazabilidad.service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,21 +12,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.anpael.shared.exception.NoEncontradoException;
+import com.anpael.trazabilidad.api.dto.IdentificacionDto;
 import com.anpael.trazabilidad.domain.AnimalEvento;
 import com.anpael.trazabilidad.domain.AnimalLista;
+import com.anpael.trazabilidad.domain.Identificacion;
+import com.anpael.trazabilidad.domain.TipoIdentificacion;
 import com.anpael.trazabilidad.infrastructure.AnimalEventoRepository;
 import com.anpael.trazabilidad.infrastructure.AnimalListaRepository;
+import com.anpael.trazabilidad.infrastructure.IdentificacionRepository;
+import com.anpael.trazabilidad.infrastructure.TipoIdentificacionRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class AnimalService {
 
+    // Mismo orden de preferencia que v_ident_principal (docs/modelo-datos.md):
+    // no es alfabetico, VISUAL es la que se reconoce a simple vista.
+    private static final List<String> ORDEN_TIPOS = List.of("VISUAL", "RFID", "SENASA", "FUEGO");
+
     private final AnimalListaRepository animales;
     private final AnimalEventoRepository eventos;
+    private final IdentificacionRepository identificaciones;
+    private final TipoIdentificacionRepository tiposIdentificacion;
 
-    public AnimalService(AnimalListaRepository animales, AnimalEventoRepository eventos) {
+    public AnimalService(AnimalListaRepository animales, AnimalEventoRepository eventos,
+            IdentificacionRepository identificaciones, TipoIdentificacionRepository tiposIdentificacion) {
         this.animales = animales;
         this.eventos = eventos;
+        this.identificaciones = identificaciones;
+        this.tiposIdentificacion = tiposIdentificacion;
     }
 
     public Page<AnimalLista> buscar(String caravana, Boolean sinCategoria, Boolean sinRodeo, Integer idRodeo,
@@ -70,5 +87,26 @@ public class AnimalService {
     public AnimalEvento obtenerEvento(Integer idEvento) {
         return eventos.findById(idEvento)
                 .orElseThrow(() -> new NoEncontradoException("No existe el evento " + idEvento));
+    }
+
+    /**
+     * Todas las identificaciones vigentes de un animal, no solo la principal.
+     * v_animal_lista (AnimalLista) muestra una sola -la que elige
+     * v_ident_principal-, así que un toro con VISUAL y FUEGO a la vez pierde
+     * el número de la marca ahí. Acá se ven las dos.
+     */
+    public List<IdentificacionDto> identificaciones(Integer idAnimal) {
+        obtener(idAnimal); // 404 antes que una lista vacia enganosa
+        Map<Integer, String> codigoPorTipo = tiposIdentificacion.findAll().stream()
+                .collect(Collectors.toMap(TipoIdentificacion::getIdTipoIdent, TipoIdentificacion::getCodigo));
+
+        return identificaciones.findByIdAnimalAndFechaBajaIsNull(idAnimal).stream()
+                .map(i -> new IdentificacionDto(codigoPorTipo.get(i.getIdTipoIdent()), i.getCaravana(),
+                        i.getFechaAlta(), i.getFechaAltaEsEstimada()))
+                .sorted(Comparator.comparingInt(d -> {
+                    int pos = ORDEN_TIPOS.indexOf(d.tipoIdent());
+                    return pos == -1 ? Integer.MAX_VALUE : pos;
+                }))
+                .toList();
     }
 }

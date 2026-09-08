@@ -72,6 +72,18 @@ export function historialAnimal(idAnimal: number) {
   return api.get<AnimalEvento[]>(`/api/animales/${idAnimal}/historial`).then(r => r.data)
 }
 
+/** Una identificación vigente del animal (docs/modelo-datos.md: puede tener varias a la vez). */
+export interface Identificacion {
+  tipoIdent: string
+  caravana: string
+  fechaAlta?: string
+  fechaAltaEsEstimada?: boolean
+}
+
+export function identificacionesAnimal(idAnimal: number) {
+  return api.get<Identificacion[]>(`/api/animales/${idAnimal}/identificaciones`).then(r => r.data)
+}
+
 export interface Categoria {
   idCategoria: number
   codigo: string

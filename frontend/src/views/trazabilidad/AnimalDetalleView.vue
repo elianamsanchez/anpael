@@ -4,9 +4,9 @@ import { useRoute } from 'vue-router'
 import {
   getAnimal, listarCategorias, listarRodeos, asignarCategoria, asignarRodeo,
   listarCausasBaja, darDeBaja, listarRazas, listarPelajes, corregirAnimal, historialAnimal,
-  marcarValidacion, listarEstablecimientos, asignarEstablecimiento,
+  marcarValidacion, listarEstablecimientos, asignarEstablecimiento, identificacionesAnimal,
   type Animal, type Categoria, type Rodeo, type CausaBaja, type Raza, type Pelaje, type AnimalEvento,
-  type MarcarValidacionParams, type Establecimiento
+  type MarcarValidacionParams, type Establecimiento, type Identificacion
 } from '@/api/animales'
 import {
   corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad
@@ -99,6 +99,7 @@ const mensajeValidacion = ref<string | null>(null)
 const errorValidacion = ref<ErrorApi | null>(null)
 
 const historial = ref<AnimalEvento[]>([])
+const identificaciones = ref<Identificacion[]>([])
 
 interface EdicionEvento {
   abierto: boolean
@@ -177,7 +178,7 @@ async function cargar() {
   error.value = null
   try {
     const [animalCargado, categoriasCargadas, rodeosCargados, causasCargadas, razasCargadas, pelajesCargados,
-      historialCargado, establecimientosCargados] = await Promise.all([
+      historialCargado, establecimientosCargados, identificacionesCargadas] = await Promise.all([
       getAnimal(idAnimal),
       listarCategorias(),
       listarRodeos(),
@@ -185,7 +186,8 @@ async function cargar() {
       listarRazas(),
       listarPelajes(),
       historialAnimal(idAnimal),
-      listarEstablecimientos()
+      listarEstablecimientos(),
+      identificacionesAnimal(idAnimal)
     ])
     animal.value = animalCargado
     categorias.value = categoriasCargadas
@@ -195,6 +197,7 @@ async function cargar() {
     pelajes.value = pelajesCargados
     historial.value = historialCargado
     establecimientos.value = establecimientosCargados
+    identificaciones.value = identificacionesCargadas
     if (ESTADOS_VALIDACION.includes(animalCargado.validacion as MarcarValidacionParams['estado'])) {
       estadoValidacionElegido.value = animalCargado.validacion as MarcarValidacionParams['estado']
     }
@@ -357,6 +360,14 @@ onMounted(cargar)
 
       <Tarjeta>
         <dl class="lista-info">
+          <div v-if="identificaciones.length">
+            <dt>Identificación</dt>
+            <dd>
+              <div v-for="ident in identificaciones" :key="ident.tipoIdent">
+                {{ ident.tipoIdent }}: {{ ident.caravana }}
+              </div>
+            </dd>
+          </div>
           <div><dt>Raza</dt><dd>{{ animal.raza ?? '—' }}</dd></div>
           <div><dt>Color</dt><dd>{{ animal.pelaje ?? '—' }}</dd></div>
           <div>
