@@ -144,7 +144,7 @@ const opcionesCategoria = computed(() => [
         <p class="atenuado">No hay animales que coincidan con la búsqueda.</p>
       </template>
 
-      <Tabla v-else :columnas="columnas" :filas="animales">
+      <Tabla v-else :columnas="columnas" :filas="animales" clave-fila="idAnimal">
         <template #celda-caravana="{ fila }">
           <RouterLink class="link-caravana" :to="`/animales/${fila.idAnimal}`">{{ fila.caravana ?? '(sin identificación)' }}</RouterLink>
         </template>

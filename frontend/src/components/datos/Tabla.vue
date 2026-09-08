@@ -4,8 +4,10 @@ withDefaults(
     columnas: { clave: string; titulo: string; alDerecha?: boolean; numerico?: boolean }[]
     filas: Record<string, unknown>[]
     vacio?: string
+    /** Campo de `filas` que identifica cada fila, para el :key. */
+    claveFila?: string
   }>(),
-  { vacio: 'No hay resultados.' }
+  { vacio: 'No hay resultados.', claveFila: 'id' }
 )
 </script>
 
@@ -20,7 +22,7 @@ withDefaults(
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(fila, i) in filas" :key="(fila.id as string | number | undefined) ?? i">
+      <tr v-for="(fila, i) in filas" :key="(fila[claveFila] as string | number | undefined) ?? i">
         <td
           v-for="c in columnas"
           :key="c.clave"
