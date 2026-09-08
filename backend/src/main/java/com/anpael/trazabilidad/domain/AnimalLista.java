@@ -1,5 +1,6 @@
 package com.anpael.trazabilidad.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
@@ -124,4 +125,13 @@ public class AnimalLista {
 
     @Column(name = "anio_primer_servicio")
     private Integer anioPrimerServicio;
+
+    @Column(name = "peso_nacer_kg")
+    private BigDecimal pesoNacerKg;
+
+    @Column(name = "id_padre")
+    private Integer idPadre;
+
+    @Column(name = "padre_caravana")
+    private String padreCaravana;
 }

@@ -38,6 +38,9 @@ export interface Animal {
   enRodeoDesde?: string
   enRodeoDesdeEsEstimada?: boolean
   idRodeo?: number
+  pesoNacerKg?: number
+  idPadre?: number
+  padreCaravana?: string
 }
 
 export interface BuscarAnimalesParams {

@@ -516,6 +516,11 @@ onMounted(cargar)
             </dd>
           </div>
           <div><dt>Año de nacimiento</dt><dd>{{ animal.anioNacimiento ?? '—' }}</dd></div>
+          <div v-if="animal.pesoNacerKg"><dt>Peso al nacer</dt><dd>{{ animal.pesoNacerKg }} kg</dd></div>
+          <div v-if="animal.padreCaravana">
+            <dt>Padre</dt>
+            <dd><RouterLink :to="`/animales/${animal.idPadre}`">{{ animal.padreCaravana }}</RouterLink></dd>
+          </div>
           <div><dt>Identificación desde</dt><dd>{{ animal.fechaIdent ?? '—' }}</dd></div>
           <div><dt>Año de ingreso</dt><dd>{{ animal.anioIngreso ?? '—' }}</dd></div>
           <div v-if="animal.sexo === 'M'"><dt>Año de primer servicio</dt><dd>{{ animal.anioPrimerServicio ?? '—' }}</dd></div>
