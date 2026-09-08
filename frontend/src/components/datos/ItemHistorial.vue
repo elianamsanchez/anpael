@@ -6,6 +6,7 @@ withDefaults(
     detalle?: string
     comentario?: string
     origenDato?: string
+    apto?: boolean
     ultimo?: boolean
   }>(),
   { ultimo: false }
@@ -67,6 +68,11 @@ const ETIQUETA_ORIGEN: Record<string, string> = {
             class="item-historial-badge"
             :style="{ color: (TIPOS[tipo] ?? GENERICO).color, background: (TIPOS[tipo] ?? GENERICO).bg }"
           >{{ tipo }}</span>
+          <span
+            v-if="apto !== undefined"
+            class="item-historial-apto"
+            :class="apto ? 'item-historial-apto--si' : 'item-historial-apto--no'"
+          >{{ apto ? 'Apto' : 'No apto' }}</span>
           <span v-if="origenDato && ETIQUETA_ORIGEN[origenDato]" class="item-historial-origen">
             {{ ETIQUETA_ORIGEN[origenDato] }}
           </span>
@@ -102,6 +108,12 @@ const ETIQUETA_ORIGEN: Record<string, string> = {
   font-size: var(--fs-11); font-weight: var(--fw-bold); letter-spacing: var(--ls-caps);
   padding: 2px 8px; border-radius: var(--radio-sm);
 }
+.item-historial-apto {
+  font-size: var(--fs-11); font-weight: var(--fw-bold); letter-spacing: var(--ls-caps);
+  padding: 2px 8px; border-radius: var(--radio-sm);
+}
+.item-historial-apto--si { color: var(--ok-text); background: var(--ok-bg); }
+.item-historial-apto--no { color: var(--bad-text); background: var(--bad-bg); }
 .item-historial-origen { font-size: var(--fs-11); color: var(--text-muted); }
 .item-historial-detalle { margin: 5px 0 0; font-size: var(--fs-135); }
 .item-historial-comentario { margin: 4px 0 0; font-size: var(--fs-135); color: var(--text-muted); font-style: italic; }

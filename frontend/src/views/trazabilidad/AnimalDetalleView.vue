@@ -636,6 +636,7 @@ onMounted(cargar)
               :detalle="ev.detalle"
               :comentario="ev.comentario"
               :origen-dato="ev.origenDato"
+              :apto="ev.apto"
               :ultimo="ev.idEvento === historialFiltrado[historialFiltrado.length - 1]?.idEvento"
             >
             <Boton

@@ -62,4 +62,7 @@ public class AnimalEvento {
 
     @Column(name = "comentario")
     private String comentario;
+
+    @Column(name = "apto")
+    private Boolean apto;
 }

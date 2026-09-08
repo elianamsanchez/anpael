@@ -69,6 +69,7 @@ export interface AnimalEvento {
   detalle?: string
   clase: string
   comentario?: string
+  apto?: boolean
 }
 
 export function historialAnimal(idAnimal: number) {
