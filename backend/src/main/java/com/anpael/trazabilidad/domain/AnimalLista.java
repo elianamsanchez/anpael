@@ -134,4 +134,7 @@ public class AnimalLista {
 
     @Column(name = "padre_caravana")
     private String padreCaravana;
+
+    @Column(name = "padre_nombre")
+    private String padreNombre;
 }

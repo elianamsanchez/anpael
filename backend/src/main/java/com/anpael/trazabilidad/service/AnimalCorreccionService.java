@@ -67,6 +67,9 @@ public class AnimalCorreccionService {
         if (pedido.pesoNacerKg() != null) {
             animal.setPesoNacerKg(pedido.pesoNacerKg());
         }
+        if (pedido.padreNombre() != null) {
+            animal.setPadreNombre(pedido.padreNombre());
+        }
 
         animales.save(animal);
     }

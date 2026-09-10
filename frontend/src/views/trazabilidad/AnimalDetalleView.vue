@@ -93,6 +93,7 @@ const anioNacimientoCorregido = ref('')
 const anioIngresoCorregido = ref('')
 const anioPrimerServicioCorregido = ref('')
 const pesoNacerCorregido = ref('')
+const padreNombreCorregido = ref('')
 
 // La fecha completa manda: si se carga, el año se completa solo (backend
 // AnimalCorreccionService), así que el campo manual no aplica.
@@ -429,7 +430,8 @@ async function guardarCorreccion() {
     anioNacimiento: anioNacimientoCorregido.value ? Number(anioNacimientoCorregido.value) : undefined,
     anioIngreso: anioIngresoCorregido.value ? Number(anioIngresoCorregido.value) : undefined,
     anioPrimerServicio: anioPrimerServicioCorregido.value ? Number(anioPrimerServicioCorregido.value) : undefined,
-    pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined
+    pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined,
+    padreNombre: padreNombreCorregido.value || undefined
   }
   if (Object.values(cambios).every(v => v === undefined)) return
 
@@ -447,6 +449,7 @@ async function guardarCorreccion() {
     anioIngresoCorregido.value = ''
     anioPrimerServicioCorregido.value = ''
     pesoNacerCorregido.value = ''
+    padreNombreCorregido.value = ''
   } catch (e) {
     errorCorreccion.value = e as ErrorApi
   } finally {
@@ -517,9 +520,12 @@ onMounted(cargar)
           </div>
           <div><dt>Año de nacimiento</dt><dd>{{ animal.anioNacimiento ?? '—' }}</dd></div>
           <div v-if="animal.pesoNacerKg"><dt>Peso al nacer</dt><dd>{{ animal.pesoNacerKg }} kg</dd></div>
-          <div v-if="animal.padreCaravana">
+          <div v-if="animal.sexo === 'M' && (animal.padreCaravana || animal.padreNombre)">
             <dt>Padre</dt>
-            <dd><RouterLink :to="`/animales/${animal.idPadre}`">{{ animal.padreCaravana }}</RouterLink></dd>
+            <dd>
+              <RouterLink v-if="animal.padreCaravana" :to="`/animales/${animal.idPadre}`">{{ animal.padreCaravana }}</RouterLink>
+              <span v-else>{{ animal.padreNombre }}</span>
+            </dd>
           </div>
           <div><dt>Identificación desde</dt><dd>{{ animal.fechaIdent ?? '—' }}</dd></div>
           <div><dt>Año de ingreso</dt><dd>{{ animal.anioIngreso ?? '—' }}</dd></div>
@@ -737,6 +743,11 @@ onMounted(cargar)
             v-model:valor="anioPrimerServicioCorregido"
           />
           <Campo etiqueta="Peso al nacer (kg)" tipo="number" min="10" max="70" step="0.1" placeholder="10 a 70" v-model:valor="pesoNacerCorregido" />
+          <Campo
+            v-if="animal.sexo === 'M'"
+            etiqueta="Padre" placeholder="Nombre, si no está registrado como animal"
+            v-model:valor="padreNombreCorregido"
+          />
           <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="guardandoCorreccion">
             {{ guardandoCorreccion ? 'Guardando…' : 'Guardar cambios' }}
           </Boton>

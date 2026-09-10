@@ -47,6 +47,10 @@ public class Animal {
     @Column(name = "id_padre")
     private Integer idPadre;
 
+    /** Nombre del padre cuando no es un animal registrado en el sistema (toro de campo/semen externo). */
+    @Column(name = "padre_nombre")
+    private String padreNombre;
+
     @Column(name = "sexo", nullable = false)
     private String sexo;
 

@@ -41,6 +41,7 @@ export interface Animal {
   pesoNacerKg?: number
   idPadre?: number
   padreCaravana?: string
+  padreNombre?: string
 }
 
 export interface BuscarAnimalesParams {
@@ -180,6 +181,7 @@ export interface CorregirAnimalParams {
   anioIngreso?: number
   anioPrimerServicio?: number
   pesoNacerKg?: number
+  padreNombre?: string
 }
 
 export function listarRazas() {
