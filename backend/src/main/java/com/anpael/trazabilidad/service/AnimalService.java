@@ -11,6 +11,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+
 import com.anpael.shared.exception.NoEncontradoException;
 import com.anpael.trazabilidad.api.dto.IdentificacionDto;
 import com.anpael.trazabilidad.domain.AnimalEvento;
@@ -48,8 +51,22 @@ public class AnimalService {
         Specification<AnimalLista> spec = Specification.where(null);
 
         if (caravana != null && !caravana.isBlank()) {
+            // No alcanza con comparar contra AnimalLista.caravana: esa es solo la
+            // principal que elige v_ident_principal (docs/modelo-datos.md). Un
+            // toro con FUEGO y VISUAL a la vez no aparecería buscando por la
+            // marca a fuego si esta no es la principal. Se busca en cualquier
+            // identificación vigente del animal.
             String patron = "%" + caravana.trim().toLowerCase() + "%";
-            spec = spec.and((raiz, consulta, cb) -> cb.like(cb.lower(raiz.get("caravana")), patron));
+            spec = spec.and((raiz, consulta, cb) -> {
+                Subquery<Integer> sub = consulta.subquery(Integer.class);
+                Root<Identificacion> ident = sub.from(Identificacion.class);
+                sub.select(ident.get("idAnimal"))
+                        .where(cb.and(
+                                cb.equal(ident.get("idAnimal"), raiz.get("idAnimal")),
+                                cb.isNull(ident.get("fechaBaja")),
+                                cb.like(cb.lower(ident.get("caravana")), patron)));
+                return cb.exists(sub);
+            });
         }
         if (Boolean.TRUE.equals(sinCategoria)) {
             spec = spec.and((raiz, consulta, cb) -> cb.isTrue(raiz.get("sinCategoria")));
