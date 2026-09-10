@@ -95,6 +95,7 @@ const anioIngresoCorregido = ref('')
 const anioPrimerServicioCorregido = ref('')
 const pesoNacerCorregido = ref('')
 const padreNombreCorregido = ref('')
+const observacionesCorregido = ref('')
 
 // La fecha completa manda: si se carga, el año se completa solo (backend
 // AnimalCorreccionService), así que el campo manual no aplica.
@@ -433,7 +434,8 @@ async function guardarCorreccion() {
     anioIngreso: anioIngresoCorregido.value ? Number(anioIngresoCorregido.value) : undefined,
     anioPrimerServicio: anioPrimerServicioCorregido.value ? Number(anioPrimerServicioCorregido.value) : undefined,
     pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined,
-    padreNombre: padreNombreCorregido.value || undefined
+    padreNombre: padreNombreCorregido.value || undefined,
+    observaciones: observacionesCorregido.value || undefined
   }
   if (Object.values(cambios).every(v => v === undefined)) return
 
@@ -452,6 +454,7 @@ async function guardarCorreccion() {
     anioPrimerServicioCorregido.value = ''
     pesoNacerCorregido.value = ''
     padreNombreCorregido.value = ''
+    observacionesCorregido.value = ''
   } catch (e) {
     errorCorreccion.value = e as ErrorApi
   } finally {
@@ -560,6 +563,7 @@ onMounted(cargar)
             </dd>
           </div>
           <div v-if="animal.validacionObs"><dt>Observaciones</dt><dd>{{ animal.validacionObs }}</dd></div>
+          <div v-if="animal.observaciones"><dt>Notas</dt><dd>{{ animal.observaciones }}</dd></div>
         </dl>
       </Tarjeta>
 
@@ -758,6 +762,7 @@ onMounted(cargar)
             etiqueta="Padre" placeholder="Nombre, si no está registrado como animal"
             v-model:valor="padreNombreCorregido"
           />
+          <Campo etiqueta="Notas" tipo="textarea" :filas="2" v-model:valor="observacionesCorregido" />
           <Boton variante="sobrio" tamano="sm" class="boton-fila" tipo="submit" :deshabilitado="guardandoCorreccion">
             {{ guardandoCorreccion ? 'Guardando…' : 'Guardar cambios' }}
           </Boton>

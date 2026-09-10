@@ -70,6 +70,9 @@ public class AnimalCorreccionService {
         if (pedido.padreNombre() != null) {
             animal.setPadreNombre(pedido.padreNombre());
         }
+        if (pedido.observaciones() != null) {
+            animal.setObservaciones(pedido.observaciones());
+        }
 
         animales.save(animal);
     }

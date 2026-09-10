@@ -51,6 +51,10 @@ public class Animal {
     @Column(name = "padre_nombre")
     private String padreNombre;
 
+    /** Notas de texto libre, distintas de animal_validacion.observacion (esa es del saneamiento). */
+    @Column(name = "observaciones")
+    private String observaciones;
+
     @Column(name = "sexo", nullable = false)
     private String sexo;
 

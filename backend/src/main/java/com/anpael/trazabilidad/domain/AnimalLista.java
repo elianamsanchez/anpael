@@ -147,4 +147,7 @@ public class AnimalLista {
 
     @Column(name = "categoria_desde_es_estimada")
     private Boolean categoriaDesdeEsEstimada;
+
+    @Column(name = "observaciones")
+    private String observaciones;
 }

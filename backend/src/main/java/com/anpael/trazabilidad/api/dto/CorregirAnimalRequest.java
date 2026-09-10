@@ -42,5 +42,7 @@ public record CorregirAnimalRequest(
         @DecimalMax(value = "70", message = "tiene que estar entre 10 y 70 kg")
         BigDecimal pesoNacerKg,
 
-        String padreNombre) {
+        String padreNombre,
+
+        String observaciones) {
 }

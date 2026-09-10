@@ -45,6 +45,7 @@ export interface Animal {
   identificaciones?: string
   categoriaDesde?: string
   categoriaDesdeEsEstimada?: boolean
+  observaciones?: string
 }
 
 export interface BuscarAnimalesParams {
@@ -185,6 +186,7 @@ export interface CorregirAnimalParams {
   anioPrimerServicio?: number
   pesoNacerKg?: number
   padreNombre?: string
+  observaciones?: string
 }
 
 export function listarRazas() {
