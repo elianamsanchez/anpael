@@ -10,6 +10,9 @@ import Campo from '@/components/formularios/Campo.vue'
 import Etiqueta from '@/components/base/Etiqueta.vue'
 import Tabla from '@/components/datos/Tabla.vue'
 import Paginado from '@/components/datos/Paginado.vue'
+import CategoriaIcon from '@/components/icons/CategoriaIcon.vue'
+import { getCategoriaIcon } from '@/components/icons/categoriaIconos'
+import SelectorCategoria from '@/components/formularios/SelectorCategoria.vue'
 
 /**
  * v0.2a · saneamiento (docs/etapas.md): buscar un animal por caravana y ver
@@ -115,12 +118,12 @@ const opcionesCategoria = computed(() => [
       <Buscador v-model:valor="caravana" placeholder="Buscar por caravana…" />
       <Check etiqueta="Sin categoría" v-model:marcado="sinCategoria" />
       <Check etiqueta="Sin rodeo" v-model:marcado="sinRodeo" />
-      <Campo
+      <SelectorCategoria
         class="campo-filtro"
         sobre-fondo
         :opciones="opcionesCategoria"
         :valor="idCategoriaElegida"
-        @update:valor="idCategoriaElegida = $event === '' ? null : Number($event)"
+        @update:valor="idCategoriaElegida = $event"
       />
       <Campo
         class="campo-filtro"
@@ -148,9 +151,16 @@ const opcionesCategoria = computed(() => [
         <template #celda-caravana="{ fila }">
           <RouterLink class="link-caravana" :to="`/animales/${fila.idAnimal}`">{{ fila.identificaciones ?? '(sin identificación)' }}</RouterLink>
         </template>
-        <template #celda-raza="{ fila }">{{ fila.raza ?? '—' }}</template>
+        <template #celda-raza="{ fila }">{{ fila.razaCodigo ?? '—' }}</template>
         <template #celda-categoria="{ fila }">
           <Etiqueta v-if="fila.sinCategoria" tono="falta">sin categoría</Etiqueta>
+          <span
+            v-else-if="getCategoriaIcon({ idCategoria: fila.idCategoria as number })"
+            :title="fila.categoria as string"
+            class="icono-categoria"
+          >
+            <CategoriaIcon :id-categoria="fila.idCategoria as number" :size="28" />
+          </span>
           <span v-else>{{ fila.categoria }}</span>
         </template>
         <template #celda-rodeo="{ fila }">
@@ -183,4 +193,5 @@ label.campo-filtro { flex: 0 0 auto; min-width: 0; }
 .etiqueta-mal { color: var(--bad); }
 .link-caravana { color: var(--text-link); font-weight: var(--fw-semibold); text-decoration: none; }
 .link-caravana:hover { text-decoration: underline; }
+.icono-categoria { display: inline-flex; align-items: center; }
 </style>

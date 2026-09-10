@@ -150,4 +150,7 @@ public class AnimalLista {
 
     @Column(name = "observaciones")
     private String observaciones;
+
+    @Column(name = "raza_codigo")
+    private String razaCodigo;
 }

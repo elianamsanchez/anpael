@@ -12,6 +12,7 @@ export interface Animal {
   tipoIdent?: string
   sexo: string
   raza?: string
+  razaCodigo?: string
   pelaje?: string
   categoriaCodigo?: string
   categoria?: string
