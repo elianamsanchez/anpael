@@ -43,6 +43,7 @@ const categorias = ref<Categoria[]>([])
 const rodeos = ref<Rodeo[]>([])
 
 const idCategoriaElegida = ref<number | null>(null)
+const fechaEsEstimadaCategoria = ref(false)
 const guardandoCategoria = ref(false)
 const mensajeCategoria = ref<string | null>(null)
 const errorCategoria = ref<ErrorApi | null>(null)
@@ -337,9 +338,10 @@ async function guardarCategoria() {
   mensajeCategoria.value = null
   errorCategoria.value = null
   try {
-    const resultado = await asignarCategoria(idAnimal, idCategoriaElegida.value)
+    const resultado = await asignarCategoria(idAnimal, idCategoriaElegida.value, fechaEsEstimadaCategoria.value)
     animal.value = resultado.animal
     mensajeCategoria.value = resultado.mensaje
+    fechaEsEstimadaCategoria.value = false
   } catch (e) {
     errorCategoria.value = e as ErrorApi
   } finally {
@@ -498,7 +500,15 @@ onMounted(cargar)
           <div><dt>Color</dt><dd>{{ animal.pelaje ?? '—' }}</dd></div>
           <div>
             <dt>Categoría</dt>
-            <dd><Etiqueta v-if="animal.sinCategoria" tono="falta">sin asignar</Etiqueta><span v-else>{{ animal.categoria }}</span></dd>
+            <dd>
+              <Etiqueta v-if="animal.sinCategoria" tono="falta">sin asignar</Etiqueta>
+              <span v-else>
+                {{ animal.categoria }}
+                <span v-if="animal.categoriaDesde" class="atenuado">
+                  (desde {{ animal.categoriaDesde }}<template v-if="animal.categoriaDesdeEsEstimada">, estimada</template>)
+                </span>
+              </span>
+            </dd>
           </div>
           <div>
             <dt>Rodeo</dt>
@@ -769,6 +779,7 @@ onMounted(cargar)
               {{ guardandoCategoria ? 'Guardando…' : 'Asignar' }}
             </Boton>
           </form>
+          <Check etiqueta="La fecha es estimada" v-model:marcado="fechaEsEstimadaCategoria" />
           <Aviso v-if="mensajeCategoria" tono="ok" class="aviso-fila">{{ mensajeCategoria }}</Aviso>
           <Aviso v-if="errorCategoria" tono="error" class="aviso-fila">{{ errorCategoria.mensaje }}</Aviso>
         </div>

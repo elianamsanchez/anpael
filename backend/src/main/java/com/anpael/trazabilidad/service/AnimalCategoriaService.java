@@ -20,6 +20,13 @@ import com.anpael.trazabilidad.infrastructure.CategoriaRepository;
  * estaba en esa categoria, error si la fecha nueva no es posterior a la de
  * ingreso actual. El indice unico parcial ux_animal_categoria_abierta es la
  * red de seguridad si esto se rompe.
+ *
+ * Ojo con el orden: id_animal_categoria es IDENTITY, así que el INSERT de
+ * la fila nueva se manda a la base apenas se llama a save() -no se puede
+ * diferir como un UPDATE normal-. Si el cierre de la fila vieja (un
+ * UPDATE, que Hibernate sí posterga) no se fuerza antes con saveAndFlush(),
+ * el INSERT llega primero y choca con ux_animal_categoria_abierta: hay dos
+ * filas "abiertas" para el mismo animal por un instante.
  */
 @Service
 public class AnimalCategoriaService {
@@ -33,7 +40,7 @@ public class AnimalCategoriaService {
     }
 
     @Transactional
-    public String asignar(Integer idAnimal, Integer idCategoria, LocalDate fecha) {
+    public String asignar(Integer idAnimal, Integer idCategoria, LocalDate fecha, Boolean fechaEsEstimada) {
         Categoria categoria = categorias.findById(idCategoria)
                 .orElseThrow(() -> new ReglaDeNegocioException("La categoría " + idCategoria + " no existe."));
 
@@ -50,12 +57,14 @@ public class AnimalCategoriaService {
                         + "a la categoría actual (" + desdeActual + "). No se cambió nada.");
             }
             actual.get().setFechaHasta(fecha);
+            animalCategorias.saveAndFlush(actual.get());
         }
 
         AnimalCategoria nueva = new AnimalCategoria();
         nueva.setIdAnimal(idAnimal);
         nueva.setIdCategoria(idCategoria);
         nueva.setFechaDesde(fecha);
+        nueva.setFechaDesdeEsEstimada(Boolean.TRUE.equals(fechaEsEstimada));
         animalCategorias.save(nueva);
 
         return (actual.isPresent() ? "Movido a " : "Asignado a ") + categoria.getNombre() + " el " + fecha + ".";

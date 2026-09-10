@@ -121,7 +121,7 @@ public class AnimalAltaService {
 
         LocalDate fechaAsignacion = pedido.fechaIngreso() != null ? pedido.fechaIngreso() : LocalDate.now();
         if (pedido.idCategoria() != null) {
-            animalCategoriaService.asignar(animal.getIdAnimal(), pedido.idCategoria(), fechaAsignacion);
+            animalCategoriaService.asignar(animal.getIdAnimal(), pedido.idCategoria(), fechaAsignacion, false);
         }
         if (pedido.idRodeo() != null) {
             animalRodeoService.asignar(animal.getIdAnimal(), pedido.idRodeo(), fechaAsignacion, false);

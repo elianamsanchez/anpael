@@ -106,7 +106,7 @@ public class AnimalController {
             @Valid @RequestBody AsignarCategoriaRequest pedido) {
         animalService.obtener(idAnimal); // 404 antes de tocar la base, no un FK roto
         String mensaje = animalCategoriaService.asignar(idAnimal, pedido.idCategoria(),
-                pedido.fecha() != null ? pedido.fecha() : LocalDate.now());
+                pedido.fecha() != null ? pedido.fecha() : LocalDate.now(), pedido.fechaEsEstimada());
         return new AsignacionResultado(mensaje, animalService.obtener(idAnimal));
     }
 

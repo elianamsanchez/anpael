@@ -137,4 +137,14 @@ public class AnimalLista {
 
     @Column(name = "padre_nombre")
     private String padreNombre;
+
+    /** Todas las identificaciones vigentes, no solo la principal: "CO70 · 1122". */
+    @Column(name = "identificaciones")
+    private String identificaciones;
+
+    @Column(name = "categoria_desde")
+    private LocalDate categoriaDesde;
+
+    @Column(name = "categoria_desde_es_estimada")
+    private Boolean categoriaDesdeEsEstimada;
 }

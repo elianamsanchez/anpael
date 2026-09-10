@@ -40,4 +40,7 @@ public class AnimalCategoria {
 
     @Column(name = "fecha_hasta")
     private LocalDate fechaHasta;
+
+    @Column(name = "fecha_desde_es_estimada", nullable = false)
+    private Boolean fechaDesdeEsEstimada;
 }

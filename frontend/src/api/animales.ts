@@ -42,6 +42,9 @@ export interface Animal {
   idPadre?: number
   padreCaravana?: string
   padreNombre?: string
+  identificaciones?: string
+  categoriaDesde?: string
+  categoriaDesdeEsEstimada?: boolean
 }
 
 export interface BuscarAnimalesParams {
@@ -118,8 +121,8 @@ export function listarRodeos(idCategoria?: number) {
   return api.get<Rodeo[]>('/api/rodeos', { params: idCategoria ? { idCategoria } : undefined }).then(r => r.data)
 }
 
-export function asignarCategoria(idAnimal: number, idCategoria: number) {
-  return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/categoria`, { idCategoria }).then(r => r.data)
+export function asignarCategoria(idAnimal: number, idCategoria: number, fechaEsEstimada?: boolean) {
+  return api.post<AsignacionResultado>(`/api/animales/${idAnimal}/categoria`, { idCategoria, fechaEsEstimada }).then(r => r.data)
 }
 
 export function asignarRodeo(idAnimal: number, idRodeo: number, fechaEsEstimada?: boolean) {
