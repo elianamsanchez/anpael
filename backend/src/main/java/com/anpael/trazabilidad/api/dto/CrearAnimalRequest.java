@@ -5,6 +5,8 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PastOrPresent;
@@ -42,6 +44,10 @@ public record CrearAnimalRequest(
 
         Boolean fechaNacEsEstimada,
 
+        @Min(value = 1900, message = "tiene que ser un año válido")
+        @Max(value = 2100, message = "tiene que ser un año válido")
+        Integer anioNacimiento,
+
         @DecimalMin(value = "10", message = "tiene que estar entre 10 y 70 kg")
         @DecimalMax(value = "70", message = "tiene que estar entre 10 y 70 kg")
         BigDecimal pesoNacerKg,
@@ -49,9 +55,21 @@ public record CrearAnimalRequest(
         @PastOrPresent(message = "no puede ser una fecha futura")
         LocalDate fechaIngreso,
 
+        @Min(value = 1900, message = "tiene que ser un año válido")
+        @Max(value = 2100, message = "tiene que ser un año válido")
+        Integer anioIngreso,
+
+        @Min(value = 1900, message = "tiene que ser un año válido")
+        @Max(value = 2100, message = "tiene que ser un año válido")
+        Integer anioPrimerServicio,
+
         Integer idMadre,
 
         Integer idPadre,
+
+        String padreNombre,
+
+        String observaciones,
 
         Integer idCategoria,
 

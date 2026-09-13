@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   crearAnimal, listarCategorias, listarRodeos, listarRazas, listarPelajes,
@@ -38,12 +38,21 @@ const idCabana = ref<number | null>(null)
 const idEstabOrigen = ref<number | null>(null)
 const fechaNacimiento = ref('')
 const fechaNacEsEstimada = ref(false)
+const anioNacimiento = ref('')
 const pesoNacerKg = ref('')
 const fechaIngreso = ref('')
+const anioIngreso = ref('')
+const anioPrimerServicio = ref('')
 const idMadre = ref('')
 const idPadre = ref('')
+const padreNombre = ref('')
+const observaciones = ref('')
 const idCategoria = ref<number | null>(null)
 const idRodeo = ref<number | null>(null)
+
+// La fecha completa manda: si se carga, el año se completa solo (backend
+// AnimalAltaService), así que el campo manual no aplica.
+watch(fechaNacimiento, (valor) => { if (valor) anioNacimiento.value = '' })
 
 const guardando = ref(false)
 const error = ref<ErrorApi | null>(null)
@@ -62,10 +71,15 @@ async function guardar() {
       idEstabOrigen: origen.value !== 'NACIDO' ? (idEstabOrigen.value ?? undefined) : undefined,
       fechaNacimiento: fechaNacimiento.value || undefined,
       fechaNacEsEstimada: fechaNacimiento.value ? fechaNacEsEstimada.value : undefined,
+      anioNacimiento: !fechaNacimiento.value && anioNacimiento.value ? Number(anioNacimiento.value) : undefined,
       pesoNacerKg: pesoNacerKg.value ? Number(pesoNacerKg.value) : undefined,
       fechaIngreso: fechaIngreso.value || undefined,
+      anioIngreso: anioIngreso.value ? Number(anioIngreso.value) : undefined,
+      anioPrimerServicio: sexo.value === 'M' && anioPrimerServicio.value ? Number(anioPrimerServicio.value) : undefined,
       idMadre: idMadre.value ? Number(idMadre.value) : undefined,
       idPadre: idPadre.value ? Number(idPadre.value) : undefined,
+      padreNombre: sexo.value === 'M' && padreNombre.value ? padreNombre.value.trim() : undefined,
+      observaciones: observaciones.value.trim() || undefined,
       idCategoria: idCategoria.value ?? undefined,
       idRodeo: idRodeo.value ?? undefined
     })
@@ -148,13 +162,30 @@ onMounted(() => {
         <div class="fila">
           <Campo etiqueta="Fecha de nacimiento" tipo="date" v-model:valor="fechaNacimiento" />
           <Check v-if="fechaNacimiento" etiqueta="Es estimada" class="check-fila" v-model:marcado="fechaNacEsEstimada" />
+          <Campo
+            etiqueta="Año de nacimiento"
+            tipo="number" min="1900" max="2100"
+            :placeholder="fechaNacimiento ? 'Se completa solo con la fecha' : 'Si no se sabe la fecha exacta'"
+            :deshabilitado="!!fechaNacimiento"
+            v-model:valor="anioNacimiento"
+          />
           <Campo etiqueta="Peso al nacer (kg)" tipo="number" min="10" max="70" step="0.1" placeholder="10 a 70" v-model:valor="pesoNacerKg" />
         </div>
 
         <div class="fila">
           <Campo etiqueta="Fecha de ingreso" tipo="date" v-model:valor="fechaIngreso" />
+          <Campo etiqueta="Año de ingreso" tipo="number" min="1900" max="2100" v-model:valor="anioIngreso" />
+          <Campo v-if="sexo === 'M'" etiqueta="Año de primer servicio" tipo="number" min="1900" max="2100" v-model:valor="anioPrimerServicio" />
+        </div>
+
+        <div class="fila">
           <Campo etiqueta="N° de madre (id animal)" tipo="number" min="1" placeholder="Opcional" v-model:valor="idMadre" />
           <Campo etiqueta="N° de padre (id animal)" tipo="number" min="1" placeholder="Opcional" v-model:valor="idPadre" />
+          <Campo
+            v-if="sexo === 'M'"
+            etiqueta="Padre" placeholder="Nombre, si no está registrado como animal"
+            v-model:valor="padreNombre"
+          />
         </div>
 
         <div class="fila">
@@ -171,6 +202,8 @@ onMounted(() => {
             @update:valor="idRodeo = $event === '' ? null : Number($event)"
           />
         </div>
+
+        <Campo etiqueta="Notas" tipo="textarea" :filas="2" placeholder="Opcional" v-model:valor="observaciones" />
 
         <Boton class="boton-guardar" tipo="submit" :deshabilitado="!caravana || !sexo || guardando">
           {{ guardando ? 'Guardando…' : 'Dar de alta' }}

@@ -234,10 +234,15 @@ export interface NuevoAnimalParams {
   idEstabOrigen?: number
   fechaNacimiento?: string
   fechaNacEsEstimada?: boolean
+  anioNacimiento?: number
   pesoNacerKg?: number
   fechaIngreso?: string
+  anioIngreso?: number
+  anioPrimerServicio?: number
   idMadre?: number
   idPadre?: number
+  padreNombre?: string
+  observaciones?: string
   idCategoria?: number
   idRodeo?: number
 }

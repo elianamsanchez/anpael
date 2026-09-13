@@ -102,11 +102,19 @@ public class AnimalAltaService {
         animal.setFechaNacimiento(pedido.fechaNacimiento());
         animal.setFechaNacEsEstimada(Boolean.TRUE.equals(pedido.fechaNacEsEstimada()));
         if (pedido.fechaNacimiento() != null) {
+            // la fecha completa manda: si se carga, el año se recalcula de
+            // ella y pisa cualquier año cargado a mano en el mismo pedido.
             animal.setAnioNacimiento(pedido.fechaNacimiento().getYear());
+        } else if (pedido.anioNacimiento() != null) {
+            animal.setAnioNacimiento(pedido.anioNacimiento());
         }
         animal.setPesoNacerKg(pedido.pesoNacerKg());
         animal.setOrigen(pedido.origen());
         animal.setFechaIngreso(pedido.fechaIngreso());
+        animal.setAnioIngreso(pedido.anioIngreso());
+        animal.setAnioPrimerServicio(pedido.anioPrimerServicio());
+        animal.setPadreNombre(pedido.padreNombre());
+        animal.setObservaciones(pedido.observaciones());
         animal.setActivo(true);
         animal = animales.save(animal);
 
