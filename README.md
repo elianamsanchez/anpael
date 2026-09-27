@@ -13,21 +13,27 @@ anpael/
 ├── backend/            Spring Boot 3.3.5 · Java 21 · monolito modular
 │   └── src/main/java/com/anpael/
 │       ├── AnpaelApplication.java
-│       └── shared/          config, excepciones, auditoría, /api/health
+│       ├── shared/          config, excepciones, auditoría, seguridad HTTP, /api/health
+│       ├── seguridad/       login, persona, roles
+│       ├── trazabilidad/    padrón: animal, identificación, categoría, rodeo, baja
+│       ├── planillas/       trabajos, eventos, PDF y carga de resultados
+│       └── sanidad/, reproduccion/, nutricion/, reportes/   paquetes creados, vacíos
 ├── frontend/           Vue 3 · TypeScript · Vite · PrimeVue · PWA
 ├── supabase/
 │   └── migrations/     los .sql que le dan forma a la base
 ├── docs/
-│   ├── decisiones.md   ADR: por qué está hecho así  ← LEER PRIMERO
-│   └── modelo-datos.md qué tablas hay y qué significan
+│   ├── arquitectura.md  vista de conjunto del sistema
+│   ├── decisiones.md    ADR: por qué está hecho así  ← LEER PRIMERO
+│   └── modelo-datos.md  qué tablas hay y qué significan
 └── .github/workflows/  compilar y testear en cada push
 ```
 
-Los módulos de negocio (`trazabilidad`, `sanidad`, `reproduccion`,
-`planillas`, `seguridad`) todavía no existen. Se crean cada uno como paquete
-bajo `com.anpael/`, con su propio controller, service y repository. La regla
-del monolito modular: **un módulo no importa clases de otro módulo**; si
-necesita datos ajenos, los pide por un servicio público o por una vista.
+Los módulos de negocio se crean cada uno como paquete bajo `com.anpael/`, con
+su propio `api/`, `service/`, `domain/` e `infrastructure/`. La regla del
+monolito modular: **un módulo no importa clases de otro módulo**; si necesita
+datos ajenos, los pide por un servicio público o por una vista.
+`seguridad`, `trazabilidad` y `planillas` ya están escritos; `sanidad`,
+`reproduccion`, `nutricion` y `reportes` todavía son paquetes vacíos.
 
 ---
 
@@ -157,13 +163,13 @@ quedar. Todo entra por variables de entorno.
 | | |
 |---|---|
 | Base de datos migrada y verificada | ✅ |
-| Esqueleto del repositorio | ✅ ← acá estamos |
-| `/api/health` conectado de punta a punta | ⏳ falta que lo corras |
-| Módulo Seguridad | ⏳ bloqueado por **ADR-001** |
-| Saneamiento de datos | ⏳ |
-| Generador de planillas | ⏳ |
+| `/api/health` conectado de punta a punta | ✅ |
+| v0.1 · Módulo Seguridad (login, JWT, roles) | ✅ ADR-001 resuelto |
+| v0.2a · Saneamiento de datos | 🔄 en curso — faltan 381 animales sin categoría y los potreros |
+| v0.2b · Generador de planillas + carga de resultados | ✅ |
+| Etapa 2 · Carga offline en el celular (PWA) | ⏳ |
+| Etapa 3 · Indicadores (preñez, destete, ADPV, mortandad) | ⏳ |
 
-**Antes de escribir el módulo Seguridad hay que cerrar ADR-001**
-(`docs/decisiones.md`): quién manda en la autorización, Spring Security o
-las 112 políticas RLS que ya tiene la base. No es un detalle de
-configuración; las dos capas no se suman, compiten.
+El detalle de cada etapa está en `docs/etapas.md`, y el mapa completo del
+sistema —módulos, modelo de datos, seguridad, CI/CD— en
+`docs/arquitectura.md`.
