@@ -1,0 +1,491 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/avisos/**",
+              "components/base/**",
+              "components/datos/**",
+              "components/formularios/**",
+              "ui_kits/anpael-campo/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Instrument Serif|Karla|IBM Plex Mono))/i]",
+        "message": "Font not provided by the design system. Available: Instrument Serif, Karla, IBM Plex Mono."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Aviso'] > JSXAttribute > JSXIdentifier[name!=/^(?:tono|detalle|children|style|key|ref|className|style|children)$/]",
+        "message": "<Aviso> doesn't accept that prop. Declared props: tono, detalle, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Aviso'] > JSXAttribute[name.name='tono'] > Literal[value!=/^(?:ok|error|atencion|info)$/]",
+        "message": "<Aviso> tono must be one of 'ok' | 'error' | 'atencion' | 'info'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Boton'] > JSXAttribute > JSXIdentifier[name!=/^(?:variante|tamano|ancho|deshabilitado|tipo|onClick|children|style|key|ref|className|style|children)$/]",
+        "message": "<Boton> doesn't accept that prop. Declared props: variante, tamano, ancho, deshabilitado, tipo, onClick, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Boton'] > JSXAttribute[name.name='variante'] > Literal[value!=/^(?:primario|acento|sobrio|texto)$/]",
+        "message": "<Boton> variante must be one of 'primario' | 'acento' | 'sobrio' | 'texto'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Boton'] > JSXAttribute[name.name='tamano'] > Literal[value!=/^(?:md|sm)$/]",
+        "message": "<Boton> tamano must be one of 'md' | 'sm'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Boton'] > JSXAttribute[name.name='tipo'] > Literal[value!=/^(?:button|submit|reset)$/]",
+        "message": "<Boton> tipo must be one of 'button' | 'submit' | 'reset'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Buscador'] > JSXAttribute > JSXIdentifier[name!=/^(?:valor|onChange|placeholder|ancho|style|key|ref|className|style|children)$/]",
+        "message": "<Buscador> doesn't accept that prop. Declared props: valor, onChange, placeholder, ancho, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='OpcionCampo'] > JSXAttribute > JSXIdentifier[name!=/^(?:valor|etiqueta|key|ref|className|style|children)$/]",
+        "message": "<OpcionCampo> doesn't accept that prop. Declared props: valor, etiqueta."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Check'] > JSXAttribute > JSXIdentifier[name!=/^(?:etiqueta|marcado|onChange|deshabilitado|style|key|ref|className|style|children)$/]",
+        "message": "<Check> doesn't accept that prop. Declared props: etiqueta, marcado, onChange, deshabilitado, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Etiqueta'] > JSXAttribute > JSXIdentifier[name!=/^(?:tono|capsula|children|style|key|ref|className|style|children)$/]",
+        "message": "<Etiqueta> doesn't accept that prop. Declared props: tono, capsula, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Etiqueta'] > JSXAttribute[name.name='tono'] > Literal[value!=/^(?:falta|tipo|ok|mal|atenuado)$/]",
+        "message": "<Etiqueta> tono must be one of 'falta' | 'tipo' | 'ok' | 'mal' | 'atenuado'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ItemHistorial'] > JSXAttribute > JSXIdentifier[name!=/^(?:fecha|tipo|detalle|comentario|ultimo|children|style|key|ref|className|style|children)$/]",
+        "message": "<ItemHistorial> doesn't accept that prop. Declared props: fecha, tipo, detalle, comentario, ultimo, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ItemDato'] > JSXAttribute > JSXIdentifier[name!=/^(?:rotulo|valor|numerico|key|ref|className|style|children)$/]",
+        "message": "<ItemDato> doesn't accept that prop. Declared props: rotulo, valor, numerico."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Marca'] > JSXAttribute > JSXIdentifier[name!=/^(?:titulo|bajada|punto|logo|logoSrc|children|style|key|ref|className|style|children)$/]",
+        "message": "<Marca> doesn't accept that prop. Declared props: titulo, bajada, punto, logo, logoSrc, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Paginado'] > JSXAttribute > JSXIdentifier[name!=/^(?:pagina|totalPaginas|onCambio|style|key|ref|className|style|children)$/]",
+        "message": "<Paginado> doesn't accept that prop. Declared props: pagina, totalPaginas, onCambio, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ColumnaTabla'] > JSXAttribute > JSXIdentifier[name!=/^(?:clave|titulo|alDerecha|numerico|render|key|ref|className|style|children)$/]",
+        "message": "<ColumnaTabla> doesn't accept that prop. Declared props: clave, titulo, alDerecha, numerico, render."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Tarjeta'] > JSXAttribute > JSXIdentifier[name!=/^(?:titulo|nota|denso|children|style|key|ref|className|style|children)$/]",
+        "message": "<Tarjeta> doesn't accept that prop. Declared props: titulo, nota, denso, children, style."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "Aviso": {
+        "replaces": []
+      },
+      "Boton": {
+        "replaces": []
+      },
+      "Buscador": {
+        "replaces": []
+      },
+      "OpcionCampo": {
+        "replaces": []
+      },
+      "Check": {
+        "replaces": []
+      },
+      "Etiqueta": {
+        "replaces": []
+      },
+      "ItemHistorial": {
+        "replaces": []
+      },
+      "ItemDato": {
+        "replaces": []
+      },
+      "Marca": {
+        "replaces": []
+      },
+      "Paginado": {
+        "replaces": []
+      },
+      "ColumnaTabla": {
+        "replaces": []
+      },
+      "Tarjeta": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--action-accent",
+      "--action-accent-hover",
+      "--action-disabled-opacity",
+      "--action-primary",
+      "--action-primary-hover",
+      "--action-primary-press",
+      "--action-quiet-border",
+      "--ambar",
+      "--ambar-100",
+      "--ambar-300",
+      "--ambar-500",
+      "--ancho-angosto",
+      "--ancho-forma",
+      "--ancho-lectura",
+      "--ancho-tabla",
+      "--bad",
+      "--bad-bg",
+      "--bad-border",
+      "--bad-text",
+      "--blanco",
+      "--borde-filete",
+      "--borde-fino",
+      "--border-default",
+      "--border-focus",
+      "--border-hairline",
+      "--border-strong",
+      "--cielo",
+      "--cielo-100",
+      "--cielo-300",
+      "--cielo-500",
+      "--cielo-700",
+      "--cielo-900",
+      "--dur-instantanea",
+      "--dur-media",
+      "--dur-rapida",
+      "--ease-entrada",
+      "--ease-estandar",
+      "--ease-salida",
+      "--falta-text",
+      "--foco-anillo",
+      "--foco-offset",
+      "--fondo-degrade",
+      "--font-display",
+      "--font-mono",
+      "--font-ui",
+      "--fs-11",
+      "--fs-12",
+      "--fs-125",
+      "--fs-13",
+      "--fs-135",
+      "--fs-14",
+      "--fs-15",
+      "--fs-16",
+      "--fs-20",
+      "--fs-28",
+      "--fs-40",
+      "--fs-64",
+      "--fw-bold",
+      "--fw-light",
+      "--fw-medium",
+      "--fw-regular",
+      "--fw-semibold",
+      "--gap-campo",
+      "--gap-fila",
+      "--info-bg",
+      "--info-border",
+      "--info-text",
+      "--lh-loose",
+      "--lh-normal",
+      "--lh-snug",
+      "--lh-tight",
+      "--ls-caps",
+      "--ls-normal",
+      "--ls-tight",
+      "--monte",
+      "--monte-100",
+      "--monte-300",
+      "--monte-500",
+      "--monte-700",
+      "--monte-900",
+      "--monte-hondo",
+      "--n0",
+      "--n100",
+      "--n200",
+      "--n25",
+      "--n300",
+      "--n50",
+      "--n500",
+      "--n700",
+      "--n900",
+      "--ok",
+      "--ok-bg",
+      "--ok-border",
+      "--ok-text",
+      "--pad-tarjeta",
+      "--pad-tarjeta-tabla",
+      "--pasto",
+      "--pasto-100",
+      "--pasto-300",
+      "--pasto-500",
+      "--pasto-700",
+      "--pasto-900",
+      "--piedra",
+      "--piedra-100",
+      "--piedra-300",
+      "--piedra-500",
+      "--piedra-700",
+      "--radio-circulo",
+      "--radio-lg",
+      "--radio-md",
+      "--radio-pill",
+      "--radio-sm",
+      "--radio-xs",
+      "--sombra-elevada",
+      "--sombra-flotante",
+      "--sombra-none",
+      "--sp-1",
+      "--sp-10",
+      "--sp-12",
+      "--sp-16",
+      "--sp-2",
+      "--sp-20",
+      "--sp-24",
+      "--sp-3",
+      "--sp-4",
+      "--sp-5",
+      "--sp-6",
+      "--sp-7",
+      "--sp-8",
+      "--sp-9",
+      "--surface-app",
+      "--surface-banda",
+      "--surface-brand",
+      "--surface-card",
+      "--surface-field",
+      "--surface-inverse",
+      "--surface-sunken",
+      "--tap-min",
+      "--text-base",
+      "--text-body",
+      "--text-caption",
+      "--text-dato",
+      "--text-display",
+      "--text-eyebrow",
+      "--text-h2",
+      "--text-h3",
+      "--text-label",
+      "--text-link",
+      "--text-muted",
+      "--text-on-brand",
+      "--text-on-dark",
+      "--text-small",
+      "--text-strong",
+      "--text-title",
+      "--tinta",
+      "--transicion-boton",
+      "--warn-bg",
+      "--warn-border",
+      "--warn-text"
+    ],
+    "tokenKinds": {
+      "--monte": "color",
+      "--pasto": "color",
+      "--cielo": "color",
+      "--piedra": "color",
+      "--ambar": "color",
+      "--blanco": "color",
+      "--ok": "color",
+      "--bad": "color",
+      "--tinta": "color",
+      "--monte-hondo": "color",
+      "--monte-900": "color",
+      "--monte-700": "color",
+      "--monte-500": "color",
+      "--monte-300": "color",
+      "--monte-100": "color",
+      "--pasto-900": "color",
+      "--pasto-700": "color",
+      "--pasto-500": "color",
+      "--pasto-300": "color",
+      "--pasto-100": "color",
+      "--cielo-900": "color",
+      "--cielo-700": "color",
+      "--cielo-500": "color",
+      "--cielo-300": "color",
+      "--cielo-100": "color",
+      "--piedra-700": "color",
+      "--piedra-500": "color",
+      "--piedra-300": "color",
+      "--piedra-100": "color",
+      "--ambar-500": "color",
+      "--ambar-300": "color",
+      "--ambar-100": "color",
+      "--n0": "color",
+      "--n25": "color",
+      "--n50": "color",
+      "--n100": "color",
+      "--n200": "color",
+      "--n300": "color",
+      "--n500": "color",
+      "--n700": "color",
+      "--n900": "color",
+      "--surface-app": "color",
+      "--fondo-degrade": "color",
+      "--surface-card": "color",
+      "--surface-sunken": "color",
+      "--surface-field": "color",
+      "--surface-banda": "color",
+      "--surface-inverse": "color",
+      "--surface-brand": "color",
+      "--text-body": "font",
+      "--text-strong": "font",
+      "--text-muted": "font",
+      "--text-link": "font",
+      "--text-on-dark": "font",
+      "--text-on-brand": "font",
+      "--border-default": "color",
+      "--border-hairline": "color",
+      "--border-strong": "color",
+      "--border-focus": "color",
+      "--action-primary": "color",
+      "--action-primary-hover": "color",
+      "--action-primary-press": "color",
+      "--action-accent": "color",
+      "--action-accent-hover": "color",
+      "--action-quiet-border": "color",
+      "--action-disabled-opacity": "other",
+      "--ok-bg": "color",
+      "--ok-border": "color",
+      "--ok-text": "font",
+      "--bad-bg": "color",
+      "--bad-border": "color",
+      "--bad-text": "font",
+      "--warn-bg": "color",
+      "--warn-border": "color",
+      "--warn-text": "font",
+      "--info-bg": "color",
+      "--info-border": "color",
+      "--info-text": "font",
+      "--falta-text": "font",
+      "--font-display": "font",
+      "--font-ui": "font",
+      "--font-mono": "font",
+      "--fs-11": "spacing",
+      "--fs-12": "spacing",
+      "--fs-125": "spacing",
+      "--fs-13": "spacing",
+      "--fs-135": "spacing",
+      "--fs-14": "spacing",
+      "--fs-15": "spacing",
+      "--fs-16": "spacing",
+      "--fs-20": "spacing",
+      "--fs-28": "spacing",
+      "--fs-40": "spacing",
+      "--fs-64": "spacing",
+      "--lh-tight": "other",
+      "--lh-snug": "other",
+      "--lh-normal": "other",
+      "--lh-loose": "other",
+      "--fw-light": "other",
+      "--fw-regular": "other",
+      "--fw-medium": "other",
+      "--fw-semibold": "other",
+      "--fw-bold": "other",
+      "--ls-tight": "other",
+      "--ls-normal": "other",
+      "--ls-caps": "other",
+      "--text-display": "font",
+      "--text-title": "font",
+      "--text-h2": "font",
+      "--text-h3": "font",
+      "--text-base": "font",
+      "--text-small": "font",
+      "--text-label": "font",
+      "--text-caption": "font",
+      "--text-eyebrow": "font",
+      "--text-dato": "font",
+      "--sp-1": "spacing",
+      "--sp-2": "spacing",
+      "--sp-3": "spacing",
+      "--sp-4": "spacing",
+      "--sp-5": "spacing",
+      "--sp-6": "spacing",
+      "--sp-7": "spacing",
+      "--sp-8": "spacing",
+      "--sp-9": "spacing",
+      "--sp-10": "spacing",
+      "--sp-12": "spacing",
+      "--sp-16": "spacing",
+      "--sp-20": "spacing",
+      "--sp-24": "spacing",
+      "--ancho-angosto": "spacing",
+      "--ancho-lectura": "spacing",
+      "--ancho-forma": "spacing",
+      "--ancho-tabla": "spacing",
+      "--gap-campo": "spacing",
+      "--gap-fila": "spacing",
+      "--pad-tarjeta": "spacing",
+      "--pad-tarjeta-tabla": "spacing",
+      "--tap-min": "spacing",
+      "--radio-xs": "spacing",
+      "--radio-sm": "spacing",
+      "--radio-md": "spacing",
+      "--radio-lg": "spacing",
+      "--radio-pill": "spacing",
+      "--radio-circulo": "spacing",
+      "--borde-fino": "color",
+      "--borde-filete": "color",
+      "--sombra-none": "shadow",
+      "--sombra-flotante": "shadow",
+      "--sombra-elevada": "shadow",
+      "--foco-anillo": "other",
+      "--foco-offset": "other",
+      "--dur-instantanea": "other",
+      "--dur-rapida": "other",
+      "--dur-media": "other",
+      "--ease-salida": "other",
+      "--ease-entrada": "other",
+      "--ease-estandar": "other",
+      "--transicion-boton": "other"
+    },
+    "fontFamilies": [
+      "IBM Plex Mono",
+      "Instrument Serif",
+      "Karla"
+    ]
+  }
+}

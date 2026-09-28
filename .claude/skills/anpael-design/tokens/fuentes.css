@@ -1,0 +1,4 @@
+/* SUSTITUCIÓN: el código de ANPAEL no define webfonts (usa la pila del sistema).
+   Estas tres familias son la propuesta del sistema de diseño, servidas desde
+   Google Fonts. Si la marca tiene tipografías propias, reemplazar acá. */
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Karla:ital,wght@0,300..800;1,300..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap");

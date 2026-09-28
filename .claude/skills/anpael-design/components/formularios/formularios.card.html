@@ -1,0 +1,33 @@
+<!-- @dsCard group="Components" viewport="700x330" name="Formularios" subtitle="Campo, Check y Buscador" -->
+<!doctype html><html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"><style>body{margin:0;padding:16px;background:var(--surface-app);color:var(--text-body);font:var(--text-base)}</style></head><body>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<div id="root"></div>
+<script type="text/babel">
+const { Campo, Check, Buscador, Tarjeta, Boton } = window.ANPAELDesignSystem_5fc50e;
+
+function Demo(){const [q,setQ]=React.useState('');const [c,setC]=React.useState(true);
+return (<div style={{display:'grid',gap:14}}>
+  <div style={{display:'flex',gap:16,alignItems:'center',flexWrap:'wrap'}}>
+    <Buscador valor={q} onChange={e=>setQ(e.target.value)}/>
+    <Check etiqueta="Sin categoría" marcado={c} onChange={e=>setC(e.target.checked)}/>
+    <Check etiqueta="Sin rodeo" marcado={false} onChange={()=>{}}/>
+  </div>
+  <Tarjeta>
+    <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:14}}>
+      <Campo etiqueta="Caravana" placeholder="Ej: 0075" requerido defaultValue="" onChange={()=>{}}/>
+      <Campo etiqueta="Sexo" opciones={[{valor:'',etiqueta:'Elegir…'},{valor:'H',etiqueta:'Hembra'},{valor:'M',etiqueta:'Macho'}]} onChange={()=>{}}/>
+      <Campo etiqueta="Fecha de nacimiento" tipo="date" onChange={()=>{}}/>
+    </div>
+    <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'flex-end'}}>
+      <Campo etiqueta="Peso al nacer (kg)" tipo="number" placeholder="10 a 70" onChange={()=>{}}/>
+      <Campo etiqueta="Observaciones" tipo="textarea" placeholder="Opcional" onChange={()=>{}}/>
+      <Boton variante="acento">Dar de alta</Boton>
+    </div>
+  </Tarjeta>
+</div>)}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo/>);
+</script>
+</body></html>

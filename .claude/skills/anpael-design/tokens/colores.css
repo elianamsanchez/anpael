@@ -1,0 +1,107 @@
+/* Paleta "Campo abierto" · v3
+   Reescrita a pedido: se fueron el cuero (marrón), el oliva y el trigo. La paleta ahora
+   es el campo visto en verde y aire: monte (verde profundo), pasto (verde vivo),
+   cielo (el azul de apoyo), piedra (gris frío verdoso) y ámbar en dosis mínimas.
+   El fondo de la app es plano: #F5F7F5. Se conservan del código: ok, bad y los grises,
+   estos últimos reafinados a neutros fríos. */
+:root{
+  /* --- base --- */
+  --monte:#3E6B4A;      /* verde profundo · marca, franjas, acción */
+  --pasto:#5E8F44;      /* verde vivo · acento */
+  --cielo:#3A6E8F;      /* azul de apoyo · enlaces, info */
+  --piedra:#7C8781;     /* gris frío verdoso · texto secundario, bordes */
+  --ambar:#C68A16;      /* dosis mínimas · aviso, gráficos */
+  --blanco:#FFFFFF;
+  --ok:#3F7A44;         /* del código */
+  --bad:#9A3324;        /* del código */
+  --tinta:#2A312B;      /* el texto: verde tan oscuro que lee negro */
+
+  --monte-hondo:#2F5238;  /* franjas, portadas, impresos */
+
+  /* --- rampa monte --- */
+  --monte-900:#1E3527;
+  --monte-700:#2F5238;
+  --monte-500:#3E6B4A;
+  --monte-300:#7FA48B;
+  --monte-100:#D9E4DC;
+
+  /* --- rampa pasto --- */
+  --pasto-900:#2C4720;
+  --pasto-700:#47702F;
+  --pasto-500:#5E8F44;
+  --pasto-300:#9CBE86;
+  --pasto-100:#E4EEDC;
+
+  /* --- rampa cielo --- */
+  --cielo-900:#1D3B4E;
+  --cielo-700:#2A5570;
+  --cielo-500:#3A6E8F;
+  --cielo-300:#8FB4C8;
+  --cielo-100:#E3EDF2;
+
+  /* --- rampa piedra --- */
+  --piedra-700:#49524D;
+  --piedra-500:#7C8781;
+  --piedra-300:#B4BCB7;
+  --piedra-100:#E4E8E5;
+
+  /* --- ámbar: sólo avisos y gráficos, nunca superficies grandes --- */
+  --ambar-500:#C68A16;
+  --ambar-300:#E7C377;
+  --ambar-100:#FAEDD3;
+
+  /* --- neutros fríos --- */
+  --n0:#FFFFFF;
+  --n25:#FAFBFA;
+  --n50:#F5F7F5;    /* fondo de la app */
+  --n100:#E8ECE8;   /* filete de tabla */
+  --n200:#D7DDD8;   /* borde */
+  --n300:#B6BEB8;
+  --n500:#6E766F;   /* texto secundario */
+  --n700:#454B46;
+  --n900:#1E231F;
+
+  /* --- superficie --- */
+  --surface-app:var(--n50);
+  /* el fondo dejó de ser degradé; el token queda como alias plano */
+  --fondo-degrade:var(--n50);
+  --surface-card:var(--blanco);
+  --surface-sunken:#EFF3EF;
+  --surface-field:#F1F4F1;
+  --surface-banda:#E9EEE9;
+  --surface-inverse:var(--monte-900);
+  --surface-brand:var(--monte-700);
+
+  /* --- texto --- */
+  --text-body:var(--tinta);
+  --text-strong:var(--n900);
+  --text-muted:var(--n500);
+  --text-link:var(--cielo-700);
+  --text-on-dark:var(--n25);
+  --text-on-brand:#FFFFFF;
+
+  /* --- borde --- */
+  --border-default:var(--n200);
+  --border-hairline:var(--n100);
+  --border-strong:var(--piedra-300);
+  --border-focus:var(--cielo-500);
+
+  /* --- acción --- */
+  --action-primary:var(--monte-700);
+  --action-primary-hover:#26432E;
+  --action-primary-press:var(--monte-900);
+  /* el relleno usa pasto-700: el pasto base no llega al contraste con texto blanco */
+  --action-accent:var(--pasto-700);
+  --action-accent-hover:#3A5C26;
+  --action-quiet-border:var(--n200);
+  --action-disabled-opacity:.5; /* @kind other */
+
+  /* --- estados: cada uno es un trío fondo/borde/texto --- */
+  --ok-bg:#EAF3EA;      --ok-border:#BFDDBF;   --ok-text:var(--ok);
+  --bad-bg:#FBEAE6;     --bad-border:#E8B3A6;  --bad-text:var(--bad);
+  --warn-bg:var(--ambar-100); --warn-border:#EBD8A6; --warn-text:var(--n900);
+  --info-bg:var(--cielo-100); --info-border:#C6DCE7; --info-text:var(--cielo-700);
+
+  /* --- dato faltante: gris frío, no amarillo --- */
+  --falta-text:var(--piedra-700);
+}
