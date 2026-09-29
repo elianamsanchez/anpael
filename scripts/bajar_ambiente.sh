@@ -9,7 +9,7 @@
 # node.exe que el PID de bash no siempre alcanza a matar.
 #
 # Uso:
-#   bash scripts/bajar_local.sh
+#   bash scripts/bajar_ambiente.sh
 # =====================================================================
 set -uo pipefail
 
