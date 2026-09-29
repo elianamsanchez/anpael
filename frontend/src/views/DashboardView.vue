@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth, type Rol } from '@/stores/auth'
 import { buscarAnimales } from '@/api/animales'
+import { alertasTerneros } from '@/api/terneros'
 import Marca from '@/components/base/Marca.vue'
 import Tarjeta from '@/components/base/Tarjeta.vue'
 import Aviso from '@/components/avisos/Aviso.vue'
@@ -33,6 +34,7 @@ const rolEtiqueta = computed(() => auth.usuario ? ETIQUETA_ROL[auth.usuario.rol]
 
 const sinCategoria = ref<number | null>(null)
 const sinRodeo = ref<number | null>(null)
+const ciclosConPendientes = ref<string[]>([])
 
 onMounted(async () => {
   try {
@@ -44,6 +46,12 @@ onMounted(async () => {
     sinRodeo.value = porRodeo.totalElements
   } catch {
     // si falla, esas dos alertas simplemente no aparecen
+  }
+  try {
+    const alertas = await alertasTerneros()
+    ciclosConPendientes.value = [...new Set(alertas.ciclosCerrados.map(a => a.ciclo))]
+  } catch {
+    // idem: sin alerta
   }
 })
 
@@ -76,6 +84,7 @@ const maxValidacion = Math.max(...validaciones.map(v => v.cantidad))
   <main class="pantalla">
     <Marca bajada="Santa Ana · panel principal">
       <RouterLink class="link-nav" to="/animales">Padrón</RouterLink>
+      <RouterLink class="link-nav" to="/terneros">Terneros</RouterLink>
       <RouterLink class="link-nav" to="/planillas">Planillas</RouterLink>
       <RouterLink class="link-nav" to="/estado">Estado</RouterLink>
       <div class="quien" v-if="auth.usuario">
@@ -104,6 +113,10 @@ const maxValidacion = Math.max(...validaciones.map(v => v.cantidad))
           <Aviso v-if="sinRodeo" tono="atencion">
             {{ sinRodeo.toLocaleString('es-AR') }} animales sin rodeo asignado.
             <RouterLink to="/animales">Ver en el padrón ›</RouterLink>
+          </Aviso>
+          <Aviso v-if="ciclosConPendientes.length" tono="atencion">
+            Ciclos anteriores con terneros sin identificar: {{ ciclosConPendientes.join(', ') }}.
+            <RouterLink to="/terneros">Ver terneros ›</RouterLink>
           </Aviso>
           <Aviso tono="atencion">6 animales con validación dudosa en el último saneamiento.</Aviso>
           <Aviso tono="info">1 baja registrada con fecha estimada.</Aviso>

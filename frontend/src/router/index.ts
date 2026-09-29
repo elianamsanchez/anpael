@@ -53,6 +53,21 @@ const router = createRouter({
       path: '/planillas/cargar',
       name: 'planillas-cargar',
       component: () => import('@/views/trazabilidad/CargarResultadosView.vue')
+    },
+    {
+      path: '/planillas/identificacion',
+      name: 'planillas-identificacion',
+      component: () => import('@/views/trazabilidad/IdentificacionView.vue')
+    },
+    {
+      path: '/terneros',
+      name: 'terneros',
+      component: () => import('@/views/trazabilidad/TernerosView.vue')
+    },
+    {
+      path: '/terneros/ciclos',
+      name: 'terneros-ciclos',
+      component: () => import('@/views/trazabilidad/CiclosView.vue')
     }
   ]
 })

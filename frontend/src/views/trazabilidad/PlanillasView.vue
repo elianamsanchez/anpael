@@ -97,6 +97,9 @@ onMounted(cargarRodeos)
       <p class="pie">
         ¿Ya trabajaste con la planilla impresa? <RouterLink to="/planillas/cargar">Cargar resultados</RouterLink>
       </p>
+      <p class="pie">
+        ¿Caravaneaste terneros? <RouterLink to="/planillas/identificacion">Cargar identificación</RouterLink>
+      </p>
     </Tarjeta>
   </main>
 </template>
