@@ -32,7 +32,8 @@ import org.testcontainers.utility.MountableFile;
  * Un solo contenedor para todas las clases que heredan de esta (se arranca
  * una vez por JVM). Cada test empieza con las tablas de movimientos vacías.
  *
- * REQUISITO: Docker corriendo. Si no, se saltean con mvn test -Dtest='!*IT'.
+ * REQUISITO: Docker corriendo. Corren con 'mvn verify' (maven-failsafe-plugin);
+ * sin Docker, se saltean con mvn verify -DskipITs.
  */
 @SpringBootTest
 public abstract class BaseIntegracion {

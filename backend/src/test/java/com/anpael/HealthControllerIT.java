@@ -28,8 +28,9 @@ import java.util.Map;
  * base simulada pasaria aunque la conexion estuviera mal configurada, que es
  * justo el error que uno quiere atrapar.
  *
- * REQUISITO: Docker corriendo. Si no lo tenes, este test se saltea con
- *   mvn test -Dtest='!*IT'
+ * REQUISITO: Docker corriendo. Corre con 'mvn verify' (maven-failsafe-plugin);
+ * si no tenes Docker, se saltea con
+ *   mvn verify -DskipITs
  *
  * NOTA: el contenedor arranca VACIO, sin el esquema. Por eso el health
  * devuelve 503 (no puede contar animales) y el test lo espera asi. Cuando
