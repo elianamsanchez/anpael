@@ -61,7 +61,7 @@ otra.
 ├── docs/                  arquitectura.md (este) · decisiones.md · modelo-datos.md
 │                          etapas.md · captura-planillas.md
 ├── scripts/               levantar_local.sh · levantar_produccion.sh
-│                          bajar_local.sh · usuario_prueba_local.sh
+│                          bajar_ambiente.sh · usuario_prueba_local.sh
 ├── supabase/
 │   └── migrations/        los .sql que le dan forma a la base, + su README
 ├── backend/               Spring Boot · Java 21 · monolito modular
@@ -352,7 +352,7 @@ ese camino repetible:
 ```bash
 bash scripts/levantar_local.sh       # contra el Supabase local en Docker
 bash scripts/levantar_produccion.sh  # contra la base real
-bash scripts/bajar_local.sh          # baja backend y frontend; no toca Supabase
+bash scripts/bajar_ambiente.sh       # baja backend y frontend; no toca Supabase
 ```
 
 `levantar_produccion.sh` es deliberadamente incómodo, y eso es la feature:
