@@ -74,7 +74,7 @@ if responde "http://localhost:$anpael_port/api/health"; then
   entorno_activo="$(entorno_actual "$anpael_port")"
   if [ "$entorno_activo" != "$entorno_esperado" ]; then
     echo "Ya hay un backend respondiendo en :$anpael_port, pero con entorno=\"$entorno_activo\"."
-    echo "No es el que esperaba (\"$entorno_esperado\"). Bajalo primero (bash scripts/bajar_local.sh) y volvé a correr esto."
+    echo "No es el que esperaba (\"$entorno_esperado\"). Bajalo primero (bash scripts/bajar_ambiente.sh) y volvé a correr esto."
     exit 1
   fi
   echo "Ya hay un backend de \"$entorno_esperado\" respondiendo en :$anpael_port, no arranco otro."
@@ -100,7 +100,7 @@ else
   entorno_activo="$(entorno_actual "$anpael_port")"
   if [ "$entorno_activo" != "$entorno_esperado" ]; then
     echo "El backend arrancó pero /api/health dice entorno=\"$entorno_activo\", no \"$entorno_esperado\"."
-    echo "Algo no está usando backend/.env.production. Revisá antes de seguir -no bajo el proceso por las dudas, hacelo con bash scripts/bajar_local.sh."
+    echo "Algo no está usando backend/.env.production. Revisá antes de seguir -no bajo el proceso por las dudas, hacelo con bash scripts/bajar_ambiente.sh."
     exit 1
   fi
   echo "Backend arriba en :$anpael_port contra PRODUCCIÓN (log en $backend_log)"
@@ -137,4 +137,4 @@ echo "  Backend:  http://localhost:$anpael_port/api/health"
 echo "  Frontend: http://localhost:$frontend_port"
 echo
 echo "Para bajar todo (backend y frontend, sea local o producción):"
-echo "  bash scripts/bajar_local.sh"
+echo "  bash scripts/bajar_ambiente.sh"
