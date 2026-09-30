@@ -42,7 +42,7 @@ datos ajenos, los pide por un servicio público o por una vista.
 **Atajo**, una vez que ya tenés Supabase local corriendo y los `.env`
 armados (ver abajo): `bash scripts/levantar_local.sh` levanta backend y
 frontend, espera a que contesten y avisa cuándo está todo listo.
-`bash scripts/bajar_local.sh` los baja. Ninguno de los dos toca Supabase.
+`bash scripts/bajar_ambiente.sh` los baja. Ninguno de los dos toca Supabase.
 `bash scripts/usuario_prueba_local.sh <usuario> <contraseña>` arma una
 contraseña de prueba para loguearte a mano en local sin pasar por Supabase
 Auth -y `... <usuario> --borrar` la saca de nuevo.

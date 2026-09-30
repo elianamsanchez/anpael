@@ -150,6 +150,22 @@
           </excludes>
         </configuration>
       </plugin>
+      <!-- Tests de integracion (*IT.java): surefire no los corre, failsafe si,
+           en la fase integration-test de 'mvn verify'. Sin este plugin, los
+           *IT no corrian ni aca ni en CI. Version y configuracion vienen del
+           parent de Spring Boot. Para saltearlos: mvn verify -DskipITs -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

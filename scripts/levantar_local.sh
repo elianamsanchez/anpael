@@ -104,4 +104,4 @@ echo
 echo "Para loguearte necesitás un usuario con contraseña armada -ver"
 echo "scripts/usuario_prueba_local.sh- salvo que ya tengas uno."
 echo
-echo "Para bajar todo: bash scripts/bajar_local.sh"
+echo "Para bajar todo: bash scripts/bajar_ambiente.sh"

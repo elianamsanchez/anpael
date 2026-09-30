@@ -5,11 +5,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.anpael.planillas.api.dto.CargaIdentificacionResumen;
 import com.anpael.planillas.api.dto.CargaResultadosResumen;
+import com.anpael.planillas.api.dto.CargarIdentificacionRequest;
 import com.anpael.planillas.api.dto.CargarPesadaRequest;
 import com.anpael.planillas.api.dto.CargarRevisionTorosRequest;
 import com.anpael.planillas.api.dto.CargarSanidadRequest;
 import com.anpael.planillas.api.dto.CargarTactoRequest;
+import com.anpael.planillas.service.CargaIdentificacionService;
 import com.anpael.planillas.service.CargaResultadosService;
 
 import jakarta.validation.Valid;
@@ -20,9 +23,12 @@ import jakarta.validation.Valid;
 public class CargaResultadosController {
 
     private final CargaResultadosService cargaResultadosService;
+    private final CargaIdentificacionService cargaIdentificacionService;
 
-    public CargaResultadosController(CargaResultadosService cargaResultadosService) {
+    public CargaResultadosController(CargaResultadosService cargaResultadosService,
+            CargaIdentificacionService cargaIdentificacionService) {
         this.cargaResultadosService = cargaResultadosService;
+        this.cargaIdentificacionService = cargaIdentificacionService;
     }
 
     @PostMapping("/tacto")
@@ -43,5 +49,11 @@ public class CargaResultadosController {
     @PostMapping("/sanidad")
     public CargaResultadosResumen cargarSanidad(@Valid @RequestBody CargarSanidadRequest pedido) {
         return cargaResultadosService.cargarSanidad(pedido);
+    }
+
+    /** Identificación de terneros: crea los animales y descuenta la cantidad pendiente por ciclo. */
+    @PostMapping("/identificacion")
+    public CargaIdentificacionResumen cargarIdentificacion(@Valid @RequestBody CargarIdentificacionRequest pedido) {
+        return cargaIdentificacionService.cargar(pedido);
     }
 }

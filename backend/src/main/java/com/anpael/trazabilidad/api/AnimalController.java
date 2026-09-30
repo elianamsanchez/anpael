@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.anpael.trazabilidad.api.dto.AltaAnimalResultado;
 import com.anpael.trazabilidad.api.dto.AsignacionResultado;
 import com.anpael.trazabilidad.api.dto.AsignarCategoriaRequest;
 import com.anpael.trazabilidad.api.dto.AsignarEstablecimientoRequest;
 import com.anpael.trazabilidad.api.dto.AsignarRodeoRequest;
 import com.anpael.trazabilidad.api.dto.CorregirAnimalRequest;
 import com.anpael.trazabilidad.api.dto.CrearAnimalRequest;
+import com.anpael.trazabilidad.api.dto.CrearCandidatoToritoRequest;
 import com.anpael.trazabilidad.api.dto.DarDeBajaRequest;
 import com.anpael.trazabilidad.api.dto.IdentificacionDto;
 import com.anpael.trazabilidad.api.dto.MarcarValidacionRequest;
@@ -73,6 +75,14 @@ public class AnimalController {
     public AnimalLista crear(@Valid @RequestBody CrearAnimalRequest pedido) {
         Integer idAnimal = animalAltaService.crear(pedido);
         return animalService.obtener(idAnimal);
+    }
+
+    /** Candidato a torito al nacer: categoría TORITO + caravana especial (ADICIONAL), sin caravana visual. */
+    @PostMapping("/candidatos-torito")
+    public AltaAnimalResultado crearCandidatoTorito(@Valid @RequestBody CrearCandidatoToritoRequest pedido) {
+        Integer idAnimal = animalAltaService.crearCandidatoTorito(pedido);
+        return new AltaAnimalResultado(idAnimal,
+                "Candidato a torito cargado con la caravana especial " + pedido.caravanaAdicional().trim() + ".");
     }
 
     @GetMapping

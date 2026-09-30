@@ -1,0 +1,1329 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Definiciones de negocio de ANPAEL</title>
+<meta name="description" content="Qué hace el sistema ANPAEL, qué información maneja y qué reglas del campo quedaron plasmadas en él.">
+<style>
+  :root {
+    --fondo: #F5F7F5;
+    --tarjeta: #FFFFFF;
+    --hundido: #EFF3EF;
+    --franja: #E9EEE9;
+    --borde: #D7DDD8;
+    --filete: #E8ECE8;
+    --tinta: #2A312B;
+    --tenue: #5C655E;
+    --monte: #2F5238;
+    --monte-claro: #E4EDE6;
+    --enlace: #2A5570;
+    --ambar-fondo: #FAEDD3;
+    --ambar-borde: #EBD8A6;
+    --ok: #3F7A44;
+    --mal: #9A3324;
+    --mal-fondo: #F6E4E0;
+    --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --serif: Georgia, "Times New Roman", serif;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--tinta);
+    font-family: var(--ui); font-size: 15px; line-height: 1.6;
+  }
+  .pagina { max-width: 1060px; margin: 0 auto; padding: 32px 18px 64px; }
+
+  /* portada */
+  .portada {
+    background: var(--monte); color: #fff; border-radius: 10px;
+    padding: 34px 32px 28px; margin-bottom: 22px;
+  }
+  .portada .marca { font-weight: 700; letter-spacing: .12em; font-size: 12px; text-transform: uppercase; opacity: .85; }
+  .portada h1 { font-family: var(--serif); font-weight: 400; font-size: 38px; line-height: 1.15; margin: 10px 0 12px; }
+  .portada p { margin: 0; max-width: 720px; opacity: .92; }
+  .portada .datos { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; font-size: 13px; opacity: .9; }
+  .portada .datos b { font-weight: 600; }
+
+  /* índice */
+  nav.indice {
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 22px;
+  }
+  nav.indice h2 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--tenue); }
+  nav.indice ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 34px; }
+  nav.indice li { margin: 2px 0; break-inside: avoid; }
+  nav.indice ol ol { columns: 1; padding-left: 18px; font-size: 14px; }
+
+  /* secciones */
+  section.bloque {
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px;
+    padding: 24px 28px; margin-bottom: 22px;
+  }
+  h2 { font-size: 22px; margin: 0 0 6px; color: var(--monte); }
+  h2 .num { color: var(--tenue); font-weight: 400; margin-right: 6px; }
+  h3 { font-size: 17px; margin: 26px 0 6px; }
+  h4 { font-size: 15px; margin: 18px 0 4px; }
+  p { margin: 0 0 10px; }
+  .bajada { color: var(--tenue); margin-bottom: 16px; }
+  a { color: var(--enlace); font-weight: 600; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin: 3px 0; }
+
+  /* la regla y de dónde sale */
+  .regla { margin: 0 0 12px; }
+  small.origen, .origen {
+    display: block; font-size: 12.5px; color: var(--tenue); margin-top: 2px; line-height: 1.45;
+  }
+  small.origen::before { content: "De dónde sale: "; font-weight: 600; }
+
+  /* estados */
+  .estado { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 9px; white-space: nowrap; }
+  .estado.en-uso { background: var(--monte-claro); color: var(--ok); }
+  .estado.en-curso { background: var(--ambar-fondo); color: #6B4A0A; }
+  .estado.vacio { background: var(--hundido); color: var(--tenue); }
+
+  .aviso {
+    background: var(--ambar-fondo); border: 1px solid var(--ambar-borde); border-radius: 8px;
+    padding: 10px 14px; margin: 10px 0 14px; font-size: 14px;
+  }
+  .nota { background: var(--hundido); border-radius: 8px; padding: 10px 14px; margin: 10px 0 14px; font-size: 14px; }
+
+  /* tablas */
+  .tabla-scroll { overflow-x: auto; margin: 6px 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    text-align: left; font-size: 12px; color: var(--tenue); font-weight: 600;
+    padding: 8px 10px; border-bottom: 1px solid var(--borde); background: var(--franja); vertical-align: bottom;
+  }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--filete); vertical-align: top; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.grupo td {
+    background: var(--monte-claro); color: var(--monte); font-weight: 700; font-size: 13px;
+    text-transform: uppercase; letter-spacing: .06em; padding-top: 12px;
+  }
+  table.glosario td:first-child { font-weight: 700; width: 14%; }
+  table.glosario td:nth-child(2) { width: 24%; }
+  table.glosario td:nth-child(3) { width: 32%; }
+  table.glosario td:nth-child(4) { width: 14%; font-size: 13px; }
+  table.glosario td:nth-child(5) { width: 16%; font-size: 13px; color: var(--tenue); }
+  .codigo { font-family: var(--mono); font-size: 12.5px; background: var(--hundido); border-radius: 4px; padding: 0 4px; }
+
+  /* buscador (solo si corre JavaScript) */
+  .buscador { display: none; margin: 4px 0 12px; }
+  .con-js .buscador { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .buscador input {
+    font: inherit; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 8px;
+    min-width: 280px; flex: 1; max-width: 460px; background: #F1F4F1;
+  }
+  .buscador input:focus { outline: 2px solid #3A6E8F; outline-offset: 1px; }
+  .buscador span { font-size: 13px; color: var(--tenue); }
+  tr.oculta { display: none; }
+
+  .historial td:first-child { white-space: nowrap; font-weight: 600; }
+  footer { color: var(--tenue); font-size: 13px; text-align: center; margin-top: 28px; }
+
+  @media (max-width: 720px) {
+    .portada h1 { font-size: 30px; }
+    nav.indice ol { columns: 1; }
+    section.bloque { padding: 18px 16px; }
+  }
+  @media print {
+    body { background: #fff; font-size: 11pt; }
+    .portada { background: #fff; color: var(--tinta); border: 2px solid var(--monte); }
+    section.bloque, nav.indice { border: none; padding: 0; break-inside: auto; }
+    .buscador { display: none !important; }
+    tr.oculta { display: table-row; }
+    a { color: var(--tinta); }
+  }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+<!-- ================================================================== 0 -->
+<header class="portada" id="inicio">
+  <div class="marca">Agropecuaria Anpael · Establecimiento Santa Ana</div>
+  <h1>Definiciones de negocio de ANPAEL</h1>
+  <p>
+    Qué hace el sistema de gestión ganadera, qué información maneja y qué reglas del campo
+    quedaron escritas adentro de él, con el porqué de cada una.
+  </p>
+  <div class="datos">
+    <span><b>Versión</b> 1</span>
+    <span><b>Fecha</b> 29/09/2026</span>
+    <span><b>Para</b> jefe, gerente y gestor del establecimiento</span>
+    <span><b>Documento vivo:</b> se actualiza a medida que avanza el desarrollo</span>
+  </div>
+</header>
+
+<nav class="indice" aria-label="Índice">
+  <h2>Índice</h2>
+  <ol>
+    <li><a href="#como-leer">Cómo leer este documento</a></li>
+    <li><a href="#resumen">Resumen</a></li>
+    <li><a href="#mapa">Mapa del sistema</a></li>
+    <li><a href="#modulos">Módulos de negocio</a>
+      <ol>
+        <li><a href="#mod-seguridad">Seguridad y acceso</a></li>
+        <li><a href="#mod-trazabilidad">Trazabilidad (padrón)</a></li>
+        <li><a href="#mod-planillas">Trabajos y planillas</a></li>
+        <li><a href="#mod-sanidad">Sanidad</a></li>
+        <li><a href="#mod-reproduccion">Reproducción</a></li>
+        <li><a href="#mod-nutricion">Nutrición</a></li>
+        <li><a href="#mod-reportes">Reportes</a></li>
+      </ol>
+    </li>
+    <li><a href="#transversales">Reglas que cruzan todo el sistema</a></li>
+    <li><a href="#glosario">Glosario y reglas de negocio</a></li>
+    <li><a href="#catalogos">Catálogos de referencia</a></li>
+    <li><a href="#abiertos">Puntos abiertos</a></li>
+    <li><a href="#historial">Historial de cambios</a></li>
+    <li><a href="#fuentes">Fuentes consultadas</a></li>
+  </ol>
+</nav>
+
+<section class="bloque" id="como-leer">
+  <h2>Cómo leer este documento</h2>
+  <p>
+    Está escrito para quien conoce el campo, no para quien programa. Cada regla está dicha
+    primero en lenguaje de trabajo. Debajo, en letra chica y precedida por
+    <em>«De dónde sale»</em>, está el lugar del sistema donde esa regla quedó escrita, para
+    quien quiera rastrearla o discutirla con quien desarrolla.
+  </p>
+  <p>
+    Todo lo que dice acá sale del propio sistema y de sus documentos internos. Donde algo no
+    está decidido, no se inventa una regla: se lista en <a href="#abiertos">Puntos abiertos</a>.
+  </p>
+  <p>
+    Las cifras (cantidad de animales, pendientes, etc.) son una foto de la copia de trabajo de
+    la base al 29/09/2026 y cambian todos los días.
+  </p>
+</section>
+
+<!-- ================================================================== 1 -->
+<section class="bloque" id="resumen">
+  <h2><span class="num">1</span>Resumen</h2>
+  <p>
+    ANPAEL es el sistema con el que se lleva el ganado del establecimiento Santa Ana. No
+    reemplaza a otro sistema: reemplaza al Excel. Todo lo que estaba en las planillas de
+    cálculo —unos 1.732 animales, 1.782 caravanas y otros números de identificación, y
+    3.164 registros de trabajos hechos en la manga— se pasó al sistema y hoy vive en una
+    sola base de datos, con historia.
+  </p>
+  <p>
+    La idea central es que cada animal tenga una ficha única: quién es (sus caravanas y marcas),
+    en qué etapa productiva está (su categoría), con qué grupo se maneja (su rodeo), qué le
+    pasó en cada paso por la manga (tactos, pesadas, revisiones, sanidad) y, cuando sale del
+    campo, por qué salió. Nada se borra: el sistema guarda qué era cada animal hoy y qué era en
+    cualquier fecha pasada.
+  </p>
+  <p>
+    El trabajo diario gira alrededor de la <strong>planilla impresa</strong>: se elige un rodeo
+    y un trabajo, el sistema arma un PDF con las caravanas en orden, se anota a mano en la manga
+    y después se cargan los resultados sin volver a escribir las caravanas. Los terneros que
+    nacen y todavía no tienen caravana se cuentan por ciclo productivo hasta el trabajo de
+    identificación.
+  </p>
+  <p>
+    El proyecto está en su primera etapa: que el sistema reemplace al Excel para trabajar. Ya
+    funcionan el acceso con usuario y contraseña, el padrón con sus correcciones, las planillas
+    y la carga de resultados. Está en curso el <strong>saneamiento</strong>: completar y
+    corregir los datos que vinieron del Excel. Todavía no hay carga desde el celular sin señal
+    ni indicadores (preñez, destete, ganancia de peso, mortandad): se dejaron a propósito para
+    después del saneamiento, porque un indicador calculado sobre datos sin sanear se cree y
+    está mal.
+  </p>
+</section>
+
+<!-- ================================================================== 2 -->
+<section class="bloque" id="mapa">
+  <h2><span class="num">2</span>Mapa del sistema</h2>
+  <p class="bajada">Qué parte del sistema se ocupa de qué, y en qué estado está hoy.</p>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Módulo</th><th>Qué gestiona</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td><a href="#mod-seguridad">Seguridad y acceso</a></td><td>Usuarios, contraseñas, roles y quién cargó cada dato.</td><td><span class="estado en-uso">En uso</span></td></tr>
+        <tr><td><a href="#mod-trazabilidad">Trazabilidad (padrón)</a></td><td>Los animales, sus identificaciones, categorías, rodeos, bajas, la revisión del saneamiento, los ciclos productivos y los terneros sin caravana.</td><td><span class="estado en-uso">En uso</span> <span class="estado en-curso">Saneamiento en curso</span></td></tr>
+        <tr><td><a href="#mod-planillas">Trabajos y planillas</a></td><td>Las jornadas de manga, la planilla impresa, la carga y corrección de resultados, y el trabajo de identificación de terneros.</td><td><span class="estado en-uso">En uso</span></td></tr>
+        <tr><td><a href="#mod-sanidad">Sanidad</a></td><td>Vacunas y tratamientos. Hoy se registran como resultado de un trabajo de manga.</td><td><span class="estado vacio">Módulo propio sin empezar</span></td></tr>
+        <tr><td><a href="#mod-reproduccion">Reproducción</a></td><td>Servicio, tacto, inseminación, revisión de toros y partos. Hay datos del Excel; falta el módulo propio.</td><td><span class="estado vacio">Módulo propio sin empezar</span></td></tr>
+        <tr><td><a href="#mod-nutricion">Nutrición</a></td><td>Potreros y recursos forrajeros.</td><td><span class="estado vacio">Sin empezar</span></td></tr>
+        <tr><td><a href="#mod-reportes">Reportes</a></td><td>Stock, controles de calidad de los datos e indicadores.</td><td><span class="estado en-curso">Parcial</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <small class="origen">docs/arquitectura.md («Estado de los módulos») y docs/etapas.md.</small>
+</section>
+
+<!-- ================================================================== 3 -->
+<section class="bloque" id="modulos">
+  <h2><span class="num">3</span>Módulos de negocio</h2>
+
+  <!-- 3.1 -->
+  <h3 id="mod-seguridad">3.1 · Seguridad y acceso</h3>
+  <p>
+    Cada persona entra con su <strong>usuario</strong> y su contraseña. El usuario es distinto
+    del nombre que se muestra: el nombre se puede corregir sin que nadie pierda el acceso.
+    Una persona sin contraseña cargada todavía no puede entrar.
+  </p>
+  <p>
+    Hay cuatro roles: <strong>Propietario, Gerente, Gestor y Operativo</strong>. Hoy hay dos
+    personas cargadas: un propietario y un gestor (Gerardo). Los roles están definidos desde el
+    principio aunque todavía no limitan qué puede hacer cada uno: agregar permisos sobre datos
+    ya cargados es caro, así que la estructura se armó antes.
+  </p>
+  <p class="regla">
+    Todo lo que se carga desde la app queda firmado con quién lo cargó. Los datos que vinieron
+    del Excel no tienen autor, y eso es esperable.
+    <small class="origen">Decisión ADR-001 (docs/decisiones.md): la autoría se reimplementó en el sistema «en la v0.1, no después», porque es lo único que se pierde en silencio y es lo que sirve para auditar.</small>
+  </p>
+  <p class="regla">
+    Si el usuario no existe o la contraseña está mal, el mensaje es el mismo: «Usuario o
+    contraseña incorrectos».
+    <small class="origen">Módulo de seguridad: dar mensajes distintos le diría a un extraño qué usuarios existen.</small>
+  </p>
+
+  <!-- 3.2 -->
+  <h3 id="mod-trazabilidad">3.2 · Trazabilidad (padrón de animales)</h3>
+  <p>
+    Es el corazón del sistema: la lista de todos los animales, con todo lo que se sabe de cada uno.
+  </p>
+  <h4>El animal y su identidad</h4>
+  <p>
+    Un animal es una ficha con lo que no cambia: sexo, raza, pelaje, madre, padre, fecha o año
+    de nacimiento, peso al nacer, de dónde vino (nacido en el campo, comprado o recibido) y
+    notas. Lo que cambia con el tiempo —categoría, rodeo— se guarda aparte, con fechas, para
+    tener la historia.
+  </p>
+  <h4>Identificaciones</h4>
+  <p>
+    Un animal puede tener varias identificaciones a la vez: <strong>caravana visual</strong>,
+    <strong>botón RFID</strong>, <strong>número SENASA</strong>, <strong>marca a fuego</strong>
+    y <strong>número adicional</strong> (interno). En los listados se lo nombra por una sola, la
+    «principal», para no mostrarlo repetido.
+  </p>
+  <h4>Establecimientos y CUIG</h4>
+  <p>
+    El CUIG que acompaña a una caravana es el del <strong>establecimiento de origen</strong> del
+    animal. Santa Ana (PC269) es el único establecimiento propio; los demás son campos a los que
+    se les compró hacienda.
+  </p>
+  <h4>Categorías y rodeos</h4>
+  <p>
+    La <strong>categoría</strong> dice en qué etapa productiva está el animal (ternera, vaquillona,
+    vaca 2da… toro). El <strong>rodeo</strong> dice con qué grupo se maneja. No son lo mismo: un
+    rodeo puede juntar varias categorías, y cada animal conserva su categoría real aunque esté en
+    un rodeo con otro nombre.
+  </p>
+  <h4>Bajas</h4>
+  <p>
+    Cuando un animal sale del campo se registra la baja, con su tipo (venta, muerte, traslado,
+    faltante o regularización) y su causa. El animal no se borra: sigue en el padrón con toda su
+    historia.
+  </p>
+  <h4>Saneamiento y descartes</h4>
+  <p>
+    Los datos del Excel se revisan uno por uno: cada animal se puede marcar como
+    <em>validado</em>, <em>para corregir</em> o <em>dudoso</em>. Aparte, un animal vivo puede
+    llevar una <strong>marca de descarte</strong>: la decisión de que se va, antes de que se
+    vaya.
+  </p>
+  <h4>Ciclos productivos y terneros sin identificar</h4>
+  <p>
+    Los terneros que nacen y todavía no tienen caravana no se cargan uno por uno: se cuentan por
+    <strong>ciclo productivo</strong> y por sexo, desde el nacimiento hasta el trabajo de
+    identificación. Ahí cada caravana pasa a ser un animal del padrón. Los
+    <strong>candidatos a torito</strong> son la excepción: se cargan como animales desde que
+    nacen.
+  </p>
+
+  <!-- 3.3 -->
+  <h3 id="mod-planillas">3.3 · Trabajos y planillas</h3>
+  <p>
+    Un <strong>trabajo</strong> es un paso por la manga: un tacto, una pesada, una revisión de
+    toros, una vacunación, una identificación. Cada animal que pasó por ese trabajo tiene su
+    registro, con el resultado.
+  </p>
+  <p>
+    La <strong>planilla impresa</strong> es el entregable que más se usa. Se elige el rodeo y el
+    trabajo, y sale un PDF con las caravanas en orden y las columnas que corresponden, más
+    renglones en blanco al final para los animales que aparecen y no estaban en la lista. Después
+    del trabajo se cargan los resultados sin volver a escribir las caravanas. Hoy hay planilla
+    para tacto, pesada, revisión de toros y sanidad.
+  </p>
+  <p>
+    El <strong>trabajo de identificación</strong> es especial: convierte los terneros contados en
+    animales con caravana y le agrega la caravana visual a los candidatos a torito, todo junto.
+  </p>
+  <p class="regla">
+    Lo que importa asegurar en una planilla es la caravana, no el valor.
+    <small class="origen">docs/captura-planillas.md: un peso mal copiado se nota; una caravana mal copiada le asigna el dato a otro animal y corrompe dos registros sin que ninguno se vea raro. Por eso las caravanas van preimpresas.</small>
+  </p>
+
+  <!-- 3.4 -->
+  <h3 id="mod-sanidad">3.4 · Sanidad</h3>
+  <p>
+    Hoy la sanidad se registra como resultado de un trabajo de manga de tipo sanidad: producto,
+    dosis, vía de aplicación, lote del producto y fecha de reingreso. Hay planilla impresa y carga
+    de resultados. El módulo propio de sanidad (calendario, protocolos) existe como carpeta vacía:
+    todavía no se empezó.
+  </p>
+
+  <!-- 3.5 -->
+  <h3 id="mod-reproduccion">3.5 · Reproducción</h3>
+  <p>
+    El sistema ya guarda tactos y ecografías (preñada, vacía o dudosa, con tamaño de preñez),
+    revisiones de toros (apto, circunferencia escrotal, aplomos, raspaje) e inseminaciones que
+    vinieron del Excel. También tiene lugar para las campañas de servicio y los partos, pero esas
+    dos listas están vacías: el dato de servicio del Excel todavía no se pasó. El módulo propio de
+    reproducción no se empezó.
+  </p>
+
+  <!-- 3.6 -->
+  <h3 id="mod-nutricion">3.6 · Nutrición</h3>
+  <p>
+    Existe la lista de <strong>potreros</strong> (nombre, superficie, recurso forrajero) pero está
+    vacía, y todavía no se puede saber en qué potrero está cada rodeo. Las pesadas y la condición
+    corporal, que sirven para nutrición, se cargan desde los trabajos de manga. El módulo de
+    nutrición no se empezó.
+  </p>
+
+  <!-- 3.7 -->
+  <h3 id="mod-reportes">3.7 · Reportes</h3>
+  <p>
+    Hoy hay listados de <strong>stock</strong> (por categoría y por rodeo, en un solo listado, y
+    con una línea aparte para los terneros sin identificar), la lista de animales marcados para
+    descarte que siguen en el campo («la lista para armar la venta»), el avance de la revisión del
+    saneamiento y un conjunto de <strong>controles de calidad</strong> que detectan datos
+    imposibles o sospechosos. Los indicadores (preñez por rodeo y por toro, destete, ganancia de
+    peso, mortandad) son la etapa 3 y no se empezaron.
+  </p>
+  <p class="regla">
+    Los indicadores no se adelantan antes de terminar el saneamiento.
+    <small class="origen">docs/etapas.md: «un indicador calculado sobre datos sin sanear es peor que no tener indicador, porque se le cree».</small>
+  </p>
+</section>
+
+<!-- ================================================================== 4 -->
+<section class="bloque" id="transversales">
+  <h2><span class="num">4</span>Reglas que cruzan todo el sistema</h2>
+
+  <h3>Nada se borra</h3>
+  <p class="regla">
+    Un animal que sale no se borra: se le registra la baja y deja de figurar como vigente. Un
+    rodeo o una categoría que ya no se usa no se borra: se desactiva y deja de aparecer en las
+    listas para elegir, pero la historia de quién estuvo ahí se conserva. Los movimientos de
+    terneros sin identificar tampoco se editan: un error se corrige con un movimiento contrario.
+    <small class="origen">docs/modelo-datos.md («Un animal dado de baja no se borra»); migraciones del 03/09/2026 que desactivan rodeos y categorías; migración del 29/09/2026 de terneros sin identificar.</small>
+  </p>
+  <div class="nota">
+    <strong>Excepción:</strong> el resultado de un trabajo ya cargado (un tacto mal tipeado, un
+    peso mal anotado) se corrige pisando el valor, sin dejar el anterior. Lo mismo la revisión de
+    saneamiento: marcar de nuevo un animal reemplaza la marca anterior.
+    <small class="origen">Módulo de planillas (corrección de resultados) y módulo de trazabilidad (revisión de saneamiento).</small>
+  </div>
+
+  <h3>Cuándo pasó no es lo mismo que cuándo se cargó</h3>
+  <p class="regla">
+    La fecha de un trabajo es el día en que se hizo en el campo. El día en que se cargó al sistema
+    se guarda aparte. Un tacto de marzo cargado en agosto sigue siendo de marzo.
+    <small class="origen">docs/modelo-datos.md y decisión ADR-003.</small>
+  </p>
+
+  <h3>Fechas estimadas</h3>
+  <p class="regla">
+    Cuando una fecha no es la real sino una aproximación (una fecha de nacimiento supuesta, el
+    día en que se asignó un rodeo durante el saneamiento, el día en que se descubrió que un animal
+    ya no estaba) queda marcada como <strong>estimada</strong>. Así nadie calcula después «días
+    entre dos fechas» con fechas que no eran reales.
+    <small class="origen">Se repite en el animal, las identificaciones, la categoría, el rodeo, la baja y los terneros sin identificar. Migraciones del 28/08, 08/09 y 10/09/2026.</small>
+  </p>
+
+  <h3>Qué es hoy y qué era en marzo</h3>
+  <p class="regla">
+    La categoría y el rodeo de un animal se guardan con fecha de entrada y de salida. En cada
+    momento hay una sola vigente: un animal no puede estar en dos rodeos ni tener dos categorías a
+    la vez. Para cambiarlo, la fecha nueva tiene que ser posterior a la de entrada a la actual.
+    <small class="origen">La base tiene una restricción que impide dos rodeos (y dos categorías) abiertos para el mismo animal; el cambio de rodeo pasa por una función que cierra el anterior y abre el nuevo en un solo paso (docs/modelo-datos.md).</small>
+  </p>
+
+  <h3>Un dato que falta no es un cero</h3>
+  <p class="regla">
+    «Sin categoría», «sin rodeo», «sin fecha de nacimiento» son estados que se muestran como
+    tales. Un dato desconocido queda vacío, nunca en cero, porque cero es un valor y
+    «no se sabe» es otra cosa.
+    <small class="origen">docs/modelo-datos.md («null es un dato válido y significa no se sabe, que no es lo mismo que cero»).</small>
+  </p>
+
+  <h3>Los datos del Excel se respetan</h3>
+  <p class="regla">
+    Lo que no se pudo pasar del Excel con seguridad no se inventó: quedó anotado en una bitácora
+    de pendientes (ver <a href="#abiertos">Puntos abiertos</a>). Nada de lo que no validó se
+    descartó en silencio.
+    <small class="origen">Bitácora de la migración desde Excel (tabla de pendientes de la migración).</small>
+  </p>
+</section>
+
+<!-- ================================================================== 5 -->
+<section class="bloque" id="glosario">
+  <h2><span class="num">5</span>Glosario y reglas de negocio</h2>
+  <p class="bajada">
+    Un término por fila. La columna «Dónde vive» dice en qué parte del sistema está (módulo y
+    nombre de la tabla, para quien quiera buscarla). «Origen» dice de dónde sale la decisión
+    cuando está documentada.
+  </p>
+
+  <div class="buscador" role="search">
+    <input type="search" id="buscar" placeholder="Buscar un término o una regla…" aria-label="Buscar en el glosario">
+    <span id="contador"></span>
+  </div>
+
+  <div class="tabla-scroll">
+  <table class="glosario" id="tabla-glosario">
+    <thead>
+      <tr><th>Término</th><th>Definición</th><th>Regla de negocio</th><th>Dónde vive</th><th>Origen de la decisión</th></tr>
+    </thead>
+    <tbody>
+      <!-- ============ animal e identificación -->
+      <tr class="grupo"><td colspan="5">Animal e identificación</td></tr>
+      <tr>
+        <td>Animal</td>
+        <td>Un bovino registrado, con su ficha única. Guarda lo que no cambia; lo que cambia (categoría, rodeo) va con fechas.</td>
+        <td>Nunca se borra. Tiene que tener sexo (macho o hembra) y origen: nacido en el campo, comprado o recibido.
+          <small class="origen">Listas cerradas en la base para sexo y origen.</small></td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>docs/modelo-datos.md</td>
+      </tr>
+      <tr>
+        <td>Madre</td>
+        <td>La vaca que parió al animal, si está en el padrón.</td>
+        <td>Un animal no puede ser su propia madre. En los animales históricos casi siempre está vacía, porque el Excel registraba la categoría de la madre, no cuál era. De acá en adelante hay que completarla en cada parto cargado por la app.
+          <small class="origen">Restricción en la base (madre distinta del propio animal) y comentario confirmado del modelo original.</small></td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>Modelo original de la migración (confirmado)</td>
+      </tr>
+      <tr>
+        <td>Padre</td>
+        <td>El toro del que viene el animal.</td>
+        <td>Puede ser un animal del padrón o un nombre escrito a mano: muchos padres son toros de campo o semen que nunca se cargaron como animal. Los toros con nombre propio (Apache, Pucará, Guaminí…) se cargan como animales para poder nombrarlos como padre. Un animal no puede ser su propio padre.
+          <small class="origen">Restricción en la base; campo de texto libre agregado el 08/09/2026.</small></td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>Migración 08/09/2026 (padre como texto)</td>
+      </tr>
+      <tr>
+        <td>Fecha y año de nacimiento</td>
+        <td>Cuándo nació el animal. De buena parte del padrón migrado solo se sabe el año.</td>
+        <td>Se puede cargar el año sin la fecha completa. Si se carga la fecha completa, el año se calcula de ella. Si la fecha es aproximada, se marca como estimada. El año tiene que estar entre 1900 y 2100.
+          <small class="origen">Año como dato separado desde el 03/09/2026; rango controlado por la base.</small></td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>Migración 03/09/2026</td>
+      </tr>
+      <tr>
+        <td>Año de ingreso</td>
+        <td>El año en que el animal entró por primera vez al campo.</td>
+        <td>Se carga aparte de la fecha de ingreso, por el mismo motivo que el año de nacimiento.</td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>Migración 03/09/2026</td>
+      </tr>
+      <tr>
+        <td>Año de primer servicio</td>
+        <td>El año en que un animal entró a servicio por primera vez.</td>
+        <td>Pensado para toros, aunque el sistema no impide cargarlo en hembras: en la práctica solo se carga en toros.</td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>Migración 08/09/2026</td>
+      </tr>
+      <tr>
+        <td>Peso al nacer</td>
+        <td>Kilos del ternero al nacer.</td>
+        <td>Si se carga, tiene que estar entre 10 y 70 kg.
+          <small class="origen">Rango controlado por la base.</small></td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Raza y pelaje</td>
+        <td>Raza (Aberdeen Angus, Careta, Hereford) y color (negro, colorado), en listas separadas.</td>
+        <td>Van separados para resolver los valores mezclados del Excel (por ejemplo «N C Car»). En el padrón se muestra el código corto de la raza (AA, CAR, HER).</td>
+        <td>Trazabilidad · <span class="codigo">raza</span>, <span class="codigo">pelaje</span></td>
+        <td>Modelo original; migración 10/09/2026</td>
+      </tr>
+      <tr>
+        <td>Observaciones del animal</td>
+        <td>Notas libres sobre el animal.</td>
+        <td>Son distintas de la observación de la revisión del saneamiento, que es solo para esa revisión.</td>
+        <td>Trazabilidad · <span class="codigo">animal</span></td>
+        <td>Migración 10/09/2026</td>
+      </tr>
+      <tr>
+        <td>Identificación</td>
+        <td>Cualquier número que identifica a un animal: caravana visual, botón RFID, número SENASA, marca a fuego o número adicional.</td>
+        <td>Un animal puede tener varias a la vez. Siempre se guardan como texto, para no perder los ceros a la izquierda («0075» no es «75»). Si una identificación se da de baja, su fecha de baja no puede ser anterior a la de colocación.
+          <small class="origen">docs/modelo-datos.md; restricción de fechas en la base.</small></td>
+        <td>Trazabilidad · <span class="codigo">identificacion</span></td>
+        <td>docs/modelo-datos.md</td>
+      </tr>
+      <tr>
+        <td>Caravana visual</td>
+        <td>La caravana que se lee a simple vista. La identificación de uso diario.</td>
+        <td>Dentro de un mismo establecimiento un número de caravana no se reutiliza nunca, ni siquiera después de que el animal se fue. Por eso una caravana visual siempre tiene que decir de qué establecimiento es.
+          <small class="origen">La base impide dos caravanas visuales iguales en el mismo establecimiento, de forma permanente, y rechaza una caravana visual sin establecimiento.</small></td>
+        <td>Trazabilidad · <span class="codigo">identificacion</span></td>
+        <td>Modelo original (confirmado)</td>
+      </tr>
+      <tr>
+        <td>RFID y número SENASA</td>
+        <td>Identificaciones oficiales, de alcance nacional.</td>
+        <td>No puede haber dos iguales en todo el sistema, sin importar el establecimiento.
+          <small class="origen">Restricción de unicidad en la base para los tipos oficiales.</small></td>
+        <td>Trazabilidad · <span class="codigo">identificacion</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Marca a fuego</td>
+        <td>La marca de los toros.</td>
+        <td>En los toros, la identidad del animal es la marca a fuego. Es normal que un toro tenga marca a fuego y caravana visual a la vez.</td>
+        <td>Trazabilidad · <span class="codigo">identificacion</span></td>
+        <td>Bitácora de la migración («la identidad del toro es la marca a fuego», registrada como lectura)</td>
+      </tr>
+      <tr>
+        <td>Número adicional</td>
+        <td>Número interno del establecimiento (por ejemplo, el RP). También es la «caravana especial» de los candidatos a torito.</td>
+        <td>No puede repetirse dentro del establecimiento al dar de alta un candidato a torito.
+          <small class="origen">Validación al dar de alta un candidato a torito.</small></td>
+        <td>Trazabilidad · <span class="codigo">identificacion</span></td>
+        <td>Pedido del 29/09/2026 (terneros sin identificar)</td>
+      </tr>
+      <tr>
+        <td>Identificación principal</td>
+        <td>La identificación con la que se nombra al animal en los listados.</td>
+        <td>Se elige en este orden: caravana visual, RFID, SENASA, marca a fuego. En la ficha se muestran todas las vigentes.
+          <small class="origen">Una vista de la base elige una sola por animal; sin ella, los 64 toros aparecían dos y tres veces en los listados.</small></td>
+        <td>Trazabilidad · <span class="codigo">v_ident_principal</span></td>
+        <td>docs/modelo-datos.md</td>
+      </tr>
+      <tr>
+        <td>Establecimiento y CUIG</td>
+        <td>Un campo, identificado por su CUIG.</td>
+        <td>El CUIG de una caravana es el del establecimiento de <em>origen</em> del animal, no el de donde está hoy. Solo Santa Ana es propio; los demás son campos a los que se les compró.
+          <small class="origen">Comentario confirmado del modelo original.</small></td>
+        <td>Trazabilidad · <span class="codigo">establecimiento</span></td>
+        <td>Confirmado con el productor (modelo original)</td>
+      </tr>
+      <tr>
+        <td>Al154 y PC269</td>
+        <td>Dos CUIG del mismo campo físico, Santa Ana, de dos sociedades distintas en el tiempo.</td>
+        <td>Se unificaron como un solo establecimiento, pero se conserva cuál era el CUIG real al momento del hecho, porque para trámites (por ejemplo, SENASA) importa. El CUIG anterior (Al154) figura como propio e inactivo.</td>
+        <td>Trazabilidad · <span class="codigo">establecimiento</span></td>
+        <td>Decisión manual de la migración; corrección 08/09/2026</td>
+      </tr>
+
+      <!-- ============ categorías y rodeos -->
+      <tr class="grupo"><td colspan="5">Categorías y rodeos</td></tr>
+      <tr>
+        <td>Categoría</td>
+        <td>La etapa productiva del animal. Ver la <a href="#cat-categorias">lista completa</a>.</td>
+        <td>Un animal tiene una sola categoría vigente a la vez. Al cambiarla, la fecha nueva tiene que ser posterior a la de entrada a la actual; si ya estaba en esa categoría, no cambia nada. La historia queda guardada.
+          <small class="origen">La base impide dos categorías abiertas para el mismo animal; la fecha de salida tiene que ser posterior a la de entrada.</small></td>
+        <td>Trazabilidad · <span class="codigo">animal_categoria</span></td>
+        <td>docs/modelo-datos.md, ADR-003</td>
+      </tr>
+      <tr>
+        <td>CUT</td>
+        <td>Cría de último ternero: la vaca que está en su último ciclo antes de salir.</td>
+        <td>La escala de hembras termina en CUT. También es un motivo de descarte.</td>
+        <td>Trazabilidad · <span class="codigo">categoria</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Vaca +4</td>
+        <td>Vaca de más de cuatro pariciones. Antes se llamaba «Vaca 5ta».</td>
+        <td>Es la misma franja con otro nombre.</td>
+        <td>Trazabilidad · <span class="codigo">categoria</span></td>
+        <td>Migración 03/09/2026 (confirmado)</td>
+      </tr>
+      <tr>
+        <td>MEJ</td>
+        <td>Macho entero joven.</td>
+        <td>Categoría agregada el 03/09/2026. Va al rodeo «Novillitos, MEJ y toritos».</td>
+        <td>Trazabilidad · <span class="codigo">categoria</span></td>
+        <td>Migración 03/09/2026</td>
+      </tr>
+      <tr>
+        <td>Vaquillona preñada / parida</td>
+        <td>Antes eran categorías; hoy son rodeos de la categoría Vaquillona 24M.</td>
+        <td>Las dos categorías se dieron de baja: no se pueden asignar. Sus animales se pasaron a Vaquillona 24M.</td>
+        <td>Trazabilidad · <span class="codigo">categoria</span>, <span class="codigo">rodeo</span></td>
+        <td>Migraciones 03/09/2026</td>
+      </tr>
+      <tr>
+        <td>Rodeo</td>
+        <td>Un grupo de animales que se maneja junto. Ver la <a href="#cat-rodeos">lista completa</a>.</td>
+        <td>Un rodeo no es una categoría. Un animal está en un solo rodeo a la vez; al moverlo, la fecha nueva tiene que ser posterior a la de entrada al rodeo actual. No se puede mover un animal a un rodeo inactivo. Los rodeos que ya no se usan se desactivan, no se borran.
+          <small class="origen">La base impide dos rodeos abiertos para el mismo animal; el cambio pasa por una única función que valida rodeo activo y fecha.</small></td>
+        <td>Trazabilidad · <span class="codigo">rodeo</span>, <span class="codigo">animal_rodeo</span></td>
+        <td>docs/modelo-datos.md, ADR-003</td>
+      </tr>
+      <tr>
+        <td>Categorías admitidas por rodeo</td>
+        <td>Qué categorías puede tener cada rodeo.</td>
+        <td>Al asignar un rodeo, la pantalla ofrece solo los que admiten la categoría del animal. Un rodeo sin reglas admite cualquier categoría (Descarte).
+          <small class="origen">Tabla de reglas por rodeo. Ojo: la regla la aplica la pantalla, no la base; ver <a href="#abiertos">Puntos abiertos</a>.</small></td>
+        <td>Trazabilidad · <span class="codigo">rodeo_categoria</span></td>
+        <td>Migraciones 03/09/2026 (pedido en el chat)</td>
+      </tr>
+      <tr>
+        <td>Descarte (rodeo)</td>
+        <td>Rodeo para vacas vacías, vaca o toro descarte, animales con problemas y CUT sin ternero.</td>
+        <td>Admite cualquier categoría: el criterio es el motivo, no la categoría. En las listas aparece siempre último.</td>
+        <td>Trazabilidad · <span class="codigo">rodeo</span></td>
+        <td>Migraciones 03/09/2026</td>
+      </tr>
+      <tr>
+        <td>Tropa de Venta</td>
+        <td>Rodeo de los animales que se preparan para vender.</td>
+        <td>Admite Ternero, Torito, Novillito y Novillo (ni toros ni hembras).</td>
+        <td>Trazabilidad · <span class="codigo">rodeo_categoria</span></td>
+        <td>Migración 03/09/2026 (pedido en el chat; ver <a href="#abiertos">Puntos abiertos</a>)</td>
+      </tr>
+      <tr>
+        <td>Vaquillona a Servicio</td>
+        <td>Rodeo de las vaquillonas de 24 meses que no están preñadas ni paridas.</td>
+        <td>Solo admite Vaquillona 24M. Se armó por descarte (las VAQ24M que no están en Preñada ni en Parida), no por una campaña de servicio real.</td>
+        <td>Trazabilidad · <span class="codigo">rodeo</span></td>
+        <td>Migración 03/09/2026 (asunción a confirmar)</td>
+      </tr>
+      <tr>
+        <td>Destetados / en feedlot</td>
+        <td>Terneras y terneros separados en dos rodeos cada uno: destetados y en feedlot.</td>
+        <td>Todos los terneros y terneras que había al 03/09/2026 se pasaron a «destetados»; los de feedlot quedaron creados y vacíos.</td>
+        <td>Trazabilidad · <span class="codigo">rodeo</span></td>
+        <td>Migración 03/09/2026 (confirmado en el chat)</td>
+      </tr>
+      <tr>
+        <td>Stock unificado</td>
+        <td>El listado de cabezas por categoría y por rodeo, en una sola lista.</td>
+        <td>Aparecen juntos porque así se pidió verlo, pero los rodeos no son categorías: cada animal conserva su categoría real. Los terneros sin identificar aparecen como línea aparte, por ciclo y sexo.</td>
+        <td>Reportes · <span class="codigo">v_stock_unificado</span>, <span class="codigo">v_rodeo_stock</span></td>
+        <td>Modelo original; migración 29/09/2026</td>
+      </tr>
+
+      <!-- ============ bajas y saneamiento -->
+      <tr class="grupo"><td colspan="5">Bajas, descartes y saneamiento</td></tr>
+      <tr>
+        <td>Baja</td>
+        <td>El registro de que un animal salió del campo: cuándo, por qué, con qué peso y a dónde.</td>
+        <td>Un animal tiene una sola baja, para siempre: no hay segunda baja ni se edita. El animal no se borra y deja de figurar como vigente. Si se carga peso de salida, tiene que ser mayor a cero.
+          <small class="origen">La base impide dos bajas para el mismo animal.</small></td>
+        <td>Trazabilidad · <span class="codigo">baja</span></td>
+        <td>docs/modelo-datos.md</td>
+      </tr>
+      <tr>
+        <td>Sin módulo económico</td>
+        <td>El sistema lleva el manejo físico (kilos y cabezas).</td>
+        <td>Las bajas no guardan precio, moneda ni comprador, a propósito.</td>
+        <td>Trazabilidad · <span class="codigo">baja</span></td>
+        <td>Modelo original (confirmado)</td>
+      </tr>
+      <tr>
+        <td>Tipo y causa de baja</td>
+        <td>Tipos: venta, muerte, traslado, faltante y regularización. Cada tipo tiene sus causas. Ver la <a href="#cat-bajas">lista completa</a>.</td>
+        <td>El tipo es una lista cerrada; las causas se pueden ampliar. Sirven para las estadísticas por causa.</td>
+        <td>Trazabilidad · <span class="codigo">causa_baja</span></td>
+        <td>ADR-003</td>
+      </tr>
+      <tr>
+        <td>Regularización</td>
+        <td>Baja de un animal que figura en el padrón y no está en el campo, sin saber cuándo ni por qué salió.</td>
+        <td>Se usa <strong>solo</strong> si no se sabe ni cuándo ni por qué. Si se sabe que el animal se vendió en marzo, es una venta cargada tarde, con la fecha real. Su fecha es el día del saneamiento, así que va marcada como estimada. No cuenta en los indicadores del primer año (por ejemplo, no infla la mortandad).
+          <small class="origen">Es un tipo propio (no una causa dentro de faltante) para que el filtro de los indicadores no dependa de cómo esté escrita una descripción. Hay controles que avisan si una regularización no tiene la fecha marcada como estimada o si se carga más de 90 días después de la primera.</small></td>
+        <td>Trazabilidad · <span class="codigo">baja</span>, <span class="codigo">causa_baja</span></td>
+        <td>Migraciones 25/08 y 28/08/2026; docs/etapas.md</td>
+      </tr>
+      <tr>
+        <td>Umbral de regularización</td>
+        <td>Qué proporción del padrón se dio de baja por regularización.</td>
+        <td>Si supera el 10–15 % del padrón, hay que mostrar ese número antes de leer cualquier indicador del primer año: quiere decir que el Excel estaba bastante desactualizado.</td>
+        <td>Reportes · <span class="codigo">v_baja_resumen</span></td>
+        <td>Migración 28/08/2026</td>
+      </tr>
+      <tr>
+        <td>Marca de descarte</td>
+        <td>La decisión de que un animal vivo va a salir, antes de que salga.</td>
+        <td>Es distinta de la baja: la marca es la decisión, la baja es la salida real. Un animal tiene una sola marca vigente; se puede revocar. Si pasaron más de 120 días de la marca y el animal sigue en el campo, aparece en un control para revisar.
+          <small class="origen">La base impide dos marcas vigentes para el mismo animal.</small></td>
+        <td>Trazabilidad · <span class="codigo">animal_descarte</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Motivo de descarte vs causa de baja</td>
+        <td>Motivo de descarte: por qué se decidió que se vaya (CUT, otra). Causa de baja: cómo se fue (venta, muerte…).</td>
+        <td>Son dos listas separadas. Un control cuenta cuántas ventas no venían de una marca de descarte: si son muchas, las decisiones se están tomando fuera del sistema.</td>
+        <td>Trazabilidad · <span class="codigo">motivo_descarte</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Saneamiento</td>
+        <td>El trabajo de completar y corregir los datos que vinieron del Excel.</td>
+        <td>Se da por terminado cuando no queda ningún animal sin categoría y el stock del sistema coincide con el conteo real del campo.</td>
+        <td>Trazabilidad</td>
+        <td>docs/etapas.md (v0.2a)</td>
+      </tr>
+      <tr>
+        <td>Revisión del saneamiento</td>
+        <td>La marca de revisión de cada animal migrado.</td>
+        <td>Sin marca = sin revisar. <em>Validado</em>: los datos están bien. <em>Corregir</em>: tiene un error concreto (se anota cuál). <em>Dudoso</em>: no se puede decidir sin ver al animal. Queda quién revisó y cuándo; revisar de nuevo reemplaza la marca anterior.</td>
+        <td>Trazabilidad · <span class="codigo">animal_validacion</span></td>
+        <td>ADR-004</td>
+      </tr>
+      <tr>
+        <td>Controles de calidad</td>
+        <td>Listas automáticas de datos imposibles o sospechosos. Ver <a href="#cat-controles">cuáles hay</a>.</td>
+        <td>La mayoría tiene que estar vacía. Algunos, como el de animales en un rodeo con nombre de otra categoría, son un número para mirar, no una alarma.</td>
+        <td>Reportes · vistas de control</td>
+        <td>Modelo original</td>
+      </tr>
+
+      <!-- ============ trabajos y mediciones -->
+      <tr class="grupo"><td colspan="5">Trabajos y mediciones</td></tr>
+      <tr>
+        <td>Trabajo</td>
+        <td>Un paso por la manga: la unidad natural de carga en el campo. Ver los <a href="#cat-trabajos">tipos</a>.</td>
+        <td>Tiene fecha (cuándo se hizo), establecimiento, tipo y, si corresponde, rodeo y responsable. Cada carga de una planilla es un trabajo nuevo.</td>
+        <td>Planillas · <span class="codigo">trabajo</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Evento</td>
+        <td>Un animal dentro de un trabajo, con su resultado.</td>
+        <td>Un animal aparece una sola vez por trabajo. Queda de qué forma se tomó el dato (manual, lector RFID, voz, balanza o importación), quién lo cargó y, para datos leídos automáticamente, un grado de confianza entre 0 y 1.
+          <small class="origen">La base impide el mismo animal dos veces en un trabajo.</small></td>
+        <td>Planillas · <span class="codigo">evento</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Planilla impresa</td>
+        <td>El PDF de un rodeo para un trabajo, para anotar a mano en la manga.</td>
+        <td>Caravanas ordenadas y ocho renglones en blanco al final para los animales que aparecen y no estaban en la lista. Hoy existe para tacto, pesada, revisión de toros y sanidad; la de destete está pendiente.</td>
+        <td>Planillas</td>
+        <td>docs/etapas.md (v0.2b)</td>
+      </tr>
+      <tr>
+        <td>Tacto / ecografía</td>
+        <td>Diagnóstico de preñez.</td>
+        <td>El resultado es preñada, vacía o dudosa. El tamaño de preñez (chica, mediana, grande) y la edad gestacional solo se cargan si no está vacía. La edad gestacional va de 20 a 290 días.
+          <small class="origen">Restricciones de coherencia en la base.</small></td>
+        <td>Planillas · <span class="codigo">diagnostico_gestacion</span></td>
+        <td>Modelo original; ADR-003</td>
+      </tr>
+      <tr>
+        <td>% de preñez no interpretable</td>
+        <td>Jornadas viejas cuyo porcentaje de preñez no se puede leer.</td>
+        <td>Si la planilla de origen nunca registraba vacías, el porcentaje de preñez de esa jornada no se puede interpretar.</td>
+        <td>Reportes · <span class="codigo">v_qa_prenez_no_confiable</span></td>
+        <td>Migración desde Excel</td>
+      </tr>
+      <tr>
+        <td>Pesada</td>
+        <td>El peso de un animal en un trabajo.</td>
+        <td>Entre 15 y 1.400 kg. Tipos: nacimiento, destete, control, entrada, salida y venta.</td>
+        <td>Planillas · <span class="codigo">pesaje</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Condición corporal</td>
+        <td>Estado corporal del animal en la escala de 1 a 5.</td>
+        <td>Solo valores entre 1 y 5. Si alguien carga 10 o más en una jornada y todos iguales, aparece en un control: suele ser que se apretó siempre el mismo botón en lugar de medir.</td>
+        <td>Planillas · <span class="codigo">medicion_corporal</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Dentadura</td>
+        <td>Estado de la boca, en una escala ordenada. Ver la <a href="#cat-dentadura">escala</a>.</td>
+        <td>Solo valores del catálogo. La dentadura no puede retroceder entre dos jornadas: si pasa, es un error de carga en una de las dos fechas.</td>
+        <td>Planillas · <span class="codigo">medicion_corporal</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Revisión de toros</td>
+        <td>Evaluación del toro para servicio.</td>
+        <td>Siempre dice si es apto o no. Además puede llevar circunferencia escrotal (entre 24 y 50 cm), aplomos (bien, regular, mal), resultado del raspaje y motivo de rechazo.</td>
+        <td>Planillas · <span class="codigo">revision_toro</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Sanidad</td>
+        <td>Una vacuna o un tratamiento aplicado en un trabajo.</td>
+        <td>El producto es obligatorio. Además: principio activo, dosis, unidad, vía, lote del producto y fecha de reingreso.</td>
+        <td>Planillas · <span class="codigo">sanidad</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Corrección de un resultado</td>
+        <td>Cambiar un resultado ya cargado (un tacto o un peso mal anotado).</td>
+        <td>Se pisa el valor en el mismo registro; no se crea uno nuevo.</td>
+        <td>Planillas</td>
+        <td>Módulo de planillas (v0.2b)</td>
+      </tr>
+
+      <!-- ============ reproducción -->
+      <tr class="grupo"><td colspan="5">Reproducción</td></tr>
+      <tr>
+        <td>Servicio</td>
+        <td>Una campaña de servicio, de un rodeo o de todo el campo.</td>
+        <td>Tipo: natural, inseminación, IATF o mixto. La fecha de fin no puede ser anterior a la de inicio. Hoy no hay ninguna campaña cargada.</td>
+        <td>Reproducción · <span class="codigo">servicio</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Evento reproductivo</td>
+        <td>Inseminación, celo, monta o sincronización de un animal.</td>
+        <td>El toro de una inseminación puede quedar anotado como texto cuando no está en el padrón.</td>
+        <td>Reproducción · <span class="codigo">evento_reproductivo</span></td>
+        <td>Modelo original</td>
+      </tr>
+      <tr>
+        <td>Parto</td>
+        <td>El nacimiento de un ternero de una madre.</td>
+        <td>Resultado: vivo, muerto o aborto. Dificultad: normal, asistido, cesárea o distocia. Una cría tiene un solo parto, y una madre no puede tener dos partos el mismo día. Hoy no hay partos cargados.</td>
+        <td>Reproducción · <span class="codigo">parto</span></td>
+        <td>Modelo original</td>
+      </tr>
+
+      <!-- ============ ciclo productivo y terneros -->
+      <tr class="grupo"><td colspan="5">Ciclo productivo y terneros sin identificar</td></tr>
+      <tr>
+        <td>Ciclo productivo</td>
+        <td>Un ciclo que va del inicio del servicio al fin de la identificación de los terneros. Hay dos líneas en paralelo: <strong>vacas</strong> (código «2025-26») y <strong>vaquillonas</strong> (código «VAQ2025-26»). Ver las <a href="#cat-ciclos">fechas</a>.</td>
+        <td>Los ciclos son editables. Dentro de una misma línea, el tramo desde el inicio de la parición hasta el fin del ciclo no puede superponerse con otro ciclo: así una fecha siempre dice a qué ciclo pertenece un ternero. Cambiar las fechas de un ciclo no mueve lo ya cargado.
+          <small class="origen">La base impide ciclos superpuestos dentro de una línea.</small></td>
+        <td>Trazabilidad · <span class="codigo">ciclo_productivo</span></td>
+        <td>Pedido y diagramas de ciclo (docs/ciclo_*.png), 29/09/2026</td>
+      </tr>
+      <tr>
+        <td>Ciclo de un ternero</td>
+        <td>El ciclo en que nació.</td>
+        <td>El sistema lo sugiere solo según la fecha y la línea (vacas o vaquillonas). Se puede cambiar a mano, y queda registrado que se cambió. En la identificación se sugiere el ciclo vigente a la fecha del trabajo.</td>
+        <td>Trazabilidad · <span class="codigo">ciclo_productivo</span></td>
+        <td>Pedido del 29/09/2026</td>
+      </tr>
+      <tr>
+        <td>Terneros sin identificar</td>
+        <td>Terneros nacidos que todavía no tienen caravana.</td>
+        <td>No se cargan como animales: se cuentan por ciclo y por sexo, con movimientos de nacimiento, identificación, muerte u otra baja. Los movimientos no se editan ni se borran.</td>
+        <td>Trazabilidad · <span class="codigo">ternero_sin_identificar_mov</span></td>
+        <td>Pedido del 29/09/2026</td>
+      </tr>
+      <tr>
+        <td>Pendientes de un ciclo</td>
+        <td>Cuántos terneros de un ciclo y sexo siguen sin caravana: nacidos − identificados − muertos − otras bajas.</td>
+        <td>Una muerte u otra baja no puede dejar los pendientes en negativo: no pueden morir terneros que el sistema no tiene. Una identificación sí puede pasarse, si quien carga lo confirma: los terneros existen, lo más probable es que falten nacimientos por cargar o sean de otro ciclo. Queda marcada y el pendiente negativo queda a la vista.
+          <small class="origen">Lo controla la base al cargar cada movimiento, además de la pantalla.</small></td>
+        <td>Trazabilidad · <span class="codigo">v_ternero_sin_identificar_saldo</span></td>
+        <td>Pedido y confirmación del 29/09/2026</td>
+      </tr>
+      <tr>
+        <td>Trabajo de identificación</td>
+        <td>El trabajo en que los terneros contados reciben su caravana.</td>
+        <td>Cada caravana es un animal nuevo, con categoría Ternero o Ternera según el sexo, sin fecha de nacimiento y con el año de nacimiento del ciclo (el último año del código: «2025-26» → 2026). Cada grupo descuenta de los pendientes de su ciclo. Puede haber terneros de ciclos distintos en el mismo trabajo. Entra todo junto o no entra nada.</td>
+        <td>Planillas y trazabilidad</td>
+        <td>Pedido del 29/09/2026</td>
+      </tr>
+      <tr>
+        <td>Candidato a torito</td>
+        <td>Ternero macho que se sigue individualmente desde que nace.</td>
+        <td>Se carga como animal al nacer, con categoría Torito y su caravana especial (número adicional), con madre, padre y peso al nacer si se conocen. No suma en los pendientes. En la identificación recibe su caravana visual sin tocar los pendientes.</td>
+        <td>Trazabilidad · <span class="codigo">animal</span>, <span class="codigo">identificacion</span></td>
+        <td>Pedido del 29/09/2026</td>
+      </tr>
+      <tr>
+        <td>Anulación de un movimiento</td>
+        <td>La forma de corregir un movimiento de terneros equivocado.</td>
+        <td>Se carga un movimiento contrario en el mismo ciclo, con el mismo sexo y cantidad; el original queda como anulado. Una anulación no se anula. Una identificación no se anula sola (dejaría animales creados sin descontar): si el ciclo estaba mal, se pasa a otro ciclo.</td>
+        <td>Trazabilidad · <span class="codigo">ternero_sin_identificar_mov</span></td>
+        <td>Pedido del 29/09/2026</td>
+      </tr>
+      <tr>
+        <td>Ciclo terminado con pendientes</td>
+        <td>Un ciclo cuya fecha de fin ya pasó y todavía tiene terneros sin caravana (o identificados de más).</td>
+        <td>No es un error, pero queda a la vista como alerta en la pantalla de terneros y en el panel principal.</td>
+        <td>Reportes · <span class="codigo">v_alerta_ternero_ciclo_cerrado</span></td>
+        <td>Pedido del 29/09/2026</td>
+      </tr>
+
+      <!-- ============ usuarios -->
+      <tr class="grupo"><td colspan="5">Usuarios</td></tr>
+      <tr>
+        <td>Usuario</td>
+        <td>La persona que entra al sistema.</td>
+        <td>El nombre para entrar es único y distinto del nombre que se muestra. Sin contraseña cargada, no puede entrar. La contraseña nunca se guarda como texto.</td>
+        <td>Seguridad · <span class="codigo">persona</span></td>
+        <td>ADR-001 (opción A1)</td>
+      </tr>
+      <tr>
+        <td>Rol</td>
+        <td>Propietario, Gerente, Gestor u Operativo.</td>
+        <td>Cada usuario tiene uno. Hoy los roles todavía no limitan lo que cada uno puede hacer en la app.</td>
+        <td>Seguridad · <span class="codigo">persona</span></td>
+        <td>docs/arquitectura.md; corrección 10/09/2026</td>
+      </tr>
+      <tr>
+        <td>Autoría</td>
+        <td>Quién cargó cada dato.</td>
+        <td>Todo lo que se carga desde la app queda con la persona que lo cargó. Nadie puede cargar un dato a nombre de otro. Los datos históricos del Excel no tienen autor.</td>
+        <td>Seguridad, en todos los módulos</td>
+        <td>ADR-001</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ================================================================== 6 -->
+<section class="bloque" id="catalogos">
+  <h2><span class="num">6</span>Catálogos de referencia</h2>
+  <p class="bajada">Las listas cerradas que el sistema acepta. Si hace falta un valor nuevo, se agrega en el sistema; no se escribe a mano.</p>
+
+  <h3 id="cat-categorias">Categorías, en el orden en que se muestran</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Hembras</th><th>Machos</th></tr></thead>
+      <tbody>
+        <tr><td>Ternera</td><td>Ternero</td></tr>
+        <tr><td>Vaquillona 12M</td><td>Torito</td></tr>
+        <tr><td>Vaquillona 24M</td><td>Novillito</td></tr>
+        <tr><td>Vaca 2da</td><td>Macho entero joven (MEJ)</td></tr>
+        <tr><td>Vaca 3era</td><td>Novillo</td></tr>
+        <tr><td>Vaca 4ta</td><td>Toro</td></tr>
+        <tr><td>Vaca +4</td><td></td></tr>
+        <tr><td>CUT</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Dadas de baja (no se pueden asignar): Vaquillona Preñada y Vaquillona Parida.</p>
+
+  <h3 id="cat-rodeos">Rodeos activos y qué categorías admiten</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Rodeo</th><th>Admite</th></tr></thead>
+      <tbody>
+        <tr><td>Ternera destetada</td><td>Ternera</td></tr>
+        <tr><td>Ternera en Feedlot</td><td>Ternera</td></tr>
+        <tr><td>Vaquillona 12M</td><td>Vaquillona 12M</td></tr>
+        <tr><td>Vaquillona a Servicio</td><td>Vaquillona 24M</td></tr>
+        <tr><td>Vaquillona Preñada</td><td>Vaquillona 24M</td></tr>
+        <tr><td>Vaquillona Parida</td><td>Vaquillona 24M</td></tr>
+        <tr><td>Vaca 2da</td><td>Vaca 2da</td></tr>
+        <tr><td>Vaca 3era</td><td>Vaca 3era</td></tr>
+        <tr><td>Rodeo General 1</td><td>Vaca 3era, Vaca 4ta, Vaca +4, CUT</td></tr>
+        <tr><td>Rodeo General 2</td><td>Vaca 3era, Vaca 4ta, Vaca +4, CUT</td></tr>
+        <tr><td>Vaca 4ta</td><td>Vaca 4ta</td></tr>
+        <tr><td>Terneros destetados</td><td>Ternero</td></tr>
+        <tr><td>Terneros en Feedlot</td><td>Ternero</td></tr>
+        <tr><td>Tropa de Venta</td><td>Ternero, Torito, Novillito, Novillo</td></tr>
+        <tr><td>Novillitos, MEJ y toritos</td><td>Torito, Novillito, MEJ</td></tr>
+        <tr><td>Novillo</td><td>Novillo</td></tr>
+        <tr><td>Toro</td><td>Toro</td></tr>
+        <tr><td>Descarte</td><td>Cualquier categoría (siempre último en las listas)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Desactivados (conservan su historia): Ternero, Novillito, Torito, Ternera, Vaca 5ta y CUT.</p>
+
+  <h3 id="cat-bajas">Tipos y causas de baja</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Tipo</th><th>Causas</th></tr></thead>
+      <tbody>
+        <tr><td>Venta</td><td>Venta gordo · Venta invernada · Descarte · CUT / último ternero · Vaquillona rechazada</td></tr>
+        <tr><td>Muerte</td><td>Enfermedad · Accidente · Muerte al parto · Causa desconocida</td></tr>
+        <tr><td>Traslado</td><td>Traslado a otro establecimiento</td></tr>
+        <tr><td>Faltante</td><td>Faltante en recuento</td></tr>
+        <tr><td>Regularización</td><td>No está en el campo, salida sin registrar · Error de carga: la fila del Excel no era un animal real · Duplicado no detectado en la migración</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Motivos de descarte: CUT · Otra (el motivo real va en la observación).</p>
+
+  <h3 id="cat-trabajos">Tipos de trabajo</h3>
+  <p>Tacto · Ecografía · Pesada · Destete · Identificación · Revisión de toros · Inseminación · Sanidad · Clasificación · Embarque · Otro.</p>
+
+  <h3>Tipos de identificación</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Tipo</th><th>Alcance</th><th>Oficial</th></tr></thead>
+      <tbody>
+        <tr><td>Caravana visual</td><td>Del establecimiento</td><td>No</td></tr>
+        <tr><td>Botón RFID</td><td>Nacional</td><td>Sí</td></tr>
+        <tr><td>Marca a fuego</td><td>Del establecimiento</td><td>No</td></tr>
+        <tr><td>Número SENASA (15 dígitos)</td><td>Nacional</td><td>Sí</td></tr>
+        <tr><td>Número adicional / interno</td><td>Del establecimiento</td><td>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="cat-dentadura">Escala de dentadura</h3>
+  <p>
+    <strong>Erupción:</strong> 2D → 3D → 4D → 6D → BLL.
+    <strong>Desgaste:</strong> 3/4D → MD+ → MD → MD− → 1/4D → −1/4D → SD/CUT.
+  </p>
+
+  <h3>Otras listas</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Lista</th><th>Valores</th></tr></thead>
+      <tbody>
+        <tr><td>Origen del animal</td><td>Nacido · Comprado · Recibido</td></tr>
+        <tr><td>Resultado de tacto</td><td>Preñada · Vacía · Dudosa</td></tr>
+        <tr><td>Tamaño de preñez</td><td>Chica · Mediana · Grande</td></tr>
+        <tr><td>Método de diagnóstico</td><td>Tacto · Ecografía</td></tr>
+        <tr><td>Tipo de pesada</td><td>Nacimiento · Destete · Control · Entrada · Salida · Venta</td></tr>
+        <tr><td>Vía de aplicación (sanidad)</td><td>Subcutánea · Intramuscular · Intravenosa · Oral · Tópica · Intramamaria</td></tr>
+        <tr><td>Aplomos (toros)</td><td>Bien · Regular · Mal</td></tr>
+        <tr><td>Raspaje (toros)</td><td>Negativo · Trichomonas · Campylobacter · Sin raspar</td></tr>
+        <tr><td>Servicio</td><td>Natural · Inseminación · IATF · Mixto</td></tr>
+        <tr><td>Evento reproductivo</td><td>Inseminación · Celo · Monta · Sincronización</td></tr>
+        <tr><td>Parto: resultado</td><td>Vivo · Muerto · Aborto</td></tr>
+        <tr><td>Parto: dificultad</td><td>Normal · Asistido · Cesárea · Distocia</td></tr>
+        <tr><td>Revisión del saneamiento</td><td>Validado · Corregir · Dudoso (sin marca = sin revisar)</td></tr>
+        <tr><td>Movimientos de terneros sin identificar</td><td>Nacimiento · Identificación · Muerte · Otra baja · Anulación</td></tr>
+        <tr><td>Líneas de ciclo productivo</td><td>Vacas · Vaquillonas</td></tr>
+        <tr><td>Roles</td><td>Propietario · Gerente · Gestor · Operativo</td></tr>
+        <tr><td>Razas</td><td>Aberdeen Angus (AA) · Careta (CAR) · Hereford (HER)</td></tr>
+        <tr><td>Pelajes</td><td>Negro · Colorado</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="cat-ciclos">Ciclos productivos cargados</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Ciclo</th><th>Línea</th><th>Servicio desde</th><th>Parición</th><th>Fin (identificación)</th></tr></thead>
+      <tbody>
+        <tr><td>2025-26</td><td>Vacas</td><td>01/10/2025</td><td>15/07/2026 – 30/09/2026</td><td>30/04/2027</td></tr>
+        <tr><td>2026-27</td><td>Vacas</td><td>01/10/2026</td><td>15/07/2027 – 30/09/2027</td><td>30/04/2028</td></tr>
+        <tr><td>VAQ2025-26</td><td>Vaquillonas</td><td>01/07/2025</td><td>01/04/2026 – 31/07/2026</td><td>31/12/2026</td></tr>
+        <tr><td>VAQ2026-27</td><td>Vaquillonas</td><td>01/07/2026</td><td>01/04/2027 – 31/07/2027</td><td>31/12/2027</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <small class="origen">Diagramas docs/ciclo_vaca_anio1_a_anio3.png y docs/ciclo_vaquillona_desde_servicio.png, confirmados el 29/09/2026. La identificación se hace «en marzo o abril» (vacas) y «en diciembre» (vaquillonas); como fin se tomó el último día de ese período.</small>
+
+  <h3 id="cat-controles">Controles de calidad de los datos</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Control</th><th>Qué detecta</th><th>Qué se espera</th></tr></thead>
+      <tbody>
+        <tr><td>Sin categoría</td><td>Animales sin categoría vigente.</td><td>Vacío al terminar el saneamiento.</td></tr>
+        <tr><td>Identificación duplicada</td><td>Caravanas repetidas.</td><td>Vacío.</td></tr>
+        <tr><td>Dentadura que retrocede</td><td>La dentadura de un animal «volvió atrás» entre dos jornadas.</td><td>Vacío (es biológicamente imposible).</td></tr>
+        <tr><td>Carga sospechosa</td><td>Jornadas con 10 o más condiciones corporales, todas iguales.</td><td>Vacío.</td></tr>
+        <tr><td>Preñez no confiable</td><td>Trabajos cuyo % de preñez no se puede interpretar.</td><td>Informativo.</td></tr>
+        <tr><td>Rodeo y categoría</td><td>Animales en un rodeo con nombre de otra categoría.</td><td>No tiene que dar cero: es un número para mirar.</td></tr>
+        <tr><td>Descarte pendiente</td><td>Marcados para descarte hace más de 120 días que siguen en el campo.</td><td>Revisar.</td></tr>
+        <tr><td>Baja sin marca</td><td>Ventas que no venían de una marca de descarte.</td><td>Pocas.</td></tr>
+        <tr><td>Regularización tardía</td><td>Regularizaciones cargadas más de 90 días después de la primera.</td><td>Vacío.</td></tr>
+        <tr><td>Regularización sin marca</td><td>Regularizaciones con la fecha marcada como real.</td><td>Vacío.</td></tr>
+        <tr><td>Seguridad</td><td>Tablas o vistas que quedaron abiertas a quien no debe verlas.</td><td>Vacío.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================== 7 -->
+<section class="bloque" id="abiertos">
+  <h2><span class="num">7</span>Puntos abiertos</h2>
+  <p class="bajada">
+    Lo que no está decidido, lo que se asumió y hay que confirmar, y las contradicciones
+    encontradas. Nada de esto se resolvió al escribir el documento: se lista para decidirlo.
+  </p>
+
+  <h3>Decisiones sin cerrar</h3>
+  <ul>
+    <li><strong>Permisos por rol.</strong> Los cuatro roles existen, pero hoy cualquier usuario puede hacer cualquier cosa en la app. Falta definir qué acciones quedan para Gerente o Propietario (por ejemplo, las aprobaciones que se mencionan para el Gerente).
+      <small class="origen">docs/issues-pendientes.md (issue 16); docs/decisiones.md (ADR-001).</small></li>
+    <li><strong>Carga sin señal.</strong> Cómo se van a identificar los datos creados en el celular sin conexión (etapa 2) está decidido solo en parte.
+      <small class="origen">docs/decisiones.md (ADR-002, abierta).</small></li>
+    <li><strong>Campañas de servicio.</strong> Falta definir campaña y tipo para pasar al sistema las fechas de primer entore que están en el Excel.
+      <small class="origen">Migración 03/09/2026 (categorías y rodeos, «pendiente»).</small></li>
+  </ul>
+
+  <h3>Asunciones que hay que confirmar</h3>
+  <ul>
+    <li><strong>Vaquillona a Servicio.</strong> Se armó por descarte (las Vaquillonas 24M que no están en Preñada ni Parida). Si «a servicio» tiene que ser más estricto (solo las que están en una campaña de servicio activa), hay que revisarlo cuando se cargue el dato de servicio.
+      <small class="origen">Migración 03/09/2026, marcada «asunción a confirmar».</small></li>
+    <li><strong>Vaca 4ta o Vaca +4.</strong> La categoría de 103 animales se dedujo del año de primer servicio. Hay que confirmarla antes de usarla en reportes.
+      <small class="origen">Bitácora de la migración («lectura a confirmar: 5ta y 4ta según primer servicio»); migración 03/09/2026.</small></li>
+    <li><strong>Lecturas registradas durante la migración desde Excel:</strong> el rodeo de algunos animales se dedujo de su categoría; se fijó una fecha de corte para las categorías; algunos animales se enlazaron por caravana sin CUIG; y la identidad del toro se tomó de la marca a fuego.
+      <small class="origen">Bitácora de la migración (registros de decisión y lectura).</small></li>
+    <li><strong>Fin de cada ciclo productivo.</strong> Se tomó el último día del período de identificación (30/04 para vacas, 31/12 para vaquillonas). Si una identificación se hace más tarde, cae fuera del ciclo.
+      <small class="origen">Migración 29/09/2026.</small></li>
+  </ul>
+
+  <h3>Saneamiento pendiente</h3>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Qué falta</th><th class="num">Cuántos (29/09/2026)</th></tr></thead>
+      <tbody>
+        <tr><td>Animales sin categoría vigente</td><td class="num">274</td></tr>
+        <tr><td>Animales sin rodeo vigente</td><td class="num">114</td></tr>
+        <tr><td>Animales revisados en el saneamiento</td><td class="num">28 de 1.732</td></tr>
+        <tr><td>Animales que ya no están en el campo y siguen figurando</td><td class="num">a determinar</td></tr>
+        <tr><td>Potreros cargados</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>Normalizar tres formas de dentadura que vinieron del Excel: «Cuarto diente», «−1/4D» y «GD». Nota: «−1/4D» ya figura en el catálogo de la escala, así que hay que confirmar si sigue pendiente.</li>
+    <li>Confirmar si la lectura de 5ta contra 4ta de la hoja «Vac 5ta y 4ta 18 y 19» quedó bien.</li>
+    <li>Definir si el CUIG Al155 es el mismo campo que Al154/PC269 o es otro establecimiento.</li>
+    <li>Fechar las revisiones de toros de 2024 y 2025, que llegaron sin fecha y no se cargaron.</li>
+  </ul>
+  <small class="origen">docs/modelo-datos.md, docs/issues-pendientes.md y la copia de trabajo de la base. Las cifras de docs/etapas.md (381 sin categoría, 1.463 sin rodeo) son anteriores y ya no coinciden.</small>
+
+  <h3>Pendientes de la migración desde Excel (resumen)</h3>
+  <p>
+    La bitácora de la migración tiene <strong>265 anotaciones abiertas</strong> y 4 resueltas. Solo
+    la primera clase espera una decisión de alguien del establecimiento; las demás son avisos o
+    registro.
+  </p>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Clase</th><th class="num">Abiertos</th><th>Qué hay adentro</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Esperan una decisión</td><td class="num">149</td>
+          <td>76 resultados de tacto sin interpretar (no se cargó el diagnóstico) · 29 condiciones corporales fuera de 1 a 5 o no numéricas · 22 dentaduras sin resolver o sin equivalente en la escala · 11 resultados de preñez que dependen de valores interpretados · 6 caravanas repetidas dentro de una misma hoja · 5 datos de CUIG, raza o pelaje que no se pudieron traducir.</td>
+        </tr>
+        <tr>
+          <td>Sin dato en el origen</td><td class="num">51</td>
+          <td>47 filas sin caravana (el animal no se puede identificar) · 3 filas que eran títulos de sección · 1 aviso esperado: los registros históricos no tienen autor.</td>
+        </tr>
+        <tr>
+          <td>Avisos de calidad</td><td class="num">48</td>
+          <td>21 caravanas con un espacio en el medio · 12 filas con columnas corridas · 10 jornadas con % de preñez no interpretable · 2 jornadas con la misma condición corporal en todos los animales · 3 avisos puntuales (mayúsculas, ceros iniciales, una planilla apilada dentro de otra).</td>
+        </tr>
+        <tr>
+          <td>No migrado</td><td class="num">10</td>
+          <td>Jornadas y mediciones sin fecha completa · revisiones de toros de 2024 y 2025 sin fecha · pesos que parecen estimados de lote, no pesadas individuales · datos sin lugar en el sistema: tipo de dispositivo, estado de ovarios, nombre del padre sin caravana y una dentadura fuera de catálogo.</td>
+        </tr>
+        <tr>
+          <td>Registro de decisiones</td><td class="num">7</td>
+          <td>Las decisiones y lecturas listadas en «Asunciones que hay que confirmar», más las fechas aproximadas cargadas a pedido (quedan marcadas como estimadas).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="nota">
+    El «nombre del padre sin caravana» figura como no migrado, pero desde el 08/09/2026 el sistema
+    permite cargar el padre como texto. Hay que decidir si ese pendiente se cierra cargando esos
+    nombres.
+  </p>
+  <small class="origen">Bitácora de la migración desde Excel (lista de pendientes clasificada), consultada el 29/09/2026.</small>
+
+  <h3>Funcionalidad que todavía no existe</h3>
+  <ul>
+    <li>Planilla de destete (madre y cría en la misma fila).</li>
+    <li>Código QR en la planilla impresa, casillas para tildar y lectura de la foto de la planilla.</li>
+    <li>Asignar categoría o rodeo a varios animales de una vez (hoy es de a uno).</li>
+    <li>Cargar potreros y saber en qué potrero está cada rodeo.</li>
+    <li>Módulos propios de sanidad, reproducción, nutrición e indicadores.</li>
+    <li>Carga en el celular sin señal (etapa 2).</li>
+  </ul>
+  <small class="origen">docs/etapas.md y docs/issues-pendientes.md.</small>
+
+  <h3>Contradicciones detectadas en el sistema</h3>
+  <ul>
+    <li><strong>Stock por categoría y bajas.</strong> El listado de stock por categoría cuenta a los animales dados de baja; el de rodeos no. Hoy no hay bajas cargadas, así que todavía no se nota.
+      <small class="origen">Vista de stock unificado.</small></li>
+    <li><strong>Categorías admitidas por rodeo.</strong> La regla la aplica la pantalla (solo ofrece los rodeos permitidos), pero la base no la controla: por fuera de la pantalla se podría mover un animal a un rodeo que no admite su categoría.
+      <small class="origen">Función de cambio de rodeo; tabla de reglas por rodeo.</small></li>
+    <li><strong>Descripciones de rodeos desactualizadas.</strong> «Tropa de Venta» dice «sin restricción de categoría», pero desde el 03/09/2026 solo admite Ternero, Torito, Novillito y Novillo. «Vaquillona Preñada» y «Vaquillona Parida» todavía se describen como rodeos de categorías que ya no existen.
+      <small class="origen">Catálogo de rodeos; migraciones del 03/09/2026. La propia migración dice que la restricción de Tropa de Venta se revierte si no era la intención.</small></li>
+    <li><strong>Un rol que ya no existe.</strong> La protección adicional de la base (la que actúa cuando alguien entra por fuera de la app) todavía reconoce como gestor al rol «Encargado», que ya no existe. No afecta a la app, pero esa protección no reconoce al gestor actual.
+      <small class="origen">Migración 10/09/2026 (corrección de roles).</small></li>
+  </ul>
+</section>
+
+<!-- ================================================================== 8 -->
+<section class="bloque historial" id="historial">
+  <h2><span class="num">8</span>Historial de cambios</h2>
+  <div class="tabla-scroll">
+    <table>
+      <thead><tr><th>Versión</th><th>Fecha</th><th>Qué cambió</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td><td>29/09/2026</td>
+          <td>Primera versión. Reúne las definiciones de negocio del padrón, trabajos y planillas,
+            seguridad, bajas y saneamiento, y la funcionalidad nueva de ciclos productivos y terneros
+            sin identificar. Incluye catálogos, controles de calidad y puntos abiertos (con el resumen
+            de la bitácora de la migración desde Excel).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================================================================== apéndice -->
+<section class="bloque" id="fuentes">
+  <h2>Fuentes consultadas</h2>
+  <ul>
+    <li><strong>Documentos del proyecto:</strong> docs/decisiones.md (ADR-001 a ADR-007), docs/modelo-datos.md, docs/etapas.md, docs/arquitectura.md, docs/captura-planillas.md, docs/issues-pendientes.md y los diagramas de ciclo productivo.</li>
+    <li><strong>Migraciones de la base</strong> (supabase/migrations), del 24/08/2026 al 29/09/2026: login, bajas por regularización, catálogo de categorías y rodeos, fechas estimadas, establecimientos, roles y terneros sin identificar.</li>
+    <li><strong>Estructura de la base</strong> (restricciones y comentarios del modelo original), tomada de la copia sin datos que usan las pruebas del sistema.</li>
+    <li><strong>Módulos del sistema:</strong> seguridad, trazabilidad y planillas.</li>
+    <li><strong>Copia de trabajo de la base</strong> al 29/09/2026, solo para catálogos, cifras y la bitácora de pendientes de la migración.</li>
+  </ul>
+  <p class="nota">
+    No se encontraron en el repositorio, y por eso no se usaron: el mapa de relaciones
+    (anpael-mapa-relaciones.html), el documento de stack técnico (ANPAEL-stack-tecnico.md) ni un
+    catálogo de categorías y rodeos aparte de las migraciones. Si se suman a docs/, se van a tener
+    en cuenta en la próxima versión.
+  </p>
+</section>
+
+<footer>ANPAEL · Definiciones de negocio · versión 1 · 29/09/2026</footer>
+</div>
+
+<script>
+/* Mejora progresiva: sin JavaScript el glosario se ve completo. Con JavaScript
+   aparece un buscador que filtra filas y oculta los títulos de grupo vacíos. */
+(function () {
+  document.documentElement.classList.add('con-js');
+  var campo = document.getElementById('buscar');
+  var contador = document.getElementById('contador');
+  var tabla = document.getElementById('tabla-glosario');
+  if (!campo || !tabla) return;
+  var filas = Array.prototype.slice.call(tabla.tBodies[0].rows);
+  var total = filas.filter(function (f) { return !f.classList.contains('grupo'); }).length;
+
+  function normalizar(t) {
+    return t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  var textos = filas.map(function (f) { return normalizar(f.textContent); });
+
+  function filtrar() {
+    var q = normalizar(campo.value.trim());
+    var visibles = 0, grupo = null, grupoConFilas = false;
+    filas.forEach(function (f, i) {
+      if (f.classList.contains('grupo')) {
+        if (grupo) grupo.classList.toggle('oculta', !grupoConFilas);
+        grupo = f; grupoConFilas = false;
+        return;
+      }
+      var ve = !q || textos[i].indexOf(q) !== -1;
+      f.classList.toggle('oculta', !ve);
+      if (ve) { visibles++; grupoConFilas = true; }
+    });
+    if (grupo) grupo.classList.toggle('oculta', !grupoConFilas);
+    contador.textContent = q ? visibles + ' de ' + total + ' términos' : total + ' términos';
+  }
+  campo.addEventListener('input', filtrar);
+  filtrar();
+})();
+</script>
+</body>
+</html>
