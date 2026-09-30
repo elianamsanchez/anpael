@@ -24,15 +24,17 @@ import com.anpael.trazabilidad.infrastructure.TipoIdentificacionRepository;
  * nacimiento en esta base-. Actualizacion parcial: cada campo del pedido
  * que no sea null se pisa, el resto queda como estaba.
  *
- * La marca a fuego es la excepción: es una identificación, y las
- * identificaciones no se pisan. Si el animal ya tenía una vigente, esa queda
- * dada de baja (con el motivo) y se agrega la nueva, que hereda su fecha de
- * colocación -corregir el número no cambia cuándo se marcó-.
+ * La marca a fuego (solo machos) y el número adicional (machos y hembras)
+ * son la excepción: son identificaciones, y las identificaciones no se
+ * pisan. Si el animal ya tenía una vigente de ese tipo, esa queda dada de
+ * baja (con el motivo) y se agrega la nueva, que hereda su fecha de
+ * colocación -corregir el número no cambia cuándo se colocó-.
  */
 @Service
 public class AnimalCorreccionService {
 
     private static final String CODIGO_FUEGO = "FUEGO";
+    private static final String CODIGO_ADICIONAL = "ADICIONAL";
     private static final String MOTIVO_CORRECCION = "Corregida desde la ficha del animal";
 
     private final AnimalRepository animales;
@@ -97,39 +99,48 @@ public class AnimalCorreccionService {
             animal.setObservaciones(pedido.observaciones());
         }
         if (pedido.marcaFuego() != null && !pedido.marcaFuego().isBlank()) {
-            corregirMarcaFuego(animal, pedido.marcaFuego().trim());
+            if (!"M".equals(animal.getSexo())) {
+                throw new ReglaDeNegocioException("La marca a fuego es solo para machos.");
+            }
+            corregirIdentificacion(animal, CODIGO_FUEGO, "la marca a fuego", pedido.marcaFuego().trim());
+        }
+        if (pedido.numeroAdicional() != null && !pedido.numeroAdicional().isBlank()) {
+            corregirIdentificacion(animal, CODIGO_ADICIONAL, "el número adicional", pedido.numeroAdicional().trim());
         }
 
         animales.save(animal);
     }
 
-    private void corregirMarcaFuego(Animal animal, String marca) {
-        if (!"M".equals(animal.getSexo())) {
-            throw new ReglaDeNegocioException("La marca a fuego es solo para machos.");
-        }
-        TipoIdentificacion fuego = tiposIdent.findByCodigo(CODIGO_FUEGO)
-                .orElseThrow(() -> new ReglaDeNegocioException("Falta el tipo de identificación FUEGO en el catálogo."));
+    /**
+     * Agrega o cambia una identificación de un tipo (marca a fuego, número
+     * adicional). Si ya tenía una vigente de ese tipo, queda dada de baja y
+     * la nueva hereda su fecha de colocación.
+     */
+    private void corregirIdentificacion(Animal animal, String codigoTipo, String nombre, String valor) {
+        TipoIdentificacion tipo = tiposIdent.findByCodigo(codigoTipo)
+                .orElseThrow(() -> new ReglaDeNegocioException(
+                        "Falta el tipo de identificación " + codigoTipo + " en el catálogo."));
 
         Optional<Identificacion> actual = identificaciones.findByIdAnimalAndFechaBajaIsNull(animal.getIdAnimal())
                 .stream()
-                .filter(i -> i.getIdTipoIdent().equals(fuego.getIdTipoIdent()))
+                .filter(i -> i.getIdTipoIdent().equals(tipo.getIdTipoIdent()))
                 .findFirst();
-        if (actual.isPresent() && actual.get().getCaravana().equalsIgnoreCase(marca)) {
+        if (actual.isPresent() && actual.get().getCaravana().equalsIgnoreCase(valor)) {
             return; // es la misma: nada que cambiar
         }
 
         Integer idEstablecimiento = actual.map(Identificacion::getIdEstablecimiento)
                 .orElseGet(establecimientoPropio::obtenerId);
         if (identificaciones.existsByIdTipoIdentAndIdEstablecimientoAndCaravanaIgnoreCaseAndIdAnimalNot(
-                fuego.getIdTipoIdent(), idEstablecimiento, marca, animal.getIdAnimal())) {
-            throw new ReglaDeNegocioException("Ya existe otro animal con la marca a fuego " + marca + ".");
+                tipo.getIdTipoIdent(), idEstablecimiento, valor, animal.getIdAnimal())) {
+            throw new ReglaDeNegocioException("Ya existe otro animal con " + nombre + " " + valor + ".");
         }
 
         Identificacion nueva = new Identificacion();
         nueva.setIdAnimal(animal.getIdAnimal());
-        nueva.setIdTipoIdent(fuego.getIdTipoIdent());
+        nueva.setIdTipoIdent(tipo.getIdTipoIdent());
         nueva.setIdEstablecimiento(idEstablecimiento);
-        nueva.setCaravana(marca);
+        nueva.setCaravana(valor);
         if (actual.isPresent()) {
             Identificacion anterior = actual.get();
             nueva.setFechaAlta(anterior.getFechaAlta());

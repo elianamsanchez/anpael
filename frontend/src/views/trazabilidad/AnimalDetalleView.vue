@@ -100,6 +100,7 @@ const pesoNacerCorregido = ref('')
 const padreNombreCorregido = ref('')
 const observacionesCorregido = ref('')
 const marcaFuegoCorregida = ref('')
+const numeroAdicionalCorregido = ref('')
 
 // La fecha completa manda: si se carga, el año se completa solo (backend
 // AnimalCorreccionService), así que el campo manual no aplica.
@@ -125,18 +126,28 @@ const ETIQUETA_TIPO_IDENT: Record<string, string> = {
 }
 const caravanaVisual = computed(() => identificaciones.value.find(i => i.tipoIdent === 'VISUAL')?.caravana)
 const marcaFuegoActual = computed(() => identificaciones.value.find(i => i.tipoIdent === 'FUEGO')?.caravana)
+const numeroAdicionalActual = computed(() => identificaciones.value.find(i => i.tipoIdent === 'ADICIONAL')?.caravana)
 
-// El título lleva la caravana visual y, si la tiene, la marca a fuego al lado.
+// El título lleva la caravana visual y, si los tiene, la marca a fuego y el número adicional al lado.
 const tituloAnimal = computed(() => {
-  const partes = [caravanaVisual.value, marcaFuegoActual.value ? `fuego ${marcaFuegoActual.value}` : undefined]
-    .filter(Boolean)
+  const partes = [
+    caravanaVisual.value,
+    marcaFuegoActual.value ? `fuego ${marcaFuegoActual.value}` : undefined,
+    numeroAdicionalActual.value ? `adicional ${numeroAdicionalActual.value}` : undefined
+  ].filter(Boolean)
   if (partes.length) return partes.join(' · ')
   return animal.value?.caravana ?? `Animal #${animal.value?.idAnimal}`
 })
 const bajadaAnimal = computed(() => {
   if (!animal.value) return ''
-  const tipos = [caravanaVisual.value && 'caravana visual', marcaFuegoActual.value && 'marca a fuego'].filter(Boolean)
-  const ident = tipos.length ? tipos.join(' y ') : (animal.value.tipoIdent ?? 'sin identificación')
+  const tipos = [
+    caravanaVisual.value && 'caravana visual',
+    marcaFuegoActual.value && 'marca a fuego',
+    numeroAdicionalActual.value && 'número adicional'
+  ].filter(Boolean)
+  const ident = tipos.length
+    ? (tipos.length > 1 ? `${tipos.slice(0, -1).join(', ')} y ${tipos[tipos.length - 1]}` : tipos[0])
+    : (animal.value.tipoIdent ?? 'sin identificación')
   return `${ident} · ${animal.value.sexo === 'M' ? 'macho' : 'hembra'}`
 })
 
@@ -474,7 +485,8 @@ async function guardarCorreccion() {
     pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined,
     padreNombre: padreNombreCorregido.value || undefined,
     observaciones: observacionesCorregido.value || undefined,
-    marcaFuego: animal.value?.sexo === 'M' ? (marcaFuegoCorregida.value.trim() || undefined) : undefined
+    marcaFuego: animal.value?.sexo === 'M' ? (marcaFuegoCorregida.value.trim() || undefined) : undefined,
+    numeroAdicional: numeroAdicionalCorregido.value.trim() || undefined
   }
   if (Object.values(cambios).every(v => v === undefined)) return
 
@@ -483,7 +495,7 @@ async function guardarCorreccion() {
   errorCorreccion.value = null
   try {
     animal.value = await corregirAnimal(idAnimal, cambios)
-    if (cambios.marcaFuego) identificaciones.value = await identificacionesAnimal(idAnimal)
+    if (cambios.marcaFuego || cambios.numeroAdicional) identificaciones.value = await identificacionesAnimal(idAnimal)
     mensajeCorreccion.value = 'Datos actualizados.'
     idRazaElegida.value = null
     idPelajeElegido.value = null
@@ -496,6 +508,7 @@ async function guardarCorreccion() {
     padreNombreCorregido.value = ''
     observacionesCorregido.value = ''
     marcaFuegoCorregida.value = ''
+    numeroAdicionalCorregido.value = ''
   } catch (e) {
     errorCorreccion.value = e as ErrorApi
   } finally {
@@ -780,6 +793,14 @@ onMounted(cargar)
           />
           <p v-if="animal.sexo === 'M' && marcaFuegoActual && marcaFuegoCorregida.trim()" class="atenuado chico">
             La marca {{ marcaFuegoActual }} queda dada de baja y se guarda la nueva, con la misma fecha de colocación.
+          </p>
+          <Campo
+            etiqueta="Número adicional"
+            :placeholder="numeroAdicionalActual ? `Hoy: ${numeroAdicionalActual}` : 'Todavía no tiene'"
+            v-model:valor="numeroAdicionalCorregido"
+          />
+          <p v-if="numeroAdicionalActual && numeroAdicionalCorregido.trim()" class="atenuado chico">
+            El número {{ numeroAdicionalActual }} queda dado de baja y se guarda el nuevo, con la misma fecha de colocación.
           </p>
           <Campo
             etiqueta="Raza"

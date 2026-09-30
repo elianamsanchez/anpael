@@ -190,6 +190,8 @@ export interface CorregirAnimalParams {
   observaciones?: string
   /** Solo machos. Si ya tenía una marca a fuego, la anterior queda dada de baja. */
   marcaFuego?: string
+  /** Machos y hembras. Si ya tenía un número adicional, el anterior queda dado de baja. */
+  numeroAdicional?: string
 }
 
 export function listarRazas() {
@@ -231,6 +233,8 @@ export interface NuevoAnimalParams {
   caravana?: string
   /** Número de la marca a fuego. Solo machos. */
   marcaFuego?: string
+  /** Número adicional / interno (por ejemplo, el RP). Machos y hembras. */
+  numeroAdicional?: string
   sexo: string
   origen: string
   idRaza?: number

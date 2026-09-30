@@ -112,6 +112,12 @@ public class AnimalAltaService {
         if (marcaFuego != null) {
             exigirCaravanaLibre(CODIGO_FUEGO, marcaFuego);
         }
+        // El número adicional es un dato más, para machos y hembras: no reemplaza
+        // a la caravana (ni a la marca a fuego) como identificación mínima.
+        String numeroAdicional = textoOVacio(pedido.numeroAdicional());
+        if (numeroAdicional != null) {
+            exigirCaravanaLibre(CODIGO_ADICIONAL, numeroAdicional);
+        }
 
         Animal animal = new Animal();
         animal.setIdEstabOrigen(pedido.idEstabOrigen());
@@ -146,6 +152,9 @@ public class AnimalAltaService {
         }
         if (marcaFuego != null) {
             guardarIdentificacion(animal.getIdAnimal(), CODIGO_FUEGO, marcaFuego, fechaAsignacion);
+        }
+        if (numeroAdicional != null) {
+            guardarIdentificacion(animal.getIdAnimal(), CODIGO_ADICIONAL, numeroAdicional, fechaAsignacion);
         }
 
         if (pedido.idCategoria() != null) {
@@ -270,7 +279,7 @@ public class AnimalAltaService {
                 tipo(codigoTipo).getIdTipoIdent(), estabPropio.getIdEstablecimiento(), caravana)) {
             String que = switch (codigoTipo) {
                 case CODIGO_FUEGO -> "la marca a fuego ";
-                case CODIGO_ADICIONAL -> "la caravana adicional ";
+                case CODIGO_ADICIONAL -> "el número adicional ";
                 default -> "la caravana ";
             };
             throw new ReglaDeNegocioException("Ya existe un animal con " + que + caravana

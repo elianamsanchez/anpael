@@ -29,6 +29,10 @@ public record CrearAnimalRequest(
         @Size(max = 30, message = "tiene que tener hasta 30 caracteres")
         String marcaFuego,
 
+        /** Número adicional / interno (por ejemplo, el RP). Machos y hembras. */
+        @Size(max = 30, message = "tiene que tener hasta 30 caracteres")
+        String numeroAdicional,
+
         @NotBlank(message = "el sexo es obligatorio")
         @Pattern(regexp = "M|H", message = "tiene que ser M o H")
         String sexo,

@@ -75,13 +75,42 @@ class AnimalCorreccionIT extends BaseIntegracion {
                 .isInstanceOf(ReglaDeNegocioException.class).hasMessageContaining("Ya existe otro animal");
     }
 
+    @Test
+    void a_una_hembra_se_le_agrega_y_se_le_corrige_el_numero_adicional() {
+        Integer vaca = alta.crear(nuevo("H700", null, "H"));
+
+        correccion.corregir(vaca, adicional("RP-20"));
+        assertThat(identificaciones(vaca)).isEqualTo("H700 · RP-20");
+
+        correccion.corregir(vaca, adicional("RP-21"));
+        assertThat(identificaciones(vaca)).isEqualTo("H700 · RP-21");
+        assertThat(contar("select count(*) from identificacion where id_tipo_ident = 5 and fecha_baja is not null"))
+                .isEqualTo(1);
+    }
+
+    @Test
+    void el_numero_adicional_de_otro_animal_no_se_repite() {
+        Integer una = alta.crear(nuevo("H701", null, "H"));
+        Integer otra = alta.crear(nuevo("H702", null, "H"));
+        correccion.corregir(otra, adicional("RP-22"));
+
+        assertThatThrownBy(() -> correccion.corregir(una, adicional("RP-22")))
+                .isInstanceOf(ReglaDeNegocioException.class)
+                .hasMessageContaining("Ya existe otro animal con el número adicional RP-22");
+    }
+
     private static CrearAnimalRequest nuevo(String caravana, String marcaFuego, String sexo) {
-        return new CrearAnimalRequest(caravana, marcaFuego, sexo, "NACIDO", null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null);
+        return new CrearAnimalRequest(caravana, marcaFuego, null, sexo, "NACIDO", null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     private static CorregirAnimalRequest marca(String marcaFuego) {
-        return new CorregirAnimalRequest(null, null, null, null, null, null, null, null, null, null, marcaFuego);
+        return new CorregirAnimalRequest(null, null, null, null, null, null, null, null, null, null, marcaFuego, null);
+    }
+
+    private static CorregirAnimalRequest adicional(String numeroAdicional) {
+        return new CorregirAnimalRequest(null, null, null, null, null, null, null, null, null, null, null,
+                numeroAdicional);
     }
 
     private String identificaciones(Integer idAnimal) {

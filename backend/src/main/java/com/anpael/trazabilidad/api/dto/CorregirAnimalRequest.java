@@ -49,5 +49,9 @@ public record CorregirAnimalRequest(
 
         /** Número de la marca a fuego. Solo machos. Si ya tenía una, la anterior queda dada de baja. */
         @Size(max = 30, message = "tiene que tener hasta 30 caracteres")
-        String marcaFuego) {
+        String marcaFuego,
+
+        /** Número adicional / interno. Machos y hembras. Si ya tenía uno, el anterior queda dado de baja. */
+        @Size(max = 30, message = "tiene que tener hasta 30 caracteres")
+        String numeroAdicional) {
 }

@@ -33,6 +33,7 @@ const establecimientos = ref<Establecimiento[]>([])
 
 const caravana = ref('')
 const marcaFuego = ref('')
+const numeroAdicional = ref('')
 const sexo = ref('')
 
 const esMacho = computed(() => sexo.value === 'M')
@@ -71,6 +72,7 @@ async function guardar() {
     const animal = await crearAnimal({
       caravana: caravana.value.trim() || undefined,
       marcaFuego: esMacho.value ? (marcaFuego.value.trim() || undefined) : undefined,
+      numeroAdicional: numeroAdicional.value.trim() || undefined,
       sexo: sexo.value,
       origen: origen.value,
       idRaza: idRaza.value ?? undefined,
@@ -129,8 +131,9 @@ onMounted(() => {
           />
           <Campo etiqueta="Caravana" :requerido="!esMacho" placeholder="Ej: 0075" v-model:valor="caravana" />
           <Campo v-if="esMacho" etiqueta="Marca a fuego" placeholder="Ej: 924" v-model:valor="marcaFuego" />
+          <Campo etiqueta="Número adicional" placeholder="Opcional, ej: RP" v-model:valor="numeroAdicional" />
         </div>
-        <p v-if="esMacho" class="nota">Cargá la caravana, la marca a fuego o las dos.</p>
+        <p v-if="esMacho" class="nota">Cargá la caravana, la marca a fuego o las dos. El número adicional es aparte.</p>
 
         <div class="fila">
           <Campo

@@ -64,9 +64,32 @@ class AnimalAltaIT extends BaseIntegracion {
         assertThat(contar("select count(*) from animal")).isEqualTo(1);
     }
 
+    @Test
+    void machos_y_hembras_pueden_llevar_numero_adicional_que_no_se_repite() {
+        Integer vaca = alta.crear(pedido("H600", null, "H", "RP-12"));
+        Integer toro = alta.crear(pedido("T600", "940", "M", "RP-13"));
+
+        assertThat(identificaciones(vaca)).isEqualTo("H600 · RP-12");
+        assertThat(identificaciones(toro)).isEqualTo("T600 · 940 · RP-13");
+        assertThatThrownBy(() -> alta.crear(pedido("H601", null, "H", "rp-12")))
+                .isInstanceOf(ReglaDeNegocioException.class)
+                .hasMessageContaining("Ya existe un animal con el número adicional rp-12");
+    }
+
+    @Test
+    void el_numero_adicional_solo_no_alcanza_como_identificacion() {
+        assertThatThrownBy(() -> alta.crear(pedido(null, null, "H", "RP-14")))
+                .isInstanceOf(ReglaDeNegocioException.class)
+                .hasMessageContaining("Falta la identificación");
+    }
+
     private static CrearAnimalRequest pedido(String caravana, String marcaFuego, String sexo) {
-        return new CrearAnimalRequest(caravana, marcaFuego, sexo, "NACIDO", null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null);
+        return pedido(caravana, marcaFuego, sexo, null);
+    }
+
+    private static CrearAnimalRequest pedido(String caravana, String marcaFuego, String sexo, String numeroAdicional) {
+        return new CrearAnimalRequest(caravana, marcaFuego, numeroAdicional, sexo, "NACIDO", null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     private String identificaciones(Integer idAnimal) {
