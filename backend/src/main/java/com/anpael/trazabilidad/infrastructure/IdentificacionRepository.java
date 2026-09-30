@@ -11,6 +11,10 @@ public interface IdentificacionRepository extends JpaRepository<Identificacion, 
     boolean existsByIdTipoIdentAndIdEstablecimientoAndCaravanaIgnoreCase(Integer idTipoIdent, Integer idEstablecimiento,
             String caravana);
 
+    /** Lo mismo, sin contar las del propio animal (al corregirle una identificación). */
+    boolean existsByIdTipoIdentAndIdEstablecimientoAndCaravanaIgnoreCaseAndIdAnimalNot(Integer idTipoIdent,
+            Integer idEstablecimiento, String caravana, Integer idAnimal);
+
     /** Las identificaciones vigentes de un animal (v_animal_lista las junta igual: fecha_baja is null). */
     List<Identificacion> findByIdAnimalAndFechaBajaIsNull(Integer idAnimal);
 }

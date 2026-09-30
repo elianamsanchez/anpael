@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   crearAnimal, listarCategorias, listarRodeos, listarRazas, listarPelajes,
@@ -18,7 +18,9 @@ import Aviso from '@/components/avisos/Aviso.vue'
  * Alta de un animal nuevo (v0.2a): un ternero que nace o un animal que se
  * compra necesita entrar por primera vez. La caravana es siempre VISUAL en
  * Santa Ana -el backend lo resuelve solo-, así que acá no se pide
- * establecimiento para la identificación.
+ * establecimiento para la identificación. Los machos pueden llevar además
+ * la marca a fuego; en un macho alcanza con una de las dos (hay toros que
+ * solo tienen marca a fuego).
  */
 const router = useRouter()
 
@@ -30,7 +32,12 @@ const cabanas = ref<Cabana[]>([])
 const establecimientos = ref<Establecimiento[]>([])
 
 const caravana = ref('')
+const marcaFuego = ref('')
 const sexo = ref('')
+
+const esMacho = computed(() => sexo.value === 'M')
+// Una hembra necesita caravana; un macho, caravana o marca a fuego.
+const tieneIdentificacion = computed(() => !!caravana.value.trim() || (esMacho.value && !!marcaFuego.value.trim()))
 const origen = ref('NACIDO')
 const idRaza = ref<number | null>(null)
 const idPelaje = ref<number | null>(null)
@@ -62,7 +69,8 @@ async function guardar() {
   error.value = null
   try {
     const animal = await crearAnimal({
-      caravana: caravana.value.trim(),
+      caravana: caravana.value.trim() || undefined,
+      marcaFuego: esMacho.value ? (marcaFuego.value.trim() || undefined) : undefined,
       sexo: sexo.value,
       origen: origen.value,
       idRaza: idRaza.value ?? undefined,
@@ -109,18 +117,20 @@ onMounted(() => {
       <RouterLink to="/animales" class="volver">Volver al padrón</RouterLink>
     </nav>
 
-    <Marca titulo="Nuevo animal" bajada="Alta con identificación visual en Santa Ana" class="marca-nuevo" />
+    <Marca titulo="Nuevo animal" bajada="Alta con su identificación en Santa Ana" class="marca-nuevo" />
 
     <Tarjeta>
       <form class="form-nuevo" @submit.prevent="guardar">
         <div class="fila">
-          <Campo etiqueta="Caravana" requerido placeholder="Ej: 0075" v-model:valor="caravana" />
           <Campo
             etiqueta="Sexo" requerido
             :opciones="[{ valor: '', etiqueta: 'Elegir…' }, { valor: 'H', etiqueta: 'Hembra' }, { valor: 'M', etiqueta: 'Macho' }]"
             v-model:valor="sexo"
           />
+          <Campo etiqueta="Caravana" :requerido="!esMacho" placeholder="Ej: 0075" v-model:valor="caravana" />
+          <Campo v-if="esMacho" etiqueta="Marca a fuego" placeholder="Ej: 924" v-model:valor="marcaFuego" />
         </div>
+        <p v-if="esMacho" class="nota">Cargá la caravana, la marca a fuego o las dos.</p>
 
         <div class="fila">
           <Campo
@@ -205,7 +215,7 @@ onMounted(() => {
 
         <Campo etiqueta="Notas" tipo="textarea" :filas="2" placeholder="Opcional" v-model:valor="observaciones" />
 
-        <Boton class="boton-guardar" tipo="submit" :deshabilitado="!caravana || !sexo || guardando">
+        <Boton class="boton-guardar" tipo="submit" :deshabilitado="!sexo || !tieneIdentificacion || guardando">
           {{ guardando ? 'Guardando…' : 'Dar de alta' }}
         </Boton>
         <Aviso v-if="error" tono="error">{{ error.mensaje }} <span v-if="error.detalle">— {{ error.detalle }}</span></Aviso>
@@ -225,6 +235,7 @@ header.marca-nuevo { margin-bottom: 18px; }
 .form-nuevo { display: flex; flex-direction: column; gap: var(--gap-campo); }
 .fila { display: flex; gap: var(--gap-campo); flex-wrap: wrap; align-items: flex-end; }
 label.check-fila { padding-bottom: 9px; }
+.nota { margin: -6px 0 0; font-size: var(--fs-125); color: var(--text-muted); }
 
 button.boton-guardar { align-self: flex-start; }
 </style>

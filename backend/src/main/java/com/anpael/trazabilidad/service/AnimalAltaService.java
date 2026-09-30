@@ -27,8 +27,9 @@ import com.anpael.trazabilidad.infrastructure.TipoIdentificacionRepository;
  * Alta de un animal nuevo (v0.2a, docs/etapas.md): hasta ahora la migracion
  * traia los animales completos y el backend solo corregia -AnimalCorreccionService-.
  * Un ternero que nace o un animal que se compra necesita entrar por primera
- * vez, con su identificacion visual. La caravana se guarda siempre como
- * VISUAL en el establecimiento propio activo (Santa Ana): es el mismo
+ * vez, con su identificacion: la caravana VISUAL y, en los machos, la marca
+ * a fuego (FUEGO) -alcanza con una de las dos: hay toros que solo tienen
+ * marca a fuego-. Se guardan en el establecimiento propio activo (Santa Ana): es el mismo
  * supuesto de un unico campo de trabajo que ya usa CargaResultadosService al
  * tomar el establecimiento del rodeo.
  *
@@ -45,6 +46,7 @@ public class AnimalAltaService {
 
     private static final String CODIGO_VISUAL = "VISUAL";
     private static final String CODIGO_ADICIONAL = "ADICIONAL";
+    private static final String CODIGO_FUEGO = "FUEGO";
     private static final String CATEGORIA_TORITO = "TORITO";
 
     private final AnimalRepository animales;
@@ -93,8 +95,23 @@ public class AnimalAltaService {
         }
         validarPadres(pedido.idMadre(), pedido.idPadre());
 
-        String caravana = pedido.caravana().trim();
-        exigirCaravanaLibre(CODIGO_VISUAL, caravana);
+        // La identificación: la caravana, o en un macho la marca a fuego (hay
+        // toros que solo tienen marca a fuego). La marca a fuego es de machos.
+        String caravana = textoOVacio(pedido.caravana());
+        String marcaFuego = textoOVacio(pedido.marcaFuego());
+        if (marcaFuego != null && !"M".equals(pedido.sexo())) {
+            throw new ReglaDeNegocioException("La marca a fuego es solo para machos.");
+        }
+        if (caravana == null && marcaFuego == null) {
+            throw new ReglaDeNegocioException("Falta la identificación: cargá la caravana"
+                    + ("M".equals(pedido.sexo()) ? " o la marca a fuego." : "."));
+        }
+        if (caravana != null) {
+            exigirCaravanaLibre(CODIGO_VISUAL, caravana);
+        }
+        if (marcaFuego != null) {
+            exigirCaravanaLibre(CODIGO_FUEGO, marcaFuego);
+        }
 
         Animal animal = new Animal();
         animal.setIdEstabOrigen(pedido.idEstabOrigen());
@@ -124,7 +141,12 @@ public class AnimalAltaService {
         animal = animales.save(animal);
 
         LocalDate fechaAsignacion = pedido.fechaIngreso() != null ? pedido.fechaIngreso() : LocalDate.now();
-        guardarIdentificacion(animal.getIdAnimal(), CODIGO_VISUAL, caravana, fechaAsignacion);
+        if (caravana != null) {
+            guardarIdentificacion(animal.getIdAnimal(), CODIGO_VISUAL, caravana, fechaAsignacion);
+        }
+        if (marcaFuego != null) {
+            guardarIdentificacion(animal.getIdAnimal(), CODIGO_FUEGO, marcaFuego, fechaAsignacion);
+        }
 
         if (pedido.idCategoria() != null) {
             animalCategoriaService.asignar(animal.getIdAnimal(), pedido.idCategoria(), fechaAsignacion, false);
@@ -229,6 +251,10 @@ public class AnimalAltaService {
 
     // ------------------------------------------------------------------
 
+    private static String textoOVacio(String valor) {
+        return valor != null && !valor.isBlank() ? valor.trim() : null;
+    }
+
     private void validarPadres(Integer idMadre, Integer idPadre) {
         if (idMadre != null && !animales.existsById(idMadre)) {
             throw new ReglaDeNegocioException("La madre " + idMadre + " no existe.");
@@ -242,9 +268,13 @@ public class AnimalAltaService {
         Establecimiento estabPropio = establecimientoPropio.obtener();
         if (identificaciones.existsByIdTipoIdentAndIdEstablecimientoAndCaravanaIgnoreCase(
                 tipo(codigoTipo).getIdTipoIdent(), estabPropio.getIdEstablecimiento(), caravana)) {
-            throw new ReglaDeNegocioException("Ya existe un animal con la caravana "
-                    + (CODIGO_VISUAL.equals(codigoTipo) ? "" : codigoTipo.toLowerCase() + " ")
-                    + caravana + " en " + estabPropio.getNombre() + ".");
+            String que = switch (codigoTipo) {
+                case CODIGO_FUEGO -> "la marca a fuego ";
+                case CODIGO_ADICIONAL -> "la caravana adicional ";
+                default -> "la caravana ";
+            };
+            throw new ReglaDeNegocioException("Ya existe un animal con " + que + caravana
+                    + " en " + estabPropio.getNombre() + ".");
         }
     }
 

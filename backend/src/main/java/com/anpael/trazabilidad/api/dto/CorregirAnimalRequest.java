@@ -8,6 +8,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 /**
  * Correccion parcial: solo se actualiza lo que viene distinto de null. No
@@ -44,5 +45,9 @@ public record CorregirAnimalRequest(
 
         String padreNombre,
 
-        String observaciones) {
+        String observaciones,
+
+        /** Número de la marca a fuego. Solo machos. Si ya tenía una, la anterior queda dada de baja. */
+        @Size(max = 30, message = "tiene que tener hasta 30 caracteres")
+        String marcaFuego) {
 }

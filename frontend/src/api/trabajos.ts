@@ -21,6 +21,8 @@ export interface LineaRevisionToros {
   apto: boolean
 }
 export interface LineaSanidad { idAnimal: number; producto: string; dosis?: number }
+/** Toro / estado / comentario, como en las hojas de inseminación del Excel. Estado = condición corporal. */
+export interface LineaInseminacion { idAnimal: number; toro?: string; condicionCorporal?: number; comentario?: string }
 
 export function cargarTacto(idRodeo: number, resultados: LineaTacto[], fecha?: string) {
   return api.post<ResumenCarga>('/api/trabajos/tacto', { idRodeo, fecha, resultados }).then(r => r.data)
@@ -36,6 +38,10 @@ export function cargarRevisionToros(idRodeo: number, resultados: LineaRevisionTo
 
 export function cargarSanidad(idRodeo: number, resultados: LineaSanidad[], fecha?: string) {
   return api.post<ResumenCarga>('/api/trabajos/sanidad', { idRodeo, fecha, resultados }).then(r => r.data)
+}
+
+export function cargarInseminacion(idRodeo: number, resultados: LineaInseminacion[], fecha?: string) {
+  return api.post<ResumenCarga>('/api/trabajos/inseminacion', { idRodeo, fecha, resultados }).then(r => r.data)
 }
 
 export interface CorreccionResultado {

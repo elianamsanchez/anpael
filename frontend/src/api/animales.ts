@@ -188,6 +188,8 @@ export interface CorregirAnimalParams {
   pesoNacerKg?: number
   padreNombre?: string
   observaciones?: string
+  /** Solo machos. Si ya tenía una marca a fuego, la anterior queda dada de baja. */
+  marcaFuego?: string
 }
 
 export function listarRazas() {
@@ -225,7 +227,10 @@ export function listarEstablecimientos(todos?: boolean) {
 }
 
 export interface NuevoAnimalParams {
-  caravana: string
+  /** Caravana visual. En un macho alcanza con la marca a fuego. */
+  caravana?: string
+  /** Número de la marca a fuego. Solo machos. */
+  marcaFuego?: string
   sexo: string
   origen: string
   idRaza?: number

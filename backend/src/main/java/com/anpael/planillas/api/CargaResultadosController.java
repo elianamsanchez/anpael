@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.anpael.planillas.api.dto.CargaIdentificacionResumen;
 import com.anpael.planillas.api.dto.CargaResultadosResumen;
+import com.anpael.planillas.api.dto.CargarInseminacionRequest;
 import com.anpael.planillas.api.dto.CargarIdentificacionRequest;
 import com.anpael.planillas.api.dto.CargarPesadaRequest;
 import com.anpael.planillas.api.dto.CargarRevisionTorosRequest;
@@ -49,6 +50,11 @@ public class CargaResultadosController {
     @PostMapping("/sanidad")
     public CargaResultadosResumen cargarSanidad(@Valid @RequestBody CargarSanidadRequest pedido) {
         return cargaResultadosService.cargarSanidad(pedido);
+    }
+
+    @PostMapping("/inseminacion")
+    public CargaResultadosResumen cargarInseminacion(@Valid @RequestBody CargarInseminacionRequest pedido) {
+        return cargaResultadosService.cargarInseminacion(pedido);
     }
 
     /** Identificación de terneros: crea los animales y descuenta la cantidad pendiente por ciclo. */

@@ -10,7 +10,7 @@ import {
 } from '@/api/animales'
 import {
   corregirTacto, corregirPesada, corregirRevisionToros, corregirSanidad,
-  cargarTacto, cargarPesada, cargarRevisionToros, cargarSanidad
+  cargarTacto, cargarPesada, cargarRevisionToros, cargarSanidad, cargarInseminacion
 } from '@/api/trabajos'
 import type { ErrorApi } from '@/api/client'
 import Marca from '@/components/base/Marca.vue'
@@ -27,8 +27,11 @@ const TIPOS_TRABAJO = [
   { valor: 'TACTO', etiqueta: 'Tacto' },
   { valor: 'PESADA', etiqueta: 'Pesada' },
   { valor: 'REVISION_TOROS', etiqueta: 'Revisión de toros' },
-  { valor: 'SANIDAD', etiqueta: 'Sanidad' }
+  { valor: 'SANIDAD', etiqueta: 'Sanidad' },
+  { valor: 'INSEMINACION', etiqueta: 'Inseminación' }
 ]
+// Solo se insemina una hembra: a un macho no se le ofrece (el backend también lo rechaza).
+const TIPOS_SOLO_HEMBRAS = ['INSEMINACION']
 // Catálogo de dentadura (CHECK de medicion_corporal, docs/modelo-datos.md).
 const OPCIONES_DENTADURA = ['2D', '3D', '4D', '6D', 'BLL', '3/4D', 'MD+', 'MD', 'MD-', '1/4D', '-1/4D', 'SD/CUT']
 
@@ -96,6 +99,7 @@ const anioPrimerServicioCorregido = ref('')
 const pesoNacerCorregido = ref('')
 const padreNombreCorregido = ref('')
 const observacionesCorregido = ref('')
+const marcaFuegoCorregida = ref('')
 
 // La fecha completa manda: si se carga, el año se completa solo (backend
 // AnimalCorreccionService), así que el campo manual no aplica.
@@ -115,11 +119,36 @@ const errorValidacion = ref<ErrorApi | null>(null)
 const historial = ref<AnimalEvento[]>([])
 const identificaciones = ref<Identificacion[]>([])
 
+const ETIQUETA_TIPO_IDENT: Record<string, string> = {
+  VISUAL: 'Caravana visual', FUEGO: 'Marca a fuego', RFID: 'Botón RFID',
+  SENASA: 'Número SENASA', ADICIONAL: 'Número adicional'
+}
+const caravanaVisual = computed(() => identificaciones.value.find(i => i.tipoIdent === 'VISUAL')?.caravana)
+const marcaFuegoActual = computed(() => identificaciones.value.find(i => i.tipoIdent === 'FUEGO')?.caravana)
+
+// El título lleva la caravana visual y, si la tiene, la marca a fuego al lado.
+const tituloAnimal = computed(() => {
+  const partes = [caravanaVisual.value, marcaFuegoActual.value ? `fuego ${marcaFuegoActual.value}` : undefined]
+    .filter(Boolean)
+  if (partes.length) return partes.join(' · ')
+  return animal.value?.caravana ?? `Animal #${animal.value?.idAnimal}`
+})
+const bajadaAnimal = computed(() => {
+  if (!animal.value) return ''
+  const tipos = [caravanaVisual.value && 'caravana visual', marcaFuegoActual.value && 'marca a fuego'].filter(Boolean)
+  const ident = tipos.length ? tipos.join(' y ') : (animal.value.tipoIdent ?? 'sin identificación')
+  return `${ident} · ${animal.value.sexo === 'M' ? 'macho' : 'hembra'}`
+})
+
 const ETIQUETA_TIPO_TRABAJO: Record<string, string> = {
   TACTO: 'Tacto', PESADA: 'Pesada', REVISION_TOROS: 'Revisión de toros',
-  SANIDAD: 'Sanidad', IDENTIFICACION: 'Identificación'
+  SANIDAD: 'Sanidad', IDENTIFICACION: 'Identificación', INSEMINACION: 'Inseminación'
 }
-const ORDEN_TIPOS_FILTRO = ['TACTO', 'REVISION_TOROS', 'PESADA', 'SANIDAD', 'IDENTIFICACION']
+const ORDEN_TIPOS_FILTRO = ['TACTO', 'INSEMINACION', 'REVISION_TOROS', 'PESADA', 'SANIDAD', 'IDENTIFICACION']
+
+const tiposTrabajoDisponibles = computed(() =>
+  TIPOS_TRABAJO.filter(t => animal.value?.sexo === 'H' || !TIPOS_SOLO_HEMBRAS.includes(t.valor))
+)
 
 const filtroTipoHistorial = ref<string | null>(null)
 
@@ -167,12 +196,14 @@ interface NuevoTrabajo {
   apto: string
   producto: string
   dosis: string
+  toro: string
+  comentario: string
 }
 function trabajoVacio(): NuevoTrabajo {
   return {
     tipo: '', fecha: '', resultado: '', tamano: '', observaciones: '',
     kilos: '', circunferenciaEscrotal: '', condicionCorporal: '', dentadura: '', apto: '',
-    producto: '', dosis: ''
+    producto: '', dosis: '', toro: '', comentario: ''
   }
 }
 const nuevoTrabajo = ref<NuevoTrabajo>(trabajoVacio())
@@ -282,6 +313,13 @@ async function guardarTrabajoNuevo() {
     } else if (t.tipo === 'SANIDAD') {
       resultado = await cargarSanidad(idRodeo, [{
         idAnimal, producto: t.producto, dosis: t.dosis ? Number(t.dosis) : undefined
+      }], fecha)
+    } else if (t.tipo === 'INSEMINACION') {
+      resultado = await cargarInseminacion(idRodeo, [{
+        idAnimal,
+        toro: t.toro || undefined,
+        condicionCorporal: t.condicionCorporal ? Number(t.condicionCorporal) : undefined,
+        comentario: t.comentario || undefined
       }], fecha)
     } else {
       return
@@ -435,7 +473,8 @@ async function guardarCorreccion() {
     anioPrimerServicio: anioPrimerServicioCorregido.value ? Number(anioPrimerServicioCorregido.value) : undefined,
     pesoNacerKg: pesoNacerCorregido.value ? Number(pesoNacerCorregido.value) : undefined,
     padreNombre: padreNombreCorregido.value || undefined,
-    observaciones: observacionesCorregido.value || undefined
+    observaciones: observacionesCorregido.value || undefined,
+    marcaFuego: animal.value?.sexo === 'M' ? (marcaFuegoCorregida.value.trim() || undefined) : undefined
   }
   if (Object.values(cambios).every(v => v === undefined)) return
 
@@ -444,6 +483,7 @@ async function guardarCorreccion() {
   errorCorreccion.value = null
   try {
     animal.value = await corregirAnimal(idAnimal, cambios)
+    if (cambios.marcaFuego) identificaciones.value = await identificacionesAnimal(idAnimal)
     mensajeCorreccion.value = 'Datos actualizados.'
     idRazaElegida.value = null
     idPelajeElegido.value = null
@@ -455,6 +495,7 @@ async function guardarCorreccion() {
     pesoNacerCorregido.value = ''
     padreNombreCorregido.value = ''
     observacionesCorregido.value = ''
+    marcaFuegoCorregida.value = ''
   } catch (e) {
     errorCorreccion.value = e as ErrorApi
   } finally {
@@ -485,19 +526,15 @@ onMounted(cargar)
     <template v-else-if="animal">
       <Marca
         class="marca-animal"
-        :titulo="animal.caravana ?? `Animal #${animal.idAnimal}`"
-        :bajada="`${animal.tipoIdent} · ${animal.sexo === 'M' ? 'macho' : 'hembra'}`"
+        :titulo="tituloAnimal"
+        :bajada="bajadaAnimal"
       />
 
       <Tarjeta>
         <dl class="lista-info">
-          <div v-if="identificaciones.length">
-            <dt>Identificación</dt>
-            <dd>
-              <div v-for="ident in identificaciones" :key="ident.tipoIdent">
-                {{ ident.tipoIdent }}: {{ ident.caravana }}
-              </div>
-            </dd>
+          <div v-for="ident in identificaciones" :key="ident.tipoIdent">
+            <dt>{{ ETIQUETA_TIPO_IDENT[ident.tipoIdent] ?? ident.tipoIdent }}</dt>
+            <dd class="ident">{{ ident.caravana }}</dd>
           </div>
           <div><dt>Raza</dt><dd>{{ animal.raza ?? '—' }}</dd></div>
           <div><dt>Color</dt><dd>{{ animal.pelaje ?? '—' }}</dd></div>
@@ -575,7 +612,7 @@ onMounted(cargar)
         <form v-else class="form-trabajo" @submit.prevent="guardarTrabajoNuevo">
           <Campo
             etiqueta="Tipo de trabajo"
-            :opciones="[{ valor: null, etiqueta: 'Elegir…' }, ...TIPOS_TRABAJO.map(t => ({ valor: t.valor, etiqueta: t.etiqueta }))]"
+            :opciones="[{ valor: null, etiqueta: 'Elegir…' }, ...tiposTrabajoDisponibles.map(t => ({ valor: t.valor, etiqueta: t.etiqueta }))]"
             :valor="nuevoTrabajo.tipo"
             @update:valor="nuevoTrabajo.tipo = $event"
           />
@@ -618,6 +655,12 @@ onMounted(cargar)
           <template v-else-if="nuevoTrabajo.tipo === 'SANIDAD'">
             <Campo etiqueta="Producto" v-model:valor="nuevoTrabajo.producto" />
             <Campo etiqueta="Dosis" tipo="number" min="0" step="0.01" v-model:valor="nuevoTrabajo.dosis" />
+          </template>
+
+          <template v-else-if="nuevoTrabajo.tipo === 'INSEMINACION'">
+            <Campo etiqueta="Toro" placeholder="Nombre del toro o del semen" v-model:valor="nuevoTrabajo.toro" />
+            <Campo etiqueta="Estado (condición corporal)" tipo="number" min="1" max="5" step="0.5" v-model:valor="nuevoTrabajo.condicionCorporal" />
+            <Campo etiqueta="Comentario" placeholder="Por ejemplo, GNRH" v-model:valor="nuevoTrabajo.comentario" />
           </template>
 
           <Boton
@@ -729,6 +772,15 @@ onMounted(cargar)
 
       <Tarjeta titulo="Corregir / completar datos" nota="Dejá en blanco lo que no quieras cambiar." class="tarjeta-espaciada">
         <form class="form-correccion" @submit.prevent="guardarCorreccion">
+          <Campo
+            v-if="animal.sexo === 'M'"
+            etiqueta="Marca a fuego"
+            :placeholder="marcaFuegoActual ? `Hoy: ${marcaFuegoActual}` : 'Todavía no tiene'"
+            v-model:valor="marcaFuegoCorregida"
+          />
+          <p v-if="animal.sexo === 'M' && marcaFuegoActual && marcaFuegoCorregida.trim()" class="atenuado chico">
+            La marca {{ marcaFuegoActual }} queda dada de baja y se guarda la nueva, con la misma fecha de colocación.
+          </p>
           <Campo
             etiqueta="Raza"
             :opciones="[{ valor: null, etiqueta: '(sin cambios)' }, ...razas.map(r => ({ valor: r.idRaza, etiqueta: r.nombre }))]"
@@ -906,6 +958,7 @@ section.tarjeta-espaciada { margin-top: 16px; }
 .lista-info > div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: var(--borde-filete); }
 .lista-info dt { color: var(--text-muted); font-size: var(--fs-13); flex-shrink: 0; }
 .lista-info dd { margin: 0; font-weight: var(--fw-semibold); text-align: right; }
+.lista-info dd.ident { font-family: var(--font-mono); }
 
 .asignar { display: block; padding: 10px 0; }
 .form-asignar { display: flex; gap: 8px; align-items: flex-end; }

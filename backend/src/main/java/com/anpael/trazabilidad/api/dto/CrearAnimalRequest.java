@@ -10,18 +10,24 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 /**
  * Alta de un animal nuevo, con identificacion (v0.2a): a diferencia de
- * CorregirAnimalRequest, caravana/sexo/origen son obligatorios porque no hay
- * nada previo que conservar. idCategoria/idRodeo son opcionales: si vienen,
+ * CorregirAnimalRequest, sexo/origen son obligatorios porque no hay nada
+ * previo que conservar. La identificación también: la caravana, o en un
+ * macho la marca a fuego (hay toros que solo tienen marca a fuego) -lo
+ * valida AnimalAltaService-. idCategoria/idRodeo son opcionales: si vienen,
  * se asignan en el mismo pedido en lugar de mandar al usuario a la pantalla
  * de detalle a hacerlo aparte.
  */
 public record CrearAnimalRequest(
 
-        @NotBlank(message = "la caravana es obligatoria")
         String caravana,
+
+        /** Número de la marca a fuego. Solo machos. */
+        @Size(max = 30, message = "tiene que tener hasta 30 caracteres")
+        String marcaFuego,
 
         @NotBlank(message = "el sexo es obligatorio")
         @Pattern(regexp = "M|H", message = "tiene que ser M o H")
