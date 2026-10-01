@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.anpael.shared.exception.NoEncontradoException;
 import com.anpael.shared.exception.ReglaDeNegocioException;
+import com.anpael.shared.security.ContextoAutenticacion;
 import com.anpael.trazabilidad.domain.Animal;
+import com.anpael.trazabilidad.domain.AnimalValidacion;
 import com.anpael.trazabilidad.domain.Categoria;
 import com.anpael.trazabilidad.domain.Establecimiento;
 import com.anpael.trazabilidad.domain.Identificacion;
@@ -15,6 +17,7 @@ import com.anpael.trazabilidad.domain.TipoIdentificacion;
 import com.anpael.trazabilidad.api.dto.CrearAnimalRequest;
 import com.anpael.trazabilidad.api.dto.CrearCandidatoToritoRequest;
 import com.anpael.trazabilidad.infrastructure.AnimalRepository;
+import com.anpael.trazabilidad.infrastructure.AnimalValidacionRepository;
 import com.anpael.trazabilidad.infrastructure.CabanaRepository;
 import com.anpael.trazabilidad.infrastructure.CategoriaRepository;
 import com.anpael.trazabilidad.infrastructure.EstablecimientoRepository;
@@ -40,6 +43,10 @@ import com.anpael.trazabilidad.infrastructure.TipoIdentificacionRepository;
  *     VISUAL -agregarIdentificacionVisual-, sin tocar la cantidad pendiente.
  *   - el resto se lleva como cantidad (TerneroSinIdentificarService) y pasa a
  *     ser animal recién en la identificación -crearTerneroIdentificado-.
+ *
+ * Todo animal que entra por acá queda VALIDADO (ADR-004): la revisión de
+ * saneamiento es para los datos migrados del Excel; lo que se carga en la app
+ * ya lo cargó una persona, no hay nada que revisar.
  */
 @Service
 public class AnimalAltaService {
@@ -60,12 +67,14 @@ public class AnimalAltaService {
     private final AnimalCategoriaService animalCategoriaService;
     private final AnimalRodeoService animalRodeoService;
     private final EstablecimientoPropioService establecimientoPropio;
+    private final AnimalValidacionRepository validaciones;
 
     public AnimalAltaService(AnimalRepository animales, RazaRepository razas, PelajeRepository pelajes,
             CabanaRepository cabanas, EstablecimientoRepository establecimientos,
             TipoIdentificacionRepository tiposIdent, IdentificacionRepository identificaciones,
             CategoriaRepository categorias, AnimalCategoriaService animalCategoriaService,
-            AnimalRodeoService animalRodeoService, EstablecimientoPropioService establecimientoPropio) {
+            AnimalRodeoService animalRodeoService, EstablecimientoPropioService establecimientoPropio,
+            AnimalValidacionRepository validaciones) {
         this.animales = animales;
         this.razas = razas;
         this.pelajes = pelajes;
@@ -77,6 +86,7 @@ public class AnimalAltaService {
         this.animalCategoriaService = animalCategoriaService;
         this.animalRodeoService = animalRodeoService;
         this.establecimientoPropio = establecimientoPropio;
+        this.validaciones = validaciones;
     }
 
     @Transactional
@@ -145,6 +155,7 @@ public class AnimalAltaService {
         animal.setObservaciones(pedido.observaciones());
         animal.setActivo(true);
         animal = animales.save(animal);
+        marcarValidado(animal.getIdAnimal());
 
         LocalDate fechaAsignacion = pedido.fechaIngreso() != null ? pedido.fechaIngreso() : LocalDate.now();
         if (caravana != null) {
@@ -201,6 +212,7 @@ public class AnimalAltaService {
         animal.setObservaciones(pedido.observaciones());
         animal.setActivo(true);
         animal = animales.save(animal);
+        marcarValidado(animal.getIdAnimal());
 
         guardarIdentificacion(animal.getIdAnimal(), CODIGO_ADICIONAL, caravana, pedido.fechaNacimiento());
         animalCategoriaService.asignar(animal.getIdAnimal(), torito.getIdCategoria(), pedido.fechaNacimiento(),
@@ -232,6 +244,7 @@ public class AnimalAltaService {
         animal.setAnioNacimiento(anioNacimiento);
         animal.setActivo(true);
         animal = animales.save(animal);
+        marcarValidado(animal.getIdAnimal());
 
         guardarIdentificacion(animal.getIdAnimal(), CODIGO_VISUAL, limpia, fechaIdentificacion);
         animalCategoriaService.asignar(animal.getIdAnimal(), categoria.getIdCategoria(), fechaIdentificacion, false);
@@ -262,6 +275,14 @@ public class AnimalAltaService {
 
     private static String textoOVacio(String valor) {
         return valor != null && !valor.isBlank() ? valor.trim() : null;
+    }
+
+    private void marcarValidado(Integer idAnimal) {
+        AnimalValidacion validacion = new AnimalValidacion();
+        validacion.setIdAnimal(idAnimal);
+        validacion.setEstado("VALIDADO");
+        validacion.setIdPersona(ContextoAutenticacion.idPersonaActual());
+        validaciones.save(validacion);
     }
 
     private void validarPadres(Integer idMadre, Integer idPadre) {

@@ -28,6 +28,14 @@ class AnimalAltaIT extends BaseIntegracion {
     }
 
     @Test
+    void un_animal_nuevo_queda_validado() {
+        Integer id = alta.crear(pedido("H100", null, "H"));
+
+        assertThat(jdbc.sql("select estado from animal_validacion where id_animal = :id")
+                .param("id", id).query(String.class).single()).isEqualTo("VALIDADO");
+    }
+
+    @Test
     void un_macho_se_puede_dar_de_alta_solo_con_la_marca_a_fuego() {
         Integer id = alta.crear(pedido(null, "925", "M"));
 
